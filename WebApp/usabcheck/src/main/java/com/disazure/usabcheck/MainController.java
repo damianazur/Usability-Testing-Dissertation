@@ -1,12 +1,21 @@
 package com.disazure.usabcheck;
 
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
+import com.disazure.usabcheck.dao.*;
 
 @RestController
 public class MainController {
+	
+	@Autowired
+	private ResearcherDAO resDao;
+	
     @GetMapping("/api/helloo")
     public String hello() {
+    	
+    	resDao.count();
+    	
         return "Rest point accessed!!!";
     }
 }
