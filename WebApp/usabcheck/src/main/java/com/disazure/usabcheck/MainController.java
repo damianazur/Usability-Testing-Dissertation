@@ -9,7 +9,13 @@ import com.disazure.usabcheck.dao.*;
 public class MainController {
 	
 	@Autowired
-	private ResearcherDAO resDao;
+	private ResearcherDao resDao;
+	
+	@GetMapping("")
+    public String viewHomePage() {
+		System.out.println("Home page...");
+        return "index";
+    }
 	
     @GetMapping("/api/helloo")
     public String hello() {
