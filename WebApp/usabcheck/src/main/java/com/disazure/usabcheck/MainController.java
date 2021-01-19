@@ -18,10 +18,7 @@ public class MainController {
     }
 	
     @GetMapping("/api/helloo")
-    public String hello() {
-    	
-    	resDao.count();
-    	
+    public String hello() {	
         return "Rest point accessed!!!";
     }
 }

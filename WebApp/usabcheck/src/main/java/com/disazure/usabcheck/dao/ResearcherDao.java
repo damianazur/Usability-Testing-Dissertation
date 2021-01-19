@@ -28,14 +28,5 @@ public class ResearcherDao {
         return jdbcTemplate.update(sql, user.getUsername(), user.getPassword());
 		
 	}
-	
-    public int count() {
-    	System.out.println("Counting researchers: " + jdbcTemplate);
-    	
-        int count = jdbcTemplate.queryForObject("select count(*) from researcher", Integer.class);
-        
-        System.out.println(count);
-        
-        return count;
-    }
+
 }

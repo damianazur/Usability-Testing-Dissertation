@@ -1,7 +1,5 @@
 package com.disazure.usabcheck.payload.request;
 
-import java.util.Set;
-
 import javax.validation.constraints.*;
  
 public class SignupRequest {
