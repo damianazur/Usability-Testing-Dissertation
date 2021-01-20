@@ -45,7 +45,7 @@ public class AuthController {
 	@Autowired
 	JwtUtils jwtUtils;
 
-	@PostMapping("/signin")
+	@PostMapping("/login")
 	public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
 		System.out.println("#######" + loginRequest.getUsername() + " " + loginRequest.getPassword());
 		
@@ -63,13 +63,13 @@ public class AuthController {
 												 userDetails.getUsername()));
 	}
 
-	@PostMapping("/signup")
+	@PostMapping("/register")
 	public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
-//		if (researcherDao.existsByUsername(signUpRequest.getUsername())) {
-//			return ResponseEntity
-//					.badRequest()
-//					.body(new MessageResponse("Error: Username is already taken!"));
-//		}
+		if (researcherDao.existsByUsername(signUpRequest.getUsername())) {
+			return ResponseEntity
+					.badRequest()
+					.body(new MessageResponse("Error: Username is already taken!"));
+		}
 
 		// Create new user's account
 		Researcher researcher = new Researcher(signUpRequest.getUsername(), 

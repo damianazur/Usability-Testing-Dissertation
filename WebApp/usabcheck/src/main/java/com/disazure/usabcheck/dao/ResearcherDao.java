@@ -21,6 +21,19 @@ public class ResearcherDao {
 		
 	}
 	
+	public boolean existsByUsername(String username) {
+		String sql = "SELECT COUNT(username) FROM researcher WHERE username = ?";
+		
+		int count = jdbcTemplate.queryForObject(sql, Integer.class, username);
+		
+		if (count == 1) {
+			return true;
+		}
+		
+		return false;
+		
+	}
+	
 	public int createUser(Researcher researcher) {
 		String sql = "INSERT INTO researcher (username, userPassword) VALUES (?, ?)";
 		

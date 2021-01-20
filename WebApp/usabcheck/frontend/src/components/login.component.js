@@ -5,11 +5,13 @@ import CheckButton from "react-validation/build/button";
 
 import AuthService from "../services/auth.service";
 
+import "./form.css";
+
 const required = value => {
   if (!value) {
     return (
       <div className="alert alert-danger" role="alert">
-        
+      
       </div>
     );
   }
@@ -46,8 +48,8 @@ export default class Login extends Component {
     e.preventDefault();
 
     this.setState({
-      message: "",
-      loading: true
+        message: "",
+        loading: true
     });
 
     this.form.validateAll();
@@ -59,10 +61,10 @@ export default class Login extends Component {
           window.location.reload();
         },
         error => {
-          const resMessage =
-            (error.response &&
-              error.response.data &&
-              error.response.data.message) ||
+          const resMessage = (
+            error.response &&
+            error.response.data &&
+            error.response.data.message) || 
             error.message ||
             error.toString();
 
@@ -83,14 +85,14 @@ export default class Login extends Component {
     return (
       <div>
         <div className="loginFormContainer">
-            <h2 id="formHeading">Login</h2>
+          <h2 id="formHeading">Login</h2>
 
-            <Form
-                onSubmit={this.handleLogin}
-                ref={c => {
-                this.form = c;
-                }}
-            >
+          <Form
+            onSubmit={this.handleLogin}
+            ref={c => {
+            this.form = c;
+            }}
+          >
 
             <div className="inputGroup">
               <label htmlFor="username">Username</label>
@@ -122,7 +124,7 @@ export default class Login extends Component {
                 disabled={this.state.loading}
               >
                 {this.state.loading && (
-                  <span className="spinner-border spinner-border-sm"></span>
+                <span className="spinner-border spinner-border-sm"></span>
                 )}
                 <span>Login</span>
               </button>
@@ -138,7 +140,7 @@ export default class Login extends Component {
             <CheckButton
               style={{ display: "none" }}
               ref={c => {
-                this.checkBtn = c;
+                  this.checkBtn = c;
               }}
             />
           </Form>

@@ -2,7 +2,8 @@ import React, { Component } from "react";
 import Form from "react-validation/build/form";
 import Input from "react-validation/build/input";
 import CheckButton from "react-validation/build/button";
-import { isEmail } from "validator";
+
+import "./form.css";
 
 import AuthService from "../services/auth.service";
 
@@ -103,13 +104,9 @@ export default class Register extends Component {
 
   render() {
     return (
-      <div className="col-md-12">
-        <div className="card card-container">
-          <img
-            src="//ssl.gstatic.com/accounts/ui/avatar_2x.png"
-            alt="profile-img"
-            className="profile-img-card"
-          />
+      <div>
+        <div className="loginFormContainer">
+          <h2 id="formHeading">Register</h2>
 
           <Form
             onSubmit={this.handleRegister}
@@ -119,11 +116,11 @@ export default class Register extends Component {
           >
             {!this.state.successful && (
               <div>
-                <div className="form-group">
+                <div className="inputGroup">
                   <label htmlFor="username">Username</label>
                   <Input
                     type="text"
-                    className="form-control"
+                    className="inputField"
                     name="username"
                     value={this.state.username}
                     onChange={this.onChangeUsername}
@@ -131,11 +128,11 @@ export default class Register extends Component {
                   />
                 </div>
 
-                <div className="form-group">
+                <div className="inputGroup">
                   <label htmlFor="password">Password</label>
                   <Input
                     type="password"
-                    className="form-control"
+                    className="inputField"
                     name="password"
                     value={this.state.password}
                     onChange={this.onChangePassword}
@@ -143,14 +140,14 @@ export default class Register extends Component {
                   />
                 </div>
 
-                <div className="form-group">
-                  <button className="btn btn-primary btn-block">Sign Up</button>
+                <div className="inputGroup">
+                  <button className="primaryButton">Sign Up</button>
                 </div>
               </div>
             )}
 
             {this.state.message && (
-              <div className="form-group">
+              <div className="inputGroup">
                 <div
                   className={
                     this.state.successful
