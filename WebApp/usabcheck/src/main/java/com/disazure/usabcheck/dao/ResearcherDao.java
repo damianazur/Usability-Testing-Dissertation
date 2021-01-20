@@ -3,9 +3,8 @@ package com.disazure.usabcheck.dao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Repository;
 
-import com.disazure.usabcheck.models.*;
+import com.disazure.usabcheck.entity.*;
 import com.disazure.usabcheck.rowmappers.*;
 
 @Component
@@ -13,19 +12,19 @@ public class ResearcherDao {
 	@Autowired
     private JdbcTemplate jdbcTemplate;
 	
-	public User findByUsername(String username) {
+	public Researcher findByUsername(String username) {
 		String sql = "SELECT * FROM researcher WHERE username = ?";
 
-		UserRowMapper userRowMapper = new UserRowMapper();
+		ResearcherRowMapper userRowMapper = new ResearcherRowMapper();
 		
         return jdbcTemplate.queryForObject(sql, userRowMapper, username);
 		
 	}
 	
-	public int createUser(User user) {
+	public int createUser(Researcher researcher) {
 		String sql = "INSERT INTO researcher (username, userPassword) VALUES (?, ?)";
 		
-        return jdbcTemplate.update(sql, user.getUsername(), user.getPassword());
+        return jdbcTemplate.update(sql, researcher.getUsername(), researcher.getPassword());
 		
 	}
 

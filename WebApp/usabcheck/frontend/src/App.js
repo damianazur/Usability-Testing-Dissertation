@@ -1,12 +1,12 @@
 import React, { Component } from "react";
 import { Switch, Route, Link, BrowserRouter as Router} from "react-router-dom";
-import "bootstrap/dist/css/bootstrap.min.css";
 import "./App.css";
 
 import AuthService from "./services/auth.service";
 
 import Login from "./components/login.component";
 import Register from "./components/register.component";
+import Home from "./components/home.component";
 
 class App extends Component {
   constructor(props) {
@@ -38,15 +38,16 @@ class App extends Component {
     return (
       <Router>
       <div>
-        <nav className="navbar navbar-expand navbar-dark bg-dark">
-          <Link to={"/"} className="navbar-brand">
-            UsabCheck
-          </Link>
+        <nav className="navbar">
+          <div className="navbar-nav">
+            <Link to={"/"} className="nav-link">
+              UsabCheck
+            </Link>
+          </div>
 
-
-          <div className="navbar-nav mr-auto">
+          <div className="navbar-nav">
             {currentUser && (
-              <li className="nav-item">
+              <li>
                 <Link to={"/dashboard"} className="nav-link">
                   Dashboard
                 </Link>
@@ -55,42 +56,42 @@ class App extends Component {
           </div>
 
           {currentUser ? (
-            <div className="navbar-nav ml-auto">
-              <li className="nav-item">
-                <Link to={"/dashboard"} className="nav-link">
-                  {currentUser.username}
-                </Link>
-              </li>
-              <li className="nav-item">
+            <div className="navbar-nav">
+              <li className="nav-right">
                 <a href="/login" className="nav-link" onClick={this.logOut}>
                   LogOut
                 </a>
               </li>
+              <li className="nav-right">
+                <Link to={"/dashboard"} className="nav-link">
+                  {currentUser.username}
+                </Link>
+              </li>
             </div>
           ) : (
-            <div className="navbar-nav ml-auto">
-              <li className="nav-item">
-                <Link to={"/login"} className="nav-link">
-                  Login
+            <div className="navbar-nav">
+              <li className="nav-right">
+                <Link to={"/register"} className="nav-link">
+                  Sign Up
                 </Link>
               </li>
 
-              <li className="nav-item">
-                <Link to={"/register"} className="nav-link">
-                  Sign Up
+              <li className="nav-right">
+                <Link to={"/login"} className="nav-link">
+                  Login
                 </Link>
               </li>
             </div>
           )}
         </nav>
 
-        <div className="container mt-3">
-          <Switch>
-            <Route exact path="/login" component={Login} />
-            <Route exact path="/register" component={Register} />
-          </Switch>
-        </div>
+        <Switch>
+          <Route exact path="/" component={Home} />
+          <Route exact path="/login" component={Login} />
+          <Route exact path="/register" component={Register} />
+        </Switch>
       </div>
+
       </Router>
     );
   }

@@ -12,29 +12,15 @@ export default class Home extends Component {
   }
 
   componentDidMount() {
-    // UserService.getPublicContent().then(
-    //   response => {
-    //     this.setState({
-    //       content: response.data
-    //     });
-    //   },
-    //   error => {
-    //     this.setState({
-    //       content:
-    //         (error.response && error.response.data) ||
-    //         error.message ||
-    //         error.toString()
-    //     });
-    //   }
-    // );
   }
 
   render() {
     return (
-      <div className="container">
-        <header className="jumbotron">
-          <h3>{this.state.content}</h3>
-        </header>
+      <div className="mainDiv" style={{ backgroundImage: "url(/Background.jpg)" }}>
+        <div id="headingDiv">
+          <h1 id="mainText">UsabCheck</h1>
+          <h1 id="otherText">Test the usability of software with emotion recognition technology</h1>
+        </div>
       </div>
     );
   }

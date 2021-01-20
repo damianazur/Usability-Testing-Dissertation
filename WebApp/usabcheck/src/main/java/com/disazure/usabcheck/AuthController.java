@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.disazure.usabcheck.models.User;
+import com.disazure.usabcheck.entity.Researcher;
 import com.disazure.usabcheck.payload.request.LoginRequest;
 import com.disazure.usabcheck.payload.request.SignupRequest;
 import com.disazure.usabcheck.payload.response.JwtResponse;
@@ -54,8 +54,6 @@ public class AuthController {
 
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 		
-		System.out.println(authentication);
-		
 		String jwt = jwtUtils.generateJwtToken(authentication);
 		
 		UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();		
@@ -74,10 +72,10 @@ public class AuthController {
 //		}
 
 		// Create new user's account
-		User user = new User(signUpRequest.getUsername(), 
+		Researcher researcher = new Researcher(signUpRequest.getUsername(), 
 							 encoder.encode(signUpRequest.getPassword()));
 
-		researcherDao.createUser(user);
+		researcherDao.createUser(researcher);
 
 		return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
 	}

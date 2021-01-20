@@ -9,7 +9,7 @@ const required = value => {
   if (!value) {
     return (
       <div className="alert alert-danger" role="alert">
-        This field is required!
+        
       </div>
     );
   }
@@ -81,25 +81,22 @@ export default class Login extends Component {
 
   render() {
     return (
-      <div className="col-md-12">
-        <div className="card card-container">
-          <img
-            src="//ssl.gstatic.com/accounts/ui/avatar_2x.png"
-            alt="profile-img"
-            className="profile-img-card"
-          />
+      <div>
+        <div className="loginFormContainer">
+            <h2 id="formHeading">Login</h2>
 
-          <Form
-            onSubmit={this.handleLogin}
-            ref={c => {
-              this.form = c;
-            }}
-          >
-            <div className="form-group">
+            <Form
+                onSubmit={this.handleLogin}
+                ref={c => {
+                this.form = c;
+                }}
+            >
+
+            <div className="inputGroup">
               <label htmlFor="username">Username</label>
               <Input
                 type="text"
-                className="form-control"
+                className="inputField"
                 name="username"
                 value={this.state.username}
                 onChange={this.onChangeUsername}
@@ -107,11 +104,11 @@ export default class Login extends Component {
               />
             </div>
 
-            <div className="form-group">
+            <div className="inputGroup">
               <label htmlFor="password">Password</label>
               <Input
                 type="password"
-                className="form-control"
+                className="inputField"
                 name="password"
                 value={this.state.password}
                 onChange={this.onChangePassword}
@@ -119,9 +116,9 @@ export default class Login extends Component {
               />
             </div>
 
-            <div className="form-group">
+            <div className="inputGroup">
               <button
-                className="btn btn-primary btn-block"
+                className="primaryButton"
                 disabled={this.state.loading}
               >
                 {this.state.loading && (
@@ -132,7 +129,7 @@ export default class Login extends Component {
             </div>
 
             {this.state.message && (
-              <div className="form-group">
+              <div className="inputGroup">
                 <div className="alert alert-danger" role="alert">
                   {this.state.message}
                 </div>

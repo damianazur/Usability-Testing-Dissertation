@@ -7,7 +7,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.disazure.usabcheck.models.User;
+import com.disazure.usabcheck.entity.Researcher;
 //import com.bezkoder.springjwt.repository.UserRepository;
 import com.disazure.usabcheck.dao.ResearcherDao;
 
@@ -19,13 +19,13 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 	@Override
 	@Transactional
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-		User user = researcherDao.findByUsername(username);
+		Researcher researcher = researcherDao.findByUsername(username);
 				
-		if (user == null) {
-			throw new UsernameNotFoundException("User Not Found with username: " + username);
+		if (researcher == null) {
+			throw new UsernameNotFoundException("Researcher Not Found with username: " + username);
 		}
 
-		return UserDetailsImpl.build(user);
+		return UserDetailsImpl.build(researcher);
 	}
 
 }

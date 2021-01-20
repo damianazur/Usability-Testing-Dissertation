@@ -1,15 +1,12 @@
 package com.disazure.usabcheck.security.services;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import com.disazure.usabcheck.models.User;
+import com.disazure.usabcheck.entity.Researcher;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 public class UserDetailsImpl implements UserDetails {
@@ -28,12 +25,12 @@ public class UserDetailsImpl implements UserDetails {
 		this.password = password;
 	}
 
-	public static UserDetailsImpl build(User user) {
+	public static UserDetailsImpl build(Researcher researcher) {
 		
 		return new UserDetailsImpl(
-				user.getResearcherId(), 
-				user.getUsername(), 
-				user.getPassword());
+				researcher.getResearcherId(), 
+				researcher.getUsername(), 
+				researcher.getPassword());
 	}
 
 	public Long getResearcherId() {
