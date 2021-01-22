@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import { Switch, Route, Link, BrowserRouter as Router} from "react-router-dom";
+
 import "./App.css";
 
 import AuthService from "./services/auth.service";
@@ -7,6 +8,7 @@ import AuthService from "./services/auth.service";
 import Login from "./components/login.component";
 import Register from "./components/register.component";
 import Home from "./components/home.component";
+import Dashboard from "./components/dashboard.component";
 
 class App extends Component {
   constructor(props) {
@@ -38,7 +40,7 @@ class App extends Component {
     return (
       <Router>
       <div>
-        <nav className="navbar">
+        <nav className="main-navbar">
           <div className="navbar-nav">
             <Link to={"/"} className="nav-link">
               UsabCheck
@@ -89,6 +91,7 @@ class App extends Component {
           <Route exact path="/" component={Home} />
           <Route exact path="/login" component={Login} />
           <Route exact path="/register" component={Register} />
+          <Route exact path="/dashboard" component={Dashboard} />
         </Switch>
       </div>
 

@@ -1,10 +1,5 @@
 package com.disazure.usabcheck;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.disazure.usabcheck.entity.Researcher;
 import com.disazure.usabcheck.payload.request.LoginRequest;
 import com.disazure.usabcheck.payload.request.SignupRequest;
+import com.disazure.usabcheck.payload.request.GetMyUsernameRequest;
 import com.disazure.usabcheck.payload.response.JwtResponse;
 import com.disazure.usabcheck.payload.response.MessageResponse;
 import com.disazure.usabcheck.dao.*;
@@ -47,8 +43,6 @@ public class AuthController {
 
 	@PostMapping("/login")
 	public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
-		System.out.println("#######" + loginRequest.getUsername() + " " + loginRequest.getPassword());
-		
 		Authentication authentication = authenticationManager.authenticate(
 				new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
 
@@ -63,6 +57,18 @@ public class AuthController {
 												 userDetails.getUsername()));
 	}
 
+	@PostMapping("/getMyUsername")
+	public ResponseEntity<?> getMyUsername(@Valid @RequestBody GetMyUsernameRequest getMyUsernameRequest) {
+		System.out.println("Your token is: " + getMyUsernameRequest.getToken());
+		
+		String username = jwtUtils.getUserNameFromJwtToken(getMyUsernameRequest.getToken());
+		
+		System.out.println("Your username is: " + username);
+
+		return ResponseEntity.ok(new MessageResponse(username));
+	}
+	
+	
 	@PostMapping("/register")
 	public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
 		if (researcherDao.existsByUsername(signUpRequest.getUsername())) {

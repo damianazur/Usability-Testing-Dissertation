@@ -28,6 +28,13 @@ class AuthService {
         password
       });
     }
+
+    getUsernameFromBackend(token) {
+      console.log("Token to be sent: ", token);
+      return axios.post(API_URL + "getMyUsername", {
+        token
+      });
+    }
   
     getCurrentUser() {
       return JSON.parse(localStorage.getItem('user'));;

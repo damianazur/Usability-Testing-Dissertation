@@ -21,6 +21,15 @@ public class ResearcherDao {
 		
 	}
 	
+	public int getIdFromUsername(String username) {
+		String sql = "SELECT researcherId FROM researcher WHERE username = ?";
+		
+		int resId = jdbcTemplate.queryForObject(sql, Integer.class, username);
+		
+		return resId;
+		
+	}
+	
 	public boolean existsByUsername(String username) {
 		String sql = "SELECT COUNT(username) FROM researcher WHERE username = ?";
 		
