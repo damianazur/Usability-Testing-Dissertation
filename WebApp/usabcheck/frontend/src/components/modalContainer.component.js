@@ -16,10 +16,6 @@ export class ModalContainer extends Component {
     this.setState({ isShown: false });
   };
 
-  onSubmit = () => {
-    console.log("Submitted!");
-  };
-
   onClickOutside = (event) => {
     if (this.modal && this.modal.contains(event.target)) return;
     this.closeModal();

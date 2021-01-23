@@ -41,16 +41,16 @@ class App extends Component {
       <Router>
       <div>
         <nav className="main-navbar">
-          <div className="navbar-nav">
-            <Link to={"/"} className="nav-link">
+          <div className="navbar-navDiv">
+            <Link to={"/"} className="navDiv-link">
               UsabCheck
             </Link>
           </div>
 
-          <div className="navbar-nav">
+          <div className="navbar-navDiv">
             {currentUser && (
               <li>
-                <Link to={"/dashboard"} className="nav-link">
+                <Link to={"/dashboard"} className="navDiv-link">
                   Dashboard
                 </Link>
               </li>
@@ -58,28 +58,28 @@ class App extends Component {
           </div>
 
           {currentUser ? (
-            <div className="navbar-nav">
+            <div className="navbar-navDiv">
               <li className="nav-right">
-                <a href="/login" className="nav-link" onClick={this.logOut}>
+                <a href="/login" className="navDiv-link" onClick={this.logOut}>
                   LogOut
                 </a>
               </li>
               <li className="nav-right">
-                <Link to={"/dashboard"} className="nav-link">
+                <Link to={"/dashboard"} className="navDiv-link">
                   {currentUser.username}
                 </Link>
               </li>
             </div>
           ) : (
-            <div className="navbar-nav">
+            <div className="navbar-navDiv">
               <li className="nav-right">
-                <Link to={"/register"} className="nav-link">
+                <Link to={"/register"} className="navDiv-link">
                   Sign Up
                 </Link>
               </li>
 
               <li className="nav-right">
-                <Link to={"/login"} className="nav-link">
+                <Link to={"/login"} className="navDiv-link">
                   Login
                 </Link>
               </li>

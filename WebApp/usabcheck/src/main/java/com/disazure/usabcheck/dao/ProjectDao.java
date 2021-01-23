@@ -35,6 +35,18 @@ public class ProjectDao {
 	    return result;
 	}
 	
+	public int getResearcherIdFromProject(int projectId) {
+		String sql = ""
+				+ "SELECT researcherId FROM project "
+				+ "WHERE projectId = ?";
+
+		int researcherId = jdbcTemplate.queryForObject(sql, Integer.class, projectId);
+	    
+	    System.out.println("The owner (ID) of the project is : " + researcherId);
+	    
+	    return researcherId;
+	}
+	
 	public int createProject(Project project) {
 		String sql = ""
 				+ "INSERT INTO project (projectName, researcherId) "

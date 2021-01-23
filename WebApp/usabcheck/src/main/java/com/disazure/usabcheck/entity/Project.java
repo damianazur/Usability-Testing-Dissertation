@@ -1,24 +1,23 @@
 package com.disazure.usabcheck.entity;
 
 public class Project {
-	private Long projectId;
+	private int projectId;
 	private String projectName;
-	private Long researcherId;
+	private int researcherId;
 
 	public Project() {
 	}
 
-	public Project(String projectName, Long researcherId) {
-		super();
+	public Project(String projectName, int researcherId) {
 		this.projectName = projectName;
 		this.researcherId = researcherId;
 	}
 
-	public Long getProjectId() {
+	public int getProjectId() {
 		return projectId;
 	}
 
-	public void setProjectId(Long projectId) {
+	public void setProjectId(int projectId) {
 		this.projectId = projectId;
 	}
 
@@ -30,11 +29,11 @@ public class Project {
 		this.projectName = projectName;
 	}
 
-	public Long getResearcherId() {
+	public int getResearcherId() {
 		return researcherId;
 	}
 
-	public void setResearcherId(Long researcherId) {
+	public void setResearcherId(int researcherId) {
 		this.researcherId = researcherId;
 	}
 

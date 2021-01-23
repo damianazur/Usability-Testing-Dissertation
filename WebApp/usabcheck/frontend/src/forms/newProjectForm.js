@@ -2,13 +2,13 @@ import React from 'react';
 
 export const Form = ({ onSubmit }) => {
   return (
-    <form onSubmit={e => e.preventDefault()}>
+    <form onSubmit={onSubmit}>
       <div className="form-group">
-        <label htmlFor="name">Project Name</label>
-        <input className="form-control" id="name" />
+        <label>Project Name</label>
+        <input className="inputField" id="projectName" type="text" name="projectName"/>
       </div>
       <div className="form-group">
-        <button onClick={onSubmit} className="form-control btn btn-primary">
+        <button className="primaryButton">
           Submit
         </button>
       </div>

@@ -5,10 +5,12 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 
 import com.fasterxml.jackson.core.*;
 
 import java.util.List;
+import java.util.Map;
 
 import javax.validation.Valid;
 
@@ -18,6 +20,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import com.disazure.usabcheck.dao.*;
 import com.disazure.usabcheck.entity.Project;
+import com.disazure.usabcheck.entity.UsabilityTest;
 import com.disazure.usabcheck.payload.request.BasicRequest;
 import com.disazure.usabcheck.payload.request.GetMyUsernameRequest;
 import com.disazure.usabcheck.payload.response.MessageResponse;
@@ -33,6 +36,9 @@ public class MainController {
 	
 	@Autowired
 	private ProjectDao proDao;
+	
+	@Autowired
+	private TestDao testDao;
 	
 	
 	@Autowired
@@ -57,14 +63,35 @@ public class MainController {
 		return new ResponseEntity<String>(result, HttpStatus.OK);
 	}
 	
-	@PostMapping("/getMyUsername2")
-	public ResponseEntity<?> getMyUsername2(@Valid @RequestBody GetMyUsernameRequest getMyUsernameRequest) {
-		System.out.println("#Your token is: " + getMyUsernameRequest.getToken());
+	@RequestMapping(value = "/createProject", method = RequestMethod.POST)
+	public ResponseEntity<?> getProjects(@RequestBody Map<String, String> json) {
+		String token = json.get("token");
+		String projectName = json.get("projectName");
+		String username = jwtUtils.getUserNameFromJwtToken(token);
+		int researcherId = resDao.getIdFromUsername(username);
 		
-		String username = jwtUtils.getUserNameFromJwtToken(getMyUsernameRequest.getToken());
+		Project newProject = new Project(projectName, researcherId);
+		int result = proDao.createProject(newProject);
 		
-		System.out.println("#Your username is: " + username);
+		return new ResponseEntity<String>(Integer.toString(result), HttpStatus.OK);
+	}
+	
 
-		return ResponseEntity.ok(new MessageResponse(username));
+	@RequestMapping(value = "/getTests", method = RequestMethod.POST)
+	public ResponseEntity<?> getTests(@RequestBody Map<String, String> json) {
+		String token = json.get("token");
+		int projectId = Integer.parseInt(json.get("projectId"));
+		String username = jwtUtils.getUserNameFromJwtToken(token);
+		int researcherId = resDao.getIdFromUsername(username);
+		
+		String result = "";
+		
+		try {
+			result = testDao.getByUsabilityTests(researcherId, projectId);
+		} catch (JsonProcessingException e) {
+			e.printStackTrace();
+		}
+		
+		return new ResponseEntity<String>(result, HttpStatus.OK);
 	}
 }

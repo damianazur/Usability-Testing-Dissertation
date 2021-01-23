@@ -1,18 +1,29 @@
 input {
     border: 1px solid silver;
     font-size: 16px;
+    background-color: none;
+}
+
+input:focus {
+    outline: none !important;
+    border-color: #a0ceff;
+    box-shadow: 0 0 3px #68affa;
+}
+
+label {
+    font-size: 14px;
 }
 
 button {
-    border: 1px solid rgb(255, 255, 255);
-    border-radius: 15px;
-    font-size: 18px;
+    border: none;
+    border-radius: 0px;
 }
 
 .inputField {
-    padding-left: 8px;
-    height: 35px;
-    width: 95%;
+    padding: 3px;
+    padding-left: 6px;
+    height: 30px;
+    width: 100%;
     border-radius: 5px;
     margin: 0px auto 0px;
     display : block;
@@ -25,12 +36,16 @@ button {
 
 .primaryButton {
     width: 90px;
-    height: 40px;
+    height: 30px;
     background-color: rgb(37, 186, 255);
     color: white;
     margin: 0 auto;
     display : block;
-    margin-top: 40px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    border: 1px solid rgb(255, 255, 255);
+    border-radius: 15px;
+    font-size: 16px;
 }
 
 #formHeading {

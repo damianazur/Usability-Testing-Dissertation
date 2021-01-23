@@ -1,3 +1,12 @@
+:root {  
+  --button1-body: rgb(153, 206, 255); 
+  --button1-hover: rgb(139, 199, 255);
+  --button1-active: rgb(108, 184, 255);
+  --button1-active-border: rgb(72, 167, 255);
+
+  --beige: #ffeead;  
+  --yellow: #ffcc5c;  
+}
 
 .mainDiv {
   background-size: 100% auto;
@@ -37,7 +46,7 @@
   padding-right: 10%;
 }
 
-.navbar-nav {
+.navbar-navDiv {
   list-style-type: none;
   margin: 0;
   padding: 0;
@@ -51,7 +60,7 @@
   float: right;
 }
 
-.nav-link {
+.navDiv-link {
   float: left;
   color:rgb(255, 255, 255);
   text-align: center;
@@ -60,6 +69,10 @@
   font-size: 18px;
   font-family: Verdana, sans-serif;
   font-weight: bold;
+}
+
+.navbar-navDiv li a:hover, .navbar-navDiv a:hover{
+  color: rgb(82, 177, 255);
 }
 
 
@@ -88,12 +101,25 @@ button:active {
 button {
   outline: none
 }
+/* 
+.btn-success {
+  background-color: rgb(139, 185, 255);
+  border-color: blue;
+} */
 
 .dropdown-item {
   width: 100%;
   height: 100%;
+  display: block;
+  text-align: left;
+  padding-left: 10px;
+  border-bottom: 1px rgb(233, 233, 233) solid;
   border-radius: 3px;
   background-color: white;
+}
+
+.dropdown-item:hover {
+  background-color: rgb(218, 237, 255);
 }
 
 .dropdown-menu {
@@ -105,7 +131,16 @@ button {
   min-width: 150px;
 }
 
-
+.dropDownButton {
+  border-radius: 3px;
+  background-color: var(--button1-body);
+}
+.dropDownButton:hover {
+  background-color: var(--button1-hover);
+}
+.dropDownButton:active{
+  background-color: var(--button1-active);
+}
 
 
 .modal-cover {
@@ -125,7 +160,7 @@ button {
   left: 0;
   width: 100%;
   height: 100%;
-  padding: 2.5em 1.5em 1.5em 1.5em;
+  padding: 2.5em 2.5em 2.5em 2.5em;
   background-color: #ffffff;
   box-shadow: 0 0 10px 3px rgba(0, 0, 0, 0.1);
   overflow-y: auto;
@@ -139,8 +174,9 @@ button {
     top: 50%;
     height: auto;
     transform: translate(-50%, -50%);
-    max-width: 30em;
+    max-width: 20em;
     max-height: calc(100% - 1em);
+    padding-bottom: 10px;
   }
 }
 
@@ -150,10 +186,11 @@ button {
   right: 0;
   padding: 0.5em;
   line-height: 1;
-  background: #f6f6f7;
+  background: var(--button1-body);
   border: 0;
   box-shadow: 0;
   cursor: pointer;
+  border-radius: 30px;
 }
 
 ._modal-close-icon {
@@ -178,6 +215,10 @@ button {
   position: absolute !important;
   width: 1px !important;
   white-space: nowrap !important;
+}
+
+.form-group label {
+  text-align: center;
 }
 
 .scroll-lock {
