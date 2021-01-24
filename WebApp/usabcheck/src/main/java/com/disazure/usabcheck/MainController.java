@@ -107,4 +107,17 @@ public class MainController {
 		
 		return new ResponseEntity<String>(Integer.toString(result), HttpStatus.OK);
 	}
+	
+	@RequestMapping(value = "/deleteTest", method = RequestMethod.POST)
+	public ResponseEntity<?> deleteTest(@RequestBody Map<String, String> json) {
+		String token = json.get("token");
+		int testId = Integer.parseInt(json.get("testId"));
+		String testName = json.get("testName");
+		String username = jwtUtils.getUserNameFromJwtToken(token);
+		int researcherId = resDao.getIdFromUsername(username);
+		
+		int result = testDao.deleteTest(testId, testName, researcherId);
+		
+		return new ResponseEntity<String>(Integer.toString(result), HttpStatus.OK);
+	}
 }

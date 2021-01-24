@@ -62,7 +62,7 @@ public class TestDao {
 		
 	}
 	
-	public int deleteTest(int testId, int researcherId) {
+	public int deleteTest(int testId, String testName, int researcherId) {
 		// Delete ensures that the researcherId matches. Any user can send a delete request but that doesn't
 		// mean they should be allowed to delete something.
 		String sql = ""
@@ -70,9 +70,9 @@ public class TestDao {
 				+ "FROM test "
 				+ "JOIN project using(projectId) "
 				+ "JOIN researcher using(researcherId) "
-				+ "WHERE researcherId = ? AND testId = ?";
+				+ "WHERE researcherId = ? AND testId = ? AND testName = ?";
 		
-        return jdbcTemplate.update(sql, researcherId, testId);
+        return jdbcTemplate.update(sql, researcherId, testId, testName);
 		
 	}
 

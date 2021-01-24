@@ -42,6 +42,17 @@ class ServerComponent {
         })
     }
 
+    deleteTest(testId, testName) {
+      const token = JSON.parse(localStorage.getItem('user')).accessToken;
+
+      return axios
+        .post(API_URL + "deleteTest", {
+          "token": token,
+          "testId": testId,
+          "testName": testName
+        })
+    }
+
   }
   
   export default new ServerComponent();

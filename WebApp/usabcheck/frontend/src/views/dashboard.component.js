@@ -2,7 +2,7 @@ import React, { Component } from "react";
 
 import { CreateProjectForm } from 'forms/createProjectForm';
 import { DeleteProjectForm } from 'forms/deleteProjectForm';
-import Server from "components/server.component";
+import Server from "services/server.service";
 import ModalContainer from "components/modalContainer.component";
 import TestContainer from "components/testContainer.component";
 import DropdownGenerator from "components/dropdownGenerator.component";
@@ -17,12 +17,22 @@ export default class Login extends Component {
     this._createProjectModal = React.createRef();
     this._deleteProjectModal = React.createRef();
 
-    //▼
     this.state = {
       projects: undefined,
       tests: undefined,
-      selectedProject: "Choose Project"
+      selectedProject: {
+        projectName: "Choose Project",
+        projectId: undefined
+      },
+      rerenderMe: undefined
     };
+  }
+
+  update() {
+    console.log("Dashboard rerender update");
+    if (this.state.selectedProject.projectId != undefined) {
+      this.updateTestList(this.state.selectedProject.projectId);
+    }
   }
 
   async componentDidMount() {
@@ -55,7 +65,10 @@ export default class Login extends Component {
     console.log("Selected project: ", params)
 
     this.updateTestList(params.projectId);
-    this.setState({selectedProject: projectName});
+    this.setState({selectedProject: {
+      projectName: projectName,
+      projectId: params.projectId
+    }});
   }
 
   generateProjectDropdown = (onSelectFunction, selectedProjectState) => {
@@ -144,7 +157,7 @@ export default class Login extends Component {
       console.log("Test: ", test.testName);
 
       renderItems.push(
-        <TestContainer key={i} onDelete={this.deleteTestSubmit.bind(this)} testItem={test}></TestContainer>
+        <TestContainer parentUpdate={this.update.bind(this)} key={i} onDelete={this.deleteTestSubmit.bind(this)} testItem={test}></TestContainer>
       );
     }
 
@@ -177,7 +190,7 @@ export default class Login extends Component {
 
             {this.state.projects.length > 0 ? (
               <span>
-                {this.generateProjectDropdown(this.onProjectSelect.bind(this), this.state.selectedProject)}
+                {this.generateProjectDropdown(this.onProjectSelect.bind(this), this.state.selectedProject.projectName)}
 
                 <ModalContainer 
                   Form={DeleteProjectForm} 

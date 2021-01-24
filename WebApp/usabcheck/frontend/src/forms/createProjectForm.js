@@ -5,7 +5,7 @@ export const CreateProjectForm = ({ onSubmit }) => {
     <form onSubmit={onSubmit}>
       <div className="form-group">
         <label>Project Name</label>
-        <input className="inputField" id="projectName" type="text" name="projectName"/>
+        <input autocomplete="off" className="inputField" id="projectName" type="text" name="projectName"/>
       </div>
       <div className="form-group">
         <button className="primaryButton">

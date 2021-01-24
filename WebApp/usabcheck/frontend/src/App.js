@@ -3,12 +3,13 @@ import { Switch, Route, Link, BrowserRouter as Router} from "react-router-dom";
 
 import "./App.css";
 
-import AuthService from "./services/auth.service";
+import AuthService from "services/auth.service";
 
-import Login from "./components/login.component";
-import Register from "./components/register.component";
-import Home from "./components/home.component";
-import Dashboard from "./components/dashboard.component";
+import Login from "views/login.component";
+import Register from "views/register.component";
+import Home from "views/home.component";
+import Dashboard from "views/dashboard.component";
+import CreateTest from "views/createTest.component";
 
 class App extends Component {
   constructor(props) {
@@ -92,6 +93,7 @@ class App extends Component {
           <Route exact path="/login" component={Login} />
           <Route exact path="/register" component={Register} />
           <Route exact path="/dashboard" component={Dashboard} />
+          <Route exact path="/create-test" component={CreateTest} />
         </Switch>
       </div>
 

@@ -3,6 +3,7 @@ import React, { Component } from 'react';
 import ModalContainer from "components/modalContainer.component";
 import DropdownGenerator from "components/dropdownGenerator.component";
 import { DeleteTestForm } from 'forms/deleteTestForm';
+import Server from "services/server.service";
 
 export class TestContainer extends Component {
   constructor(props) {
@@ -28,6 +29,13 @@ export class TestContainer extends Component {
     let testId = e.target.deleteTestId.value
 
     console.log("Project submit!", e, testName, testId);
+
+    this._deleteTestModal.current.setState({isShown: false});
+    Server.deleteTest(testId, testName).then(response => {
+      console.log(response);
+      this.props.parentUpdate();
+    });
+
   }
 
   generateOptionsDropdown = (test, selectedOption) => {
@@ -90,7 +98,7 @@ export class TestContainer extends Component {
               ref={this._deleteTestModal} 
               buttonClassName="secondaryButton deleteButton" 
               triggerText={""}
-              onSubmit={this.deleteTest}
+              onSubmit={this.deleteTest.bind(this)}
               details={test}
               disableButton={true}
             />  
