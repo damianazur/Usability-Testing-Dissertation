@@ -94,4 +94,17 @@ public class MainController {
 		
 		return new ResponseEntity<String>(result, HttpStatus.OK);
 	}
+	
+	@RequestMapping(value = "/deleteProject", method = RequestMethod.POST)
+	public ResponseEntity<?> deleteProject(@RequestBody Map<String, String> json) {
+		String token = json.get("token");
+		int projectId = Integer.parseInt(json.get("projectId"));
+		String username = jwtUtils.getUserNameFromJwtToken(token);
+		int researcherId = resDao.getIdFromUsername(username);
+		
+		
+		int result = proDao.deleteProject(projectId, researcherId);
+		
+		return new ResponseEntity<String>(Integer.toString(result), HttpStatus.OK);
+	}
 }

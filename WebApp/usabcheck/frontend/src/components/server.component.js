@@ -32,6 +32,16 @@ class ServerComponent {
         })
     }
 
+    deleteProject(projectId) {
+      const token = JSON.parse(localStorage.getItem('user')).accessToken;
+
+      return axios
+        .post(API_URL + "deleteProject", {
+          "token": token,
+          "projectId": projectId
+        })
+    }
+
   }
   
   export default new ServerComponent();

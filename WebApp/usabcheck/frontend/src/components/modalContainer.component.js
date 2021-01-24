@@ -24,11 +24,14 @@ export class ModalContainer extends Component {
   render() {
     return (
       <React.Fragment>
-        <ModalButton
-          showModal={this.showModal}
-          buttonRef={(n) => (this.ModalButton = n)}
-          triggerText={this.props.triggerText}
-        />
+        {!this.props.disableButton ? (
+          <ModalButton
+            showModal={this.showModal}
+            buttonRef={(n) => (this.ModalButton = n)}
+            triggerText={this.props.triggerText}
+            buttonClassName={this.props.buttonClassName}
+          />
+        ) : null}
 
         {this.state.isShown ? (
           <Modal
@@ -38,6 +41,9 @@ export class ModalContainer extends Component {
             closeModal={this.closeModal}
             onKeyDown={this.onKeyDown}
             onClickOutside={this.onClickOutside}
+            Form={this.props.Form}
+            generateProjectDropdown={this.props.generateProjectDropdown}
+            details={this.props.details}
           />
         ) : null}
       </React.Fragment>

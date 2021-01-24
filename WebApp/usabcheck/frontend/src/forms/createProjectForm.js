@@ -1,6 +1,6 @@
 import React from 'react';
 
-export const Form = ({ onSubmit }) => {
+export const CreateProjectForm = ({ onSubmit }) => {
   return (
     <form onSubmit={onSubmit}>
       <div className="form-group">
@@ -15,4 +15,4 @@ export const Form = ({ onSubmit }) => {
     </form>
   );
 };
-export default Form;
+export default CreateProjectForm;

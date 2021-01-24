@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Form } from 'forms/newProjectForm';
+// import { Form } from 'forms/newProjectForm';
 import FocusTrap from 'focus-trap-react';
 
 export const Modal = ({
@@ -8,7 +8,10 @@ export const Modal = ({
   modalRef,
   buttonRef,
   closeModal,
-  onSubmit
+  onSubmit,
+  Form,
+  generateProjectDropdown,
+  details
 }) => {
   return ReactDOM.createPortal(
     <FocusTrap>
@@ -34,7 +37,7 @@ export const Modal = ({
             </svg>
           </button>
           <div className="modal-body">
-            <Form onSubmit={onSubmit} />
+            <Form onSubmit={onSubmit} generateProjectDropdown={generateProjectDropdown} details={details}/>
           </div>
         </div>
       </aside>

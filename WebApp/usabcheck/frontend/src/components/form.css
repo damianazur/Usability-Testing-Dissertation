@@ -35,17 +35,38 @@ button {
 }
 
 .primaryButton {
-    width: 90px;
+    padding-left: 20px;
+    padding-right: 20px;
     height: 30px;
     background-color: rgb(37, 186, 255);
     color: white;
     margin: 0 auto;
     display : block;
-    margin-top: 5px;
+    margin-top: 30px;
     margin-bottom: 5px;
     border: 1px solid rgb(255, 255, 255);
     border-radius: 15px;
     font-size: 16px;
+}
+
+.secondaryButton {
+    padding-left: 20px;
+    padding-right: 20px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+    background-color: rgb(37, 186, 255);
+    color: white;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    border: 1px solid rgb(255, 255, 255);
+    border-radius: 10px;
+    font-size: 14px;
+    margin-right: 20px; 
+}
+
+.deleteButton {
+    background-color: red;
+    float: right;
 }
 
 #formHeading {

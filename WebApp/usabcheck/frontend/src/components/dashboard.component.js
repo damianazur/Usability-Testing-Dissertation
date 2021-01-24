@@ -1,8 +1,11 @@
 import React, { Component } from "react";
-import { Dropdown } from 'react-bootstrap';
 
+import { CreateProjectForm } from 'forms/createProjectForm';
+import { DeleteProjectForm } from 'forms/deleteProjectForm';
 import Server from "components/server.component";
 import ModalContainer from "components/modalContainer.component";
+import TestContainer from "components/testContainer.component";
+import DropdownGenerator from "components/dropdownGenerator.component";
 
 import "bootstrap.min.css";
 
@@ -12,7 +15,9 @@ export default class Login extends Component {
 
     // Popup for creating a project
     this._createProjectModal = React.createRef();
+    this._deleteProjectModal = React.createRef();
 
+    //▼
     this.state = {
       projects: undefined,
       tests: undefined,
@@ -47,38 +52,32 @@ export default class Login extends Component {
     params = JSON.parse(params);
     let projectName = params.projectName;
 
+    console.log("Selected project: ", params)
+
     this.updateTestList(params.projectId);
     this.setState({selectedProject: projectName});
   }
 
-  renderPostsDropDown = () => {
+  generateProjectDropdown = (onSelectFunction, selectedProjectState) => {
     let projects = this.state.projects;
     let menuItems = [];
 
     for(let i = 0; i < projects.length; i++) {
-      // console.log("Project: ", projects[i]);
-      let item = projects[i];
+      let project = projects[i];
+      let item = {};
 
-      let params = JSON.stringify({
-        projectName: item.projectName,
-        projectId: item.projectId
-      });
+      item.name = project.projectName;
+      item.params = {
+        projectName: project.projectName,
+        projectId: project.projectId
+      };
+      item.onSelectFunction = onSelectFunction;
 
-      menuItems.push(
-        <Dropdown.Item  as="button" key={i} onSelect={this.onProjectSelect.bind(this)} eventKey={params}>{item.projectName}</Dropdown.Item>
-      );
+      menuItems.push(item);
     }
 
     return (
-    <Dropdown>
-      <Dropdown.Toggle className="dropDownButton" variant="success" id="dropdown-basic">
-        {this.state.selectedProject}
-      </Dropdown.Toggle>
-
-      <Dropdown.Menu>
-        {menuItems}
-      </Dropdown.Menu>
-    </Dropdown>
+      <DropdownGenerator data={menuItems} initalText={selectedProjectState}></DropdownGenerator>
     )
   }
 
@@ -95,31 +94,65 @@ export default class Login extends Component {
     });
   }
 
+  deleteProjectSubmit(e) {
+    e.preventDefault();
+    let projectId = e.target.deleteProjectId.value
+
+    if (projectId == undefined || projectId == null || projectId == "") {
+      return;
+    }
+
+    console.log("Project delete!", projectId);
+
+    this._deleteProjectModal.current.setState({isShown: false});
+    Server.deleteProject(projectId).then(response => {
+      console.log(response);
+      this.updateProjectList();
+    });
+  }
+
+  deleteTestSubmit(e) {
+    e.preventDefault();
+    let testId = e.target.testId.value
+
+    if (testId == undefined || testId == null || testId == "") {
+      return;
+    }
+
+    console.log("Test delete!", testId);
+
+    // this._deleteProjectModal.current.setState({isShown: false});
+    // Server.deleteProject(projectId).then(response => {
+    //   console.log(response);
+    //   this.updateProjectList();
+    // });
+  }
+
   displayTests() {
-    // let tests = this.state.test;
-    // let menuItems = [];
+    console.log(this.state.tests);
+    let tests = this.state.tests;
 
-    // for(let i = 0; i < projects.length; i++) {
-    //   console.log("Project: ", projects[i].projectName);
-    //   let item = projects[i];
-    //   params.projectName = item.projectName;
+    if (!tests) {
+      return(undefined);
+    }
 
-    //   menuItems.push(
-    //     <Dropdown.Item  as="button" key={i} onSelect={this.onProjectSelect.bind(this)} eventKey={item.projectName}>{item.projectName}</Dropdown.Item>
-    //   );
-    // }
+    let renderItems = [];
 
-    // return (
-    // <Dropdown>
-    //   <Dropdown.Toggle className="dropDownButton" variant="success" id="dropdown-basic">
-    //     {this.state.selectedProject}
-    //   </Dropdown.Toggle>
+    for(let i = 0; i < tests.length; i++) {
+      let test = tests[i];
 
-    //   <Dropdown.Menu>
-    //     {menuItems}
-    //   </Dropdown.Menu>
-    // </Dropdown>
-    // )
+      console.log("Test: ", test.testName);
+
+      renderItems.push(
+        <TestContainer key={i} onDelete={this.deleteTestSubmit.bind(this)} testItem={test}></TestContainer>
+      );
+    }
+
+    return (
+      <div className="testContainer">
+        {renderItems}
+      </div>
+    )
   }
 
   render() {  
@@ -130,32 +163,53 @@ export default class Login extends Component {
 
     if (projects) {
       return (
-        <div>
+        <div className="mainPageDiv">
           <h1>Projects</h1>
-          <div className="post-content">     
+          <hr></hr>
+          <div className="post-content">  
+            <ModalContainer 
+              Form={CreateProjectForm} 
+              ref={this._createProjectModal} 
+              buttonClassName="secondaryButton" 
+              triggerText={"Create Project"} 
+              onSubmit={this.createProjectSubmit.bind(this)}
+            />   
+
             {this.state.projects.length > 0 ? (
-              <div>
-                {this.renderPostsDropDown()}
-                <ModalContainer ref={this._createProjectModal} triggerText={"Create Project"} onSubmit={this.createProjectSubmit.bind(this)}/>
+              <span>
+                {this.generateProjectDropdown(this.onProjectSelect.bind(this), this.state.selectedProject)}
+
+                <ModalContainer 
+                  Form={DeleteProjectForm} 
+                  ref={this._deleteProjectModal} 
+                  buttonClassName="secondaryButton deleteButton" 
+                  triggerText={"Delete a Project"}
+                  onSubmit={this.deleteProjectSubmit.bind(this)}
+                  generateProjectDropdown={this.generateProjectDropdown.bind(this)}
+                />   
 
                 <div>
-                  <h2>Usability Tests</h2>
-                  <button onClick={() => {
-                      this.props.history.push("/create-test");
-                      window.location.reload();
-                    }} type="button">Create Usability Test
-                  </button>
+                  {this.state.tests && this.state.tests.length > 0 && (
+                    <div>
+                      <h2 style={{width: "100%"}}>Usability Tests</h2>
+                      <button onClick={() => {
+                          this.props.history.push("/create-test");
+                          window.location.reload();
+                        }} type="button" className="secondaryButton">Create Usability Test
+                      </button>
+                      {this.displayTests()}
+                    </div>
+                  )}
+
+                  {this.state.selectedProject ? (
+                    <div>
+                      
+                    </div>
+                  ):(
+                    <h2>You have no tests created</h2>
+                  )}
                 </div>
-
-                {this.state.selectedProject ? (
-                  <div>
-                    
-                  </div>
-                ):(
-                  <h2>You have no tests created</h2>
-                )}
-
-              </div>       
+              </span>       
              ) : (
               <h2>You have no projects created</h2>
             )}
