@@ -29,39 +29,26 @@ button {
     display : block;
 }
 
+.inputField2 {
+    padding: 3px;
+    padding-left: 6px;
+    height: 30px;
+    width: 200px;
+    border-radius: 5px;
+    display : block;
+}
+
 .inputGroup {
     margin-top: 1em;
     width: 100%;
 }
 
-.primaryButton {
-    padding-left: 20px;
-    padding-right: 20px;
-    height: 30px;
-    background-color: rgb(37, 186, 255);
-    color: white;
+.centerElement {
     margin: 0 auto;
-    display : block;
-    margin-top: 30px;
-    margin-bottom: 5px;
-    border: 1px solid rgb(255, 255, 255);
-    border-radius: 15px;
-    font-size: 16px;
 }
 
-.secondaryButton {
-    padding-left: 20px;
-    padding-right: 20px;
-    padding-top: 2px;
-    padding-bottom: 2px;
-    background-color: rgb(37, 186, 255);
-    color: white;
-    margin-top: 5px;
-    margin-bottom: 5px;
-    border: 1px solid rgb(255, 255, 255);
-    border-radius: 10px;
-    font-size: 14px;
-    margin-right: 20px; 
+.fullWidth {
+    width: 100%;
 }
 
 .deleteButton {

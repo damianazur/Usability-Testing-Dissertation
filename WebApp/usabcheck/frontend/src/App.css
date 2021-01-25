@@ -1,4 +1,7 @@
 :root {  
+  --primaryButton-body:rgb(37, 186, 255);
+  --primaryButton-hover: rgb(38, 172, 235);
+
   --button1-body: rgb(153, 206, 255); 
   --button1-hover: rgb(119, 189, 255);
   --button1-active: rgb(96, 177, 252);
@@ -8,6 +11,39 @@
 
   --beige: #ffeead;  
   --yellow: #ffcc5c;  
+}
+
+.primaryButton {
+  padding-left: 20px;
+  padding-right: 20px;
+  height: 30px;
+  background-color: var(--primaryButton-body);
+  color: white;
+  display : block;
+  margin-top: 30px;
+  margin-bottom: 5px;
+  border: 1px solid rgb(255, 255, 255);
+  border-radius: 15px;
+  font-size: 16px;
+}
+
+.secondaryButton {
+  padding-left: 20px;
+  padding-right: 20px;
+  padding-top: 2px;
+  padding-bottom: 2px;
+  background-color: var(--primaryButton-body);
+  color: white;
+  margin-top: 5px;
+  margin-bottom: 5px;
+  border: 1px solid rgb(255, 255, 255);
+  border-radius: 10px;
+  font-size: 14px;
+  margin-right: 20px; 
+}
+
+.primaryButton:hover, .secondaryButton:hover {
+  background-color: var(--primaryButton-hover);
 }
 
 .mainDiv {
@@ -84,7 +120,6 @@ label {
   margin-bottom: 5px;
   font-size: 18px;
   text-align: center;
-  width: 100%;
   font-family: Verdana, sans-serif;
 }
 
@@ -238,7 +273,7 @@ button {
 }
 
 .mainPageDiv {
-  width: 90%;
+  width: 85%;
   margin-left: auto;
   margin-right: auto;
 }
@@ -279,4 +314,17 @@ button {
   display: inline-block;
   min-width: 120px;
   font-weight: 700;
+}
+
+
+.createTest-content {
+  width: 80%;
+  margin: 0 auto;
+}
+
+.createTestInputBox {
+  width: 90%;
+  background-color: rgb(233, 233, 233);
+  padding: 2%;
+  border: 1px solid rgb(207, 207, 207);
 }

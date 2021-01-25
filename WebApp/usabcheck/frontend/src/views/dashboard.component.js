@@ -30,14 +30,27 @@ export default class Login extends Component {
 
   update() {
     console.log("Dashboard rerender update");
-    if (this.state.selectedProject.projectId != undefined) {
+    if (this.state.selectedProject.projectId !== undefined) {
       this.updateTestList(this.state.selectedProject.projectId);
     }
   }
 
   async componentDidMount() {
+    var state = localStorage.getItem('dashboardExitState');
+
+    if (state) {
+      state = JSON.parse(state);
+      this.setState(state);
+    }
+
     this.updateProjectList();
   }
+
+  async componentWillUnmount() {
+    localStorage.setItem('dashboardExitState', JSON.stringify(this.state));
+  }
+
+  
 
   updateProjectList() {
     Server.getProjectList().then(response => {
@@ -111,7 +124,7 @@ export default class Login extends Component {
     e.preventDefault();
     let projectId = e.target.deleteProjectId.value
 
-    if (projectId == undefined || projectId == null || projectId == "") {
+    if (projectId === undefined || projectId === null || projectId === "") {
       return;
     }
 
@@ -128,7 +141,7 @@ export default class Login extends Component {
     e.preventDefault();
     let testId = e.target.testId.value
 
-    if (testId == undefined || testId == null || testId == "") {
+    if (testId === undefined || testId === null || testId === "") {
       return;
     }
 

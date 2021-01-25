@@ -19,7 +19,7 @@ export const DeleteTestForm = ({ onSubmit, details}) => {
         </div>
       </div>
       <div className="form-group">
-        <button className="primaryButton" style={{"backgroundColor": "red"}}>
+        <button className="primaryButton centerElement" style={{"backgroundColor": "red"}}>
           Delete Test
         </button>
       </div>

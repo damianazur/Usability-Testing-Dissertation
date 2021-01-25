@@ -33,7 +33,7 @@ export class DeleteProjectForm extends Component {
           {this.props.generateProjectDropdown(this.onProjectSelect.bind(this), this.state.toDeleteProjectName)}
         </div>
         <div className="form-group">
-          <button className="primaryButton" style={{"backgroundColor": "red"}}>
+          <button className="primaryButton centerElement" style={{"backgroundColor": "red"}}>
             Delete Project
           </button>
         </div>
