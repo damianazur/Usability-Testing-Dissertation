@@ -15,31 +15,66 @@ export default class CreateTest extends Component {
     this.state = {
       pretestSequenceList: [],
       testSequenceList: [],
-      preTestKeyIndex: 0,
-      testKeyIndex: 0
+
+      pretestKeyIndex: 0,
+      testKeyIndex: 0,
+
+      pretestRefs: [],
+      testRefs: [],
     };
   }
 
-  deleteSequenceItem(sequenceKey, sequenceListName) {
-    let sequenceList = this.state[sequenceListName];
-
-    sequenceList = sequenceList.filter((item) => item.key !== sequenceKey.toString());
-    this.setState({[sequenceListName]: sequenceList});
+  update() {
+    console.log("CreateTest rerender update");
+    this.setState();
   }
 
-  appendSequenceItem(sequenceListName, keyName, itemName) {
+  deleteSequenceItem(sequenceKey, sequenceListName, refListName) {
+    let sequenceList = this.state[sequenceListName];
+    let refList = this.state[refListName];
+
+    sequenceList = sequenceList.filter((item) => item.key !== sequenceKey.toString());
+    refList = refList.filter((item) => item.key !== sequenceKey);
+
+    this.setState({
+      [sequenceListName]: sequenceList,
+      [refListName]: refList
+    });
+  }
+
+  appendSequenceItem(sequenceListName, keyName, itemName, refListName) {
     let sequenceList = this.state[sequenceListName];
     let key = this.state[keyName];
 
     const DynamicItem = this.components[itemName];
 
+    let ref = React.createRef();
+    let refContainer = {
+      key: key,
+      ref: ref
+    }
+    let refs = this.state[refListName];
+    refs.push(refContainer);
+
     sequenceList.push(
       <div key={key} style={{marginBottom: "5px"}}>
-        <DynamicItem sequenceKey={key} sequenceListName={sequenceListName} onDelete={this.deleteSequenceItem.bind(this)}></DynamicItem>
+        <DynamicItem 
+          ref={ref} 
+          sequenceKey={key} 
+          sequenceListName={sequenceListName} 
+          onDelete={this.deleteSequenceItem.bind(this)}
+          refListName={refListName}
+          updateParent={this.update.bind(this)}
+          >
+        </DynamicItem>
       </div>
     );
 
-    this.setState({[sequenceListName]: sequenceList, [keyName]: key+1});
+    this.setState({
+      [sequenceListName]: sequenceList, 
+      [keyName]: key+1,
+      [refListName]: refs
+    });
   }
   
   renderLoadingState = () => (
@@ -51,11 +86,31 @@ export default class CreateTest extends Component {
   onProjectCreate(e) {
     e.preventDefault();
     console.log("CREATE TEST ", e);
+
+    let testSequenceData = [];
+    let refs = this.state.testRefs;
+
+    console.log("REFS", refs);
+
+    for(let i = 0; i < refs.length; i++) {
+      let componentRef = this.state.testRefs[i].ref;
+      let componentData = componentRef.current.state;
+      let outputData = componentData.outputData;
+      
+      let item = {
+        data: outputData,
+        sequenceNumber: i
+      };
+
+      testSequenceData.push(item);
+    }
+
+    console.log(testSequenceData);
   }
 
   render() {  
-    console.log("RENDER", this.state.testSequenceList);
-    
+    console.log("RENDER", this.state.testRefs);
+    console.log("SEQUENCE", this.state.testSequenceList);    
     return (
       <div className="mainPageDiv">
         <h1>Create Usability Test</h1>
@@ -86,7 +141,7 @@ export default class CreateTest extends Component {
             </div>
 
             <div style={{marginTop: "10px"}}>
-              <button type="button" onClick={this.appendSequenceItem.bind(this, "testSequenceList", "testKeyIndex", "TaskCreateBox")} className="secondaryButton">
+              <button type="button" onClick={this.appendSequenceItem.bind(this, "testSequenceList", "testKeyIndex", "TaskCreateBox", "testRefs")} className="secondaryButton">
                 + Task
               </button>
               <button className="secondaryButton">
