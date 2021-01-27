@@ -67,11 +67,11 @@ export class DynamicList extends Component {
     });
 
     itemList.push(
-      <div key={key} style={{marginBottom: "5px"}}>
+      <div key={key}>
         <div style={{"width": "90%", display:"inline-block"}}>
           <input 
             onChange={evt => this.updateInputValue(evt, key)} 
-            placeholder="Enter Instruction" 
+            placeholder={this.props.inputPlaceHolder}
             autoComplete="off" 
             className="inputField" 
             type="text"/>
@@ -101,7 +101,7 @@ export class DynamicList extends Component {
           {this.state.itemList}
         </div>
         <button type="button" onClick={this.appendItem.bind(this)} className="secondaryButton">
-          Add Instruction
+          {this.props.buttonLabel}
         </button>        
       </div>
     )

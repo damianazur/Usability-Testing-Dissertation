@@ -17,18 +17,18 @@ export class TestContainer extends Component {
   }
 
   showDeletePopup() {
-    console.log("Delete Test Option Selected");
+    // console.log("Delete Test Option Selected");
     this._deleteTestModal.current.setState({isShown: true});
   }
 
   deleteTest(e) {
     e.preventDefault();
-    console.log("Test delete", e);
+    // console.log("Test delete", e);
 
     let testName = e.target.deleteTestName.value
     let testId = e.target.deleteTestId.value
 
-    console.log("Project submit!", e, testName, testId);
+    // console.log("Project submit!", e, testName, testId);
 
     this._deleteTestModal.current.setState({isShown: false});
     Server.deleteTest(testId, testName).then(response => {
@@ -57,7 +57,7 @@ export class TestContainer extends Component {
   }
 
   render() {
-    console.log("Test Container Props:", this.props);
+    // console.log("Test Container Props:", this.props);
 
     const test = this.props.testItem;
 

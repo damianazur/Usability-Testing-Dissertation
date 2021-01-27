@@ -53,6 +53,16 @@ class ServerComponent {
         })
     }
 
+    createTest(data) {
+      const token = JSON.parse(localStorage.getItem('user')).accessToken;
+
+      return axios
+        .post(API_URL + "createTest", {
+          "token": token,
+          "data": JSON.stringify(data)
+        })
+    }
+
   }
   
   export default new ServerComponent();

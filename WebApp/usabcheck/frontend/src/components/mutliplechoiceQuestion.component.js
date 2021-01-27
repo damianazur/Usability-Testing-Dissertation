@@ -2,12 +2,12 @@ import React, { Component } from 'react';
 import DropdownGenerator from "components/dropdownGenerator.component";
 import DynamicItemList from "components/dynamicList.component";
 
-export class TaskCreateBox extends Component {
+export class MultipleChoiceQuestionBox extends Component {
   constructor(props) {
     super(props);
 
-    this._instructionRef = React.createRef();
-    this._taskNameRef = React.createRef();
+    this._questionRef = React.createRef();
+    this.choiceRef = React.createRef();
 
     this.state = {
       type: "task",
@@ -16,20 +16,19 @@ export class TaskCreateBox extends Component {
   }
 
   updateOutputData() {
-    if (this._instructionRef === undefined || this._instructionRef.current === null) {
+    if (this.choiceRef === undefined || this.choiceRef.current === null) {
       return;
     }
 
     let outputData = {
-      type: "task",
-      taskName: this._taskNameRef.current.value,
-      steps: []
+      type: "question",
+      questionType: "multiple-choice",
+      questionText: this._questionRef.current.value,
+      choices: []
     };
 
-    let componentData = this._instructionRef.current.state;
+    let componentData = this.choiceRef.current.state;
     let dynamicInputs = componentData.dynamicInputs;
-
-    // console.log(dynamicInputs);
 
     if (dynamicInputs.length === 0) {
       outputData.steps = [];
@@ -38,7 +37,7 @@ export class TaskCreateBox extends Component {
       for(let j = 0; j < dynamicInputs.length; j++) {
         let inputValue = dynamicInputs[j];
 
-        outputData.steps.push({
+        outputData.choices.push({
           value: inputValue.value
         });
       }
@@ -67,28 +66,33 @@ export class TaskCreateBox extends Component {
     )
   }
 
+  // createPositionBox
+
   render() {
     // console.log("Task Create Output", this.state.outputData);
 
     return (
-      <div className="createTestInputBox taskCreate">
-        <h3 className="createTestInputBox-heading">Task</h3>
-        <input className="createTestInputBox-inputField"
-            ref={this._taskNameRef}
-            onChange={this.updateOutputData.bind(this)} 
-            placeholder="Task Name" 
-            autoComplete="off"
-            type="text"/>
-        
+      <div className="createTestInputBox multipleChoiceCreate">
+        <h3 className="createTestInputBox-heading">Question (Multiple Choice)</h3>  
         {this.generateOptionsDropdown()}
 
         <hr className="createTestInputBox-hr"></hr>
+        <input 
+            ref={this._questionRef}
+            onChange={this.updateOutputData.bind(this)} 
+            placeholder="Question" 
+            autoComplete="off" 
+            className="inputField" 
+            type="text"
+        />
+
+        <h4 className="createTestInputBox-heading" style={{marginTop: "20px"}}>Answer Choices</h4>  
         <div>
-          <DynamicItemList inputPlaceHolder="Enter Task Instruction" buttonLabel="Add Instruction" onUpdate={this.updateOutputData.bind(this)} ref={this._instructionRef}></DynamicItemList>
+          <DynamicItemList inputPlaceHolder="Answer Choice" buttonLabel="Add Answer" onUpdate={this.updateOutputData.bind(this)} ref={this.choiceRef}></DynamicItemList>
         </div>
       </div>
     )
   }
 }
 
-export default TaskCreateBox;
+export default MultipleChoiceQuestionBox;

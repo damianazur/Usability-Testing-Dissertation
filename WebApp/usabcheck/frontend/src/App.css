@@ -11,6 +11,10 @@
 
   --beige: #ffeead;  
   --yellow: #ffcc5c;  
+
+  --task-body: rgb(240, 245, 255);
+  --text-question-body:  rgb(255, 250, 240);
+  --multiple-choice-question-body:  rgb(255, 240, 240);
 }
 
 .primaryButton {
@@ -327,4 +331,34 @@ button {
   background-color: rgb(233, 233, 233);
   padding: 2%;
   border: 1px solid rgb(207, 207, 207);
+  margin-bottom: 20px;
+}
+
+.createTestInputBox-heading {
+  margin: 0px;
+  margin-right: 20px;
+  display: inline-block
+}
+
+.createTestInputBox-inputField {
+  margin: 0px;
+  margin-right: 20px;
+  display: inline-block
+}
+
+.createTestInputBox-hr {
+  border-color: white;
+  margin: 10px 0 10px
+}
+
+.taskCreate {
+  background-color: var(--task-body);
+}
+
+.textQuestionCreate {
+  background-color: var(--text-question-body);
+}
+
+.multipleChoiceCreate {
+  background-color: var(--multiple-choice-question-body);
 }

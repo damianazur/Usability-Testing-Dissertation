@@ -8,7 +8,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 import com.fasterxml.jackson.core.*;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
+import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
 
@@ -20,6 +25,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import com.disazure.usabcheck.dao.*;
 import com.disazure.usabcheck.entity.Project;
+import com.disazure.usabcheck.entity.Question;
+import com.disazure.usabcheck.entity.Task;
 import com.disazure.usabcheck.entity.UsabilityTest;
 import com.disazure.usabcheck.payload.request.BasicRequest;
 import com.disazure.usabcheck.payload.request.GetMyUsernameRequest;
@@ -40,6 +47,11 @@ public class MainController {
 	@Autowired
 	private TestDao testDao;
 	
+	@Autowired
+	private TaskDao taskDao;
+	
+	@Autowired
+	private QuestionDao questionDao;
 	
 	@Autowired
 	JwtUtils jwtUtils;
@@ -87,7 +99,7 @@ public class MainController {
 		String result = "";
 		
 		try {
-			result = testDao.getByUsabilityTests(researcherId, projectId);
+			result = testDao.getByProjectId(researcherId, projectId);
 		} catch (JsonProcessingException e) {
 			e.printStackTrace();
 		}
@@ -119,5 +131,67 @@ public class MainController {
 		int result = testDao.deleteTest(testId, testName, researcherId);
 		
 		return new ResponseEntity<String>(Integer.toString(result), HttpStatus.OK);
+	}
+	
+	@RequestMapping(value = "/createTest", method = RequestMethod.POST)
+	public ResponseEntity<?> createTest(@RequestBody Map<String, String> json) {
+		String token = json.get("token");
+		String dataString = json.get("data");
+		String username = jwtUtils.getUserNameFromJwtToken(token);
+		int researcherId = resDao.getIdFromUsername(username);
+		
+		JsonObject data = new JsonParser().parse(dataString).getAsJsonObject();
+		System.out.println("------------ DATA: ------------\n" + data);
+		JsonArray sequenceData = data.get("sequenceData").getAsJsonArray();
+		
+		// Create Usability Test
+		String testName = data.get("testName").getAsString();
+		int projectId = data.get("projectId").getAsInt();
+		java.sql.Date currentDate = new java.sql.Date(Calendar.getInstance().getTime().getTime());
+		UsabilityTest newTest = new UsabilityTest(testName, projectId, currentDate.toString(), "Open");
+		int result = testDao.createTest(researcherId, newTest);
+		
+		
+		if (result == 1) {
+			int testId = -1;
+			try {
+				testId = testDao.getIdByTestNameAndProjectId(researcherId, testName, projectId);
+			} catch (JsonProcessingException e) {
+				e.printStackTrace();
+				return new ResponseEntity<String>(Integer.toString(0), HttpStatus.INTERNAL_SERVER_ERROR);
+			}
+			
+			System.out.println("Newly created testId: " + testId);
+			
+			for (JsonElement elem : sequenceData) {
+				JsonObject object = elem.getAsJsonObject();
+				String itemType = object.get("type").getAsString();
+				
+				// Create Question
+				if (itemType.equals("question")) {
+					String questionConfigsJson = object.get("data").getAsJsonObject().toString();
+					int sequenceNumber = object.get("indexNumber").getAsInt();
+					String stage = object.get("stage").getAsString();
+					
+					Question newQuestion = new Question(testId, questionConfigsJson, sequenceNumber, stage);
+					questionDao.createQuestion(newQuestion);
+				}
+				// Create Task
+				else if (itemType.equals("task")) {
+					JsonObject taskData = object.get("data").getAsJsonObject();
+					
+					String taskName = taskData.get("taskName").getAsString();
+					String stepsJSON = taskData.get("steps").getAsJsonArray().toString();
+					int sequenceNumber = object.get("indexNumber").getAsInt();
+					
+					Task newTask = new Task(taskName, testId, stepsJSON, sequenceNumber);
+					taskDao.createTask(newTask);
+				}
+			}
+		}
+		
+		System.out.println(result);
+		
+		return new ResponseEntity<String>(Integer.toString(0), HttpStatus.OK);
 	}
 }

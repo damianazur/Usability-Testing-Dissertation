@@ -38,19 +38,24 @@ export default class Login extends Component {
   async componentDidMount() {
     var state = localStorage.getItem('dashboardExitState');
 
+    this.updateProjectList();
+
     if (state) {
       state = JSON.parse(state);
-      this.setState(state);
-    }
+      this.setState(state, this.postStateRestore);
+    } 
+  }
 
-    this.updateProjectList();
+  postStateRestore() {
+    console.log(this.state.selectedProject);
+    if (this.state.selectedProject && this.state.selectedProject.projectId) {
+      this.updateTestList(this.state.selectedProject.projectId)
+    }
   }
 
   async componentWillUnmount() {
     localStorage.setItem('dashboardExitState', JSON.stringify(this.state));
   }
-
-  
 
   updateProjectList() {
     Server.getProjectList().then(response => {
@@ -155,7 +160,8 @@ export default class Login extends Component {
   }
 
   displayTests() {
-    console.log(this.state.tests);
+    console.log(this.state.selectedProject);
+    // console.log(this.state.tests);
     let tests = this.state.tests;
 
     if (!tests) {
@@ -219,7 +225,10 @@ export default class Login extends Component {
                     <div>
                       <h2 style={{width: "100%"}}>Usability Tests</h2>
                       <button onClick={() => {
-                          this.props.history.push("/create-test");
+                          this.props.history.push({
+                            pathname: 'create-test',
+                            state: { projectId: this.state.selectedProject.projectId }
+                          });
                           window.location.reload();
                         }} type="button" className="secondaryButton">Create Usability Test
                       </button>

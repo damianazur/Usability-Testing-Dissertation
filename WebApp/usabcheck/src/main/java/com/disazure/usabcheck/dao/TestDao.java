@@ -24,7 +24,7 @@ public class TestDao {
 	
 	private final ObjectMapper mapper = new ObjectMapper();
 	
-	public String getByUsabilityTests(int researcherId, int projectId) throws JsonProcessingException {
+	public String getByProjectId(int researcherId, int projectId) throws JsonProcessingException {
 		System.out.println("ResId: " + researcherId);
 		
 		String sql = ""
@@ -44,6 +44,18 @@ public class TestDao {
 	    return result;
 	}
 	
+	public int getIdByTestNameAndProjectId(int researcherId, String testName, int projectId) throws JsonProcessingException {
+		String sql = ""
+				+ "SELECT testId FROM test "
+				+ "LEFT JOIN project using(projectId) "
+				+ "LEFT JOIN researcher using(researcherId) "
+				+ "WHERE testName = ? AND projectId = ? AND researcherId = ?";
+
+		int testId = jdbcTemplate.queryForObject(sql, Integer.class, testName, projectId, researcherId);
+		
+		return testId;
+	}
+	
 	public int createTest(int researcherId, UsabilityTest test) {
 		int resId = proDao.getResearcherIdFromProject(test.getProjectId());
 		
@@ -53,12 +65,10 @@ public class TestDao {
 		}
 		
 		String sql = ""
-				+ "INSERT INTO test (testName, projectId, launchedDate, status) "
+				+ "INSERT INTO test (testName, projectId, launchedDate, testStatus) "
 				+ "VALUES (?, ?, ?, ?)";
 		
-		java.sql.Date ourJavaDateObject = new java.sql.Date(Calendar.getInstance().getTime().getTime());
-		
-        return jdbcTemplate.update(sql, test.getTestName(), test.getProjectId(), ourJavaDateObject, test.getStatus());
+        return jdbcTemplate.update(sql, test.getTestName(), test.getProjectId(), test.getLaunchedDate(), test.getStatus());
 		
 	}
 	
