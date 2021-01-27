@@ -63,6 +63,16 @@ class ServerComponent {
         })
     }
 
+    getTestsWithDetails(testId) {
+      const token = JSON.parse(localStorage.getItem('user')).accessToken;
+
+      return axios
+        .post(API_URL + "getTestsWithDetails", {
+          "token": token,
+          "testId": testId
+        })
+    }
+
   }
   
   export default new ServerComponent();

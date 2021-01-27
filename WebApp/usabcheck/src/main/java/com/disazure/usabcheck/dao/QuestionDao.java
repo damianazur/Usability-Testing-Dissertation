@@ -28,7 +28,7 @@ public class QuestionDao {
 		System.out.println("ResId: " + researcherId);
 		
 		String sql = ""
-				+ "SELECT questionId, testId, questionConfigsJSON, sequenceNumber FROM question "
+				+ "SELECT questionId, testId, questionConfigsJSON, sequenceNumber, stage FROM question "
 				+ "LEFT JOIN test using(testId) "
 				+ "LEFT JOIN project using(projectId) "
 				+ "LEFT JOIN researcher using(researcherId) "

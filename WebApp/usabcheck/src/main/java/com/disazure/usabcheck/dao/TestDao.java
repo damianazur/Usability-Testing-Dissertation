@@ -44,6 +44,22 @@ public class TestDao {
 	    return result;
 	}
 	
+	public String getByTestId(int researcherId, int testId) throws JsonProcessingException {
+		System.out.println(researcherId + " ## " + testId);
+		String sql = ""
+				+ "SELECT testId, testName, projectId, launchedDate, testStatus FROM test "
+				+ "LEFT JOIN project using(projectId) "
+				+ "LEFT JOIN researcher using(researcherId) "
+				+ "WHERE testId = ? AND researcherId = ?";
+		
+
+		Map<String, Object> usabilityTest = jdbcTemplate.queryForMap(sql, testId, researcherId);
+		String jsonString = new ObjectMapper().writeValueAsString(usabilityTest);
+		
+		System.out.println(jsonString);
+	    return jsonString;
+	}
+	
 	public int getIdByTestNameAndProjectId(int researcherId, String testName, int projectId) throws JsonProcessingException {
 		String sql = ""
 				+ "SELECT testId FROM test "

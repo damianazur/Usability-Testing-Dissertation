@@ -176,7 +176,7 @@ export default class Login extends Component {
       console.log("Test: ", test.testName);
 
       renderItems.push(
-        <TestContainer parentUpdate={this.update.bind(this)} key={i} onDelete={this.deleteTestSubmit.bind(this)} testItem={test}></TestContainer>
+        <TestContainer history={this.props.history} parentUpdate={this.update.bind(this)} key={i} onDelete={this.deleteTestSubmit.bind(this)} testItem={test}></TestContainer>
       );
     }
 
@@ -221,20 +221,32 @@ export default class Login extends Component {
                 />   
 
                 <div>
-                  {this.state.tests && this.state.tests.length > 0 && (
+                 
                     <div>
-                      <h2 style={{width: "100%"}}>Usability Tests</h2>
-                      <button onClick={() => {
-                          this.props.history.push({
-                            pathname: 'create-test',
-                            state: { projectId: this.state.selectedProject.projectId }
-                          });
-                          window.location.reload();
-                        }} type="button" className="secondaryButton">Create Usability Test
-                      </button>
-                      {this.displayTests()}
+                      {this.state.selectedProject.projectId && (
+                        <h2 style={{width: "100%"}}>Usability Tests</h2>
+                      )}
+
+                      {this.state.selectedProject.projectId && (
+                        <button onClick={() => {
+                            this.props.history.push({
+                              pathname: 'create-test',
+                              state: { projectId: this.state.selectedProject.projectId }
+                            });
+                            window.location.reload();
+                          }} type="button" className="secondaryButton">Create Usability Test
+                        </button>
+                      )}
+
+                      {this.state.tests && this.state.tests.length > 0 ? (
+                        <div>
+                          {this.displayTests()}
+                        </div>
+                      ) : (
+                        <h3>Please create a usability test for this project</h3>
+                      )}
                     </div>
-                  )}
+                 
 
                   {this.state.selectedProject ? (
                     <div>

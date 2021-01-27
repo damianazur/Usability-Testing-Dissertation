@@ -28,7 +28,7 @@ public class TaskDao {
 		System.out.println("ResId: " + researcherId);
 		
 		String sql = ""
-				+ "SELECT taskId, stepsJSON, sequenceNumber FROM task "
+				+ "SELECT taskId, taskName, testId, stepsJSON, sequenceNumber FROM task "
 				+ "LEFT JOIN test using(testId) "
 				+ "LEFT JOIN project using(projectId) "
 				+ "LEFT JOIN researcher using(researcherId) "
@@ -43,9 +43,9 @@ public class TaskDao {
 	
 	public int createTask(Task task) {
 		String sql = ""
-				+ "INSERT INTO task (testId, stepsJSON, sequenceNumber) "
+				+ "INSERT INTO task (testId, taskName, stepsJSON, sequenceNumber) "
 				+ "VALUES (?, ?, ?)";
 		
-        return jdbcTemplate.update(sql, task.getTestId(), task.getStepsJson(), task.getSequenceNumber());	
+        return jdbcTemplate.update(sql, task.getTestId(), task.getTaskName(), task.getStepsJson(), task.getSequenceNumber());	
 	}
 }

@@ -87,8 +87,13 @@ export class TestContainer extends Component {
             {test.testName}
           </span>
           <span>
-            <button className="secondaryButton">
-              View
+            <button onClick={() => {
+                this.props.history.push({
+                  pathname: 'view-test-details',
+                  state: { testId: test.testId }
+                });
+                window.location.reload();
+              }} type="button" className="secondaryButton">View Test Details
             </button>
             <span style={{float: "right"}}>
               {this.generateOptionsDropdown(test, this.state.selectedOption)}

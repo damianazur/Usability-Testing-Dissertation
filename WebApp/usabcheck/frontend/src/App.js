@@ -10,6 +10,7 @@ import Register from "views/register.component";
 import Home from "views/home.component";
 import Dashboard from "views/dashboard.component";
 import CreateTest from "views/createTest.component";
+import ViewTestDetails from "views/viewTestDetails.component";
 
 class App extends Component {
   constructor(props) {
@@ -94,6 +95,7 @@ class App extends Component {
           <Route exact path="/register" component={Register} />
           <Route exact path="/dashboard" component={Dashboard} />
           <Route exact path="/create-test" component={CreateTest} />
+          <Route exact path="/view-test-details" component={ViewTestDetails} />
         </Switch>
       </div>
 

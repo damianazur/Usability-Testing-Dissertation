@@ -32,6 +32,7 @@ import com.disazure.usabcheck.payload.request.BasicRequest;
 import com.disazure.usabcheck.payload.request.GetMyUsernameRequest;
 import com.disazure.usabcheck.payload.response.MessageResponse;
 import com.disazure.usabcheck.security.jwt.JwtUtils;
+import com.disazure.usabcheck.security.services.UsabilityTestService;
 
 @CrossOrigin
 @RestController
@@ -52,6 +53,9 @@ public class MainController {
 	
 	@Autowired
 	private QuestionDao questionDao;
+	
+	@Autowired
+	private UsabilityTestService usabilityTestService;
 	
 	@Autowired
 	JwtUtils jwtUtils;
@@ -193,5 +197,17 @@ public class MainController {
 		System.out.println(result);
 		
 		return new ResponseEntity<String>(Integer.toString(0), HttpStatus.OK);
+	}
+	
+	@RequestMapping(value = "/getTestsWithDetails", method = RequestMethod.POST)
+	public ResponseEntity<?> getTestsWithDetails(@RequestBody Map<String, String> json) {
+		String token = json.get("token");
+		int testId = Integer.parseInt(json.get("testId"));
+		String username = jwtUtils.getUserNameFromJwtToken(token);
+		int researcherId = resDao.getIdFromUsername(username);
+
+		String result = usabilityTestService.getTestsWithDetailsByTestId(researcherId, testId);
+		
+		return new ResponseEntity<String>(result, HttpStatus.OK);
 	}
 }

@@ -165,6 +165,7 @@ export default class CreateTest extends Component {
       }
     ];
 
+    let sequenceNumber = 0;
     for (let stageIndex = 0; stageIndex < stages.length; stageIndex++) {
       let refs = stages[stageIndex].refs;
 
@@ -176,11 +177,12 @@ export default class CreateTest extends Component {
         let item = {
           data: outputData,
           stage: stages[stageIndex].stage,
-          indexNumber: i,
+          indexNumber: sequenceNumber,
           type: outputData.type
         };
 
         testSequenceData.push(item);
+        sequenceNumber += 1;
       }
     }
 
