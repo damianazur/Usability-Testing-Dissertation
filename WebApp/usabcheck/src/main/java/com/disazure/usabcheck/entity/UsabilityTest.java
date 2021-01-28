@@ -6,6 +6,7 @@ public class UsabilityTest {
 	private int projectId;
 	private String launchedDate;
 	private String status;
+	private String referenceCode;
 	
 	public UsabilityTest(String testName, int projectId, String launchedDate, String status) {
 		this.testName = testName;
@@ -53,5 +54,14 @@ public class UsabilityTest {
 	public void setStatus(String status) {
 		this.status = status;
 	}
+
+	public String getReferenceCode() {
+		return referenceCode;
+	}
+
+	public void setReferenceCode(String referenceCode) {
+		this.referenceCode = referenceCode;
+	}
+	
 	
 }

@@ -44,7 +44,7 @@ public class TaskDao {
 	public int createTask(Task task) {
 		String sql = ""
 				+ "INSERT INTO task (testId, taskName, stepsJSON, sequenceNumber) "
-				+ "VALUES (?, ?, ?)";
+				+ "VALUES (?, ?, ?, ?)";
 		
         return jdbcTemplate.update(sql, task.getTestId(), task.getTaskName(), task.getStepsJson(), task.getSequenceNumber());	
 	}
