@@ -2,27 +2,25 @@ import requests
 import json
 
 from PyQt5.QtCore import Qt
+import PyQt5.QtCore as QtCore
 import PyQt5.QtGui as QPalette
-from PyQt5.QtWidgets import QMainWindow, QPushButton, QApplication, QLabel, QLineEdit, QVBoxLayout, QHBoxLayout, QWidget, QDialogButtonBox, QGroupBox, QFormLayout, QComboBox, QSpinBox
-
+from PyQt5.QtGui import QFont, QStandardItemModel, QStandardItem
+from PyQt5.QtWidgets import QMainWindow, QPushButton, QApplication, QLabel, QLineEdit, QVBoxLayout, QHBoxLayout, QWidget, QDialogButtonBox, QGroupBox, QFormLayout, QComboBox, QSpinBox, QListWidget, QScrollArea
 
 
 class Window(QWidget):
     def __init__(self):
         QWidget.__init__(self, None, Qt.WindowStaysOnTopHint)
         # self.setWindowFlag(Qt.FramelessWindowHint) 
-        self.setGeometry(400, 350, 500, 350)
+        self.setGeometry(400, 350, 500, 250)
         self.setWindowTitle("UsabCheck")
+        self.setStyleSheet("font-size: 14px;")
         
         self.mainLayout = QVBoxLayout()
+        self.mainLayout.setContentsMargins(20, 20, 200, 0)
         self.createTestEnterLayout()
 
         self.displayTestLayout = QGroupBox()
-        layout = QFormLayout()
-        layout.addRow(QLabel("Name:"), QLineEdit())
-        self.displayTestLayout.setLayout(layout)
-        self.mainLayout.addWidget(self.displayTestLayout)
-        
         self.setLayout(self.mainLayout)
 
 
@@ -30,19 +28,20 @@ class Window(QWidget):
         layout = QFormLayout()
         
         refCodeLabel = QLabel("Reference Code:")
-        refCodeLabel.setStyleSheet("font-size: 14px;")
         self.refCodeInput = QLineEdit()
-        self.refCodeInput.setStyleSheet("font-size: 14px;")
         btn = QPushButton("Submit", self)
         btn.clicked.connect(self.submitRefCode)
         btn.resize(btn.sizeHint())
+        btn.setStyleSheet("background-color: rgb(32, 123, 207 );")
+        btn.setFixedWidth(100)
 
         layout.addRow(refCodeLabel)
         layout.addRow(self.refCodeInput)
         layout.addRow(btn)
+        layout.setContentsMargins(0, 0, 0, 30)
 
         self.mainLayout.addLayout(layout)
-        self.mainLayout.addWidget(btn)
+        # self.mainLayout.addWidget(btn)
     
 
     def submitRefCode(self, e):
@@ -57,6 +56,10 @@ class Window(QWidget):
         data = json.loads(request.text)
         print(data)
 
+        self.displayTestData(data)
+
+    
+    def displayTestData(self, data):
         testName = data["testName"]
         createdDate = data["launchedDate"]
         noOfTasks = 0
@@ -69,96 +72,165 @@ class Window(QWidget):
                 noOfTasks += 1
         
         print(testName, createdDate, noOfTasks, noOfQuestions)
-        self.displayTestData()
 
-    
-    def displayTestData(self):
         self.mainLayout.removeWidget(self.displayTestLayout)
-        self.displayTestLayout = QGroupBox("Test Details")
+        self.displayTestLayout = QGroupBox("Usability Test Details")
         layout = QFormLayout()
-        layout.addRow(QLabel("Name:"), QLineEdit())
-        layout.addRow(QLabel("Country:"), QComboBox())
-        layout.addRow(QLabel("Age:"), QSpinBox())
+        layout.setSpacing(10)
+        layout.addRow(QLabel("Test Name:  "), QLabel(str(testName)))
+        layout.addRow(QLabel("Created Date:  "), QLabel(str(createdDate)))
+        layout.addRow(QLabel("No. of Tasks:  "), QLabel(str(noOfTasks)))
+        layout.addRow(QLabel("No. of Questions:  "), QLabel(str(noOfQuestions)))
         self.displayTestLayout.setLayout(layout)
-
-        # self.mainLayout.removeWidget(self.displayTestLayout)
-        # self.displayTestLayout.deleteLater()
+        
         self.mainLayout.addWidget(self.displayTestLayout)
-        # self.displayTestLayout = groupBox
 
-
-class MainWindow(QMainWindow):
-    def __init__(self):
-        QMainWindow.__init__(self, None, Qt.WindowStaysOnTopHint)
-        # self.setWindowFlag(Qt.FramelessWindowHint) 
-        self.initUI()
-
-    def initUI(self):
-        # Window settings
-        self.setGeometry(400, 350, 700, 350)
-        self.setWindowTitle("UsabCheck")
-
-        paddingLeft = 30
-        startingY = 20
         
-        label_1 = QLabel('Enter Test Code', self)
-        label_1.move(paddingLeft, 20) 
-        label_1.setStyleSheet("font-size: 14px;") 
-        
-
-        self.layout = QHBoxLayout()
-        self.layout.addWidget(QPushButton("Left-Most"))
-        self.layout.addWidget(QPushButton("Center"), 1)
-        self.layout.addWidget(QPushButton("Right-Most"), 2)
-
-
-        # self.textBox = QLineEdit(self)
-        # self.textBox.move(paddingLeft, 80)
-        # self.textBox.resize(280, 20)
-
-        self.setLayout(self.layout)
-        self.setCentralWidget()
-
-        btn = QPushButton("Hello", self)
-        btn.setToolTip("Say Hello!")
-        btn.clicked.connect(self.closeEvent)
+        layout = QFormLayout()
+        refCodeLabel = QLabel("Your name:")
+        self.refCodeInput = QLineEdit()
+        btn = QPushButton("Begin", self)
+        btn.clicked.connect(self.begin, data)
         btn.resize(btn.sizeHint())
-        btn.move(paddingLeft, 200)
+        btn.setStyleSheet("background-color: rgb(32, 207, 76);")
+        btn.setFixedWidth(100)
 
-        self.window = Window()
-        # self.window.show()
+        layout.addRow(refCodeLabel)
+        layout.addRow(self.refCodeInput)
+        layout.addRow(btn)
+        layout.setContentsMargins(0, 30, 0, 30)
 
-        self.show()
+        self.mainLayout.addLayout(layout)
+
+
+    def begin(self, e, data):
+        self.window = OtherWindow(data)
+        self.window.show()
+        self.close()
+
+
+class OtherWindow(QWidget):
+    def __init__(self, data):
+        QWidget.__init__(self, None, Qt.WindowStaysOnTopHint)
+        self.setWindowFlag(Qt.FramelessWindowHint) 
+        self.setGeometry(1600, 70, 300, 200)
+        self.setWindowTitle("Instructions")
+        self.setStyleSheet("font-size: 14px;")
+        self.dragPos = QtCore.QPoint()
+
+        self.sequenceIndex = 4
+        self.renderTask(data)
+    
+
+    def renderTask(self, data):
+        self.mainLayout = QVBoxLayout()
+        self.mainLayout.setContentsMargins(0, 0, 0, 0)
+        
+        hideButton = QPushButton("Hide", self)
+        hideButton.clicked.connect(self.hide)
+        hideButton.resize(hideButton.sizeHint())
+        hideButton.setStyleSheet("background-color: rgb(32, 123, 207 );")
+        self.mainLayout.addWidget(hideButton)
+        
+        sequenceData = data["sequenceData"][self.sequenceIndex]
+        jsonSteps = json.loads(sequenceData["stepsJSON"])
+        
+        print(jsonSteps)
+
+        stepIndex = 1
+        stepString = ""
+        for step in jsonSteps:
+            stepString += str(stepIndex) + ".\n" + (str(step["value"]) + " ") * 20 + "\n\n"
+            stepIndex += 1
+
+        label = ScrollLabel(self) 
+        label.setText(stepString) 
+        label.setGeometry(0, 40, 300, 200) 
+        label.setContentsMargins(0, 0, 0, 0)
+
+        hbox = QHBoxLayout()
+        nextTaskButton = QPushButton("Finish Task", self)
+        nextTaskButton.clicked.connect(self.hide)
+        nextTaskButton.resize(nextTaskButton.sizeHint())
+        nextTaskButton.setStyleSheet("background-color: rgb(32, 207, 76);")
+        nextTaskButton.setFixedWidth(100)
+        hbox.setAlignment(Qt.AlignCenter)
+        hbox.addWidget(nextTaskButton)
+        label.lay.addLayout(hbox)
+
+        self.mainLayout.addWidget(label)
+
+        # self.mainLayout.addWidget(label)
+        self.setLayout(self.mainLayout)
+    
+    def hide(self, e):
+        print("Hide")
+
+    def mousePressEvent(self, event):
+        self.dragPos = event.globalPos()
+        
+
+    def mouseMoveEvent(self, event):
+        if event.buttons() == QtCore.Qt.LeftButton:
+            self.move(self.pos() + event.globalPos() - self.dragPos)
+            self.dragPos = event.globalPos()
+            event.accept()
+        
+
+
+# class for scrollable label 
+class ScrollLabel(QScrollArea): 
+  
+    # contructor 
+    def __init__(self, *args, **kwargs): 
+        QScrollArea.__init__(self, *args, **kwargs) 
+  
+        # making widget resizable 
+        self.setWidgetResizable(True) 
+  
+        # making qwidget object 
+        content = QWidget(self) 
+        self.setWidget(content) 
+  
+        # vertical box layout 
+        self.lay = QVBoxLayout(content) 
+  
+        # creating label 
+        self.label = QLabel(content) 
+  
+        # setting alignment to the text 
+        self.label.setAlignment(Qt.AlignLeft | Qt.AlignTop) 
+  
+        # making label multi-line 
+        self.label.setWordWrap(True) 
+  
+        # adding label to the layout 
+        self.lay.addWidget(self.label) 
+  
+    # the setText method 
+    def setText(self, text): 
+        # setting text to the label 
+        self.label.setText(text) 
 
 def showGUI():
     app = QApplication([])
     app.setStyle('Fusion')
-    # app.setStyleSheet("QPushButton { margin: 10ex; }")
+    # mainWindow = Window()
+    # mainWindow.show()
 
-    mainWindow = Window()
-    mainWindow.show()
+    refCode = "H8VH1NLA"
+    sendData = {"referenceCode": str(refCode)}
+    request = requests.post("http://localhost:8090/api/localapp/getTestDetailsByReferenceCode", data=sendData)
+    data = json.loads(request.text)
+
+    window = OtherWindow(data)
+    window.show()
+
     app.exec_()
 
 
 if __name__ == '__main__':
-    print("----------- Starting ----------- H8VH1NLA ")
-
-    # data = {
-    #     "referenceCode": "H8VH1NLA"
-    # }
-
-    # r = requests.post("http://localhost:8090/api/localapp/getTestDetailsByReferenceCode", data=data)
-    # # print(dir(r))
-    # # print("\nTEXT\n", r.text)
-
-    # d = json.loads(r.text)
-
-    # # print(json.dumps(d, indent=1))
-
-    # for item in d["sequenceData"]:
-    #     # print("Item", item)
-    #     if ("questionConfigsJSON" in item.keys()):
-    #         print("Item", item["questionConfigsJSON"])
+    print("----------- Starting ----------- ")
 
     showGUI()
     
