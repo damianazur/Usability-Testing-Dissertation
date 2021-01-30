@@ -134,26 +134,15 @@ class InitialWindow(QWidget):
 
 
 class TaskWindow(QWidget):
-    def __init__(self, data):
+    def __init__(self, parent, sequenceDataItem, previousTaskPos):
         QWidget.__init__(self, None, Qt.WindowStaysOnTopHint)
-        self.previousTaskPos = None
+        self.parent = parent
+        self.previousTaskPos = previousTaskPos
+        self.sequenceDataItem = sequenceDataItem
 
-        self.data = data
         self.mainLayout = QVBoxLayout()
         self.mainLayout.setContentsMargins(0, 0, 0, 0)
         self.setLayout(self.mainLayout)
-
-        self.sequenceIndex = 0
-        self.loadNextSequenceItem()
-
-    
-    def loadNextSequenceItem(self):
-        # Create instruction text body
-        sequenceDataItem = self.data["sequenceData"][self.sequenceIndex]
-
-        while "stepsJSON" not in sequenceDataItem.keys() and self.sequenceIndex < len(self.data["sequenceData"]) - 1:
-            sequenceDataItem = self.data["sequenceData"][self.sequenceIndex]
-            self.sequenceIndex += 1
 
         self.renderTaskWindow()
         self.renderTask(sequenceDataItem)
@@ -185,11 +174,6 @@ class TaskWindow(QWidget):
         self.dragPos = QtCore.QPoint(self.pos().x(), self.pos().y())
         self.hideButtonDragged = False
 
-        # Remove previous Hide button
-        try:
-            self.mainLayout.removeWidget(self.hideButton)
-        except AttributeError:
-            pass
         # Hide button
         hideButton = QPushButton("Hide", self)
         hideButton.clicked.connect(self.toggleHide)
@@ -202,11 +186,6 @@ class TaskWindow(QWidget):
 
 
     def renderTask(self, sequenceDataItem):
-        try:
-            self.mainLayout.removeWidget(self.taskLayout)
-        except AttributeError:
-            pass
-        
         jsonSteps = json.loads(sequenceDataItem["stepsJSON"])
 
         # Create instruction text body
@@ -266,7 +245,7 @@ class TaskWindow(QWidget):
             x = int(self.pos().x() + self.windowW - self.buttonMinW)
             y = int(self.pos().y())
             self.setGeometry(x, y, 0, 0)
-            self.textBody.hide()
+            self.taskLayout.hide()
 
         elif (currentState == "Show"):
             self.hideButton.setText('Hide')
@@ -274,7 +253,7 @@ class TaskWindow(QWidget):
             x = int(self.pos().x() - self.windowW + self.buttonMinW)
             y = int(self.pos().y())
             self.setGeometry(x, y, 0, 0)
-            self.textBody.show()
+            self.taskLayout.show()
             
 
     # Clicking on the body of the window before it is dragged and repositioned
@@ -292,12 +271,7 @@ class TaskWindow(QWidget):
     
     # User clicked finish task
     def nextTask(self, e):
-        print("Next Task")
-        if (self.sequenceIndex < len(self.data["sequenceData"]) - 1):
-            self.sequenceIndex += 1
-            self.loadNextSequenceItem()
-        else:
-            print("TEST FINISHED!")
+        self.parent.nextTask()
 
 
 # Scroll Label is used for the body of the task
@@ -324,24 +298,64 @@ class MainProgram():
     def __init__(self):
         app = QApplication([])
         app.setStyle('Fusion')
+
         # self.mainWindow = InitialWindow(self)
         # self.mainWindow.show()
 
+        self.data = self.getDebugData()
+        self.previousTaskPos = None
+        self.sequenceIndex = 0
+        self.loadNextSequenceItem()
+
+        app.exec_()
+
+
+    def nextTask(self):
+        print("Next Task")
+        if (self.sequenceIndex < len(self.data["sequenceData"]) - 1):
+            self.previousWindow = self.window
+            self.previousTaskPos = self.window.pos()
+            self.sequenceIndex += 1
+            self.loadNextSequenceItem()
+        else:
+            print("TEST FINISHED!")
+
+    
+    def loadNextSequenceItem(self):
+        # Create instruction text body
+        sequenceDataItem = self.data["sequenceData"][self.sequenceIndex]
+
+        while "stepsJSON" not in sequenceDataItem.keys() and self.sequenceIndex < len(self.data["sequenceData"]) - 1:
+            sequenceDataItem = self.data["sequenceData"][self.sequenceIndex]
+            self.sequenceIndex += 1
+
+        print("Creating Task: ", sequenceDataItem)
+
+        self.window = TaskWindow(self, sequenceDataItem, self.previousTaskPos)
+        self.window.show()
+
+        try:
+            self.previousWindow.close()
+        except AttributeError:
+            pass
+
+
+    def getDebugData(self):
         refCode = "H8VH1NLA"
         sendData = {"referenceCode": str(refCode)}
         request = requests.post("http://localhost:8090/api/localapp/getTestDetailsByReferenceCode", data=sendData)
         data = json.loads(request.text)
         data["sequenceData"].sort(key=lambda obj: obj["sequenceNumber"], reverse=False)
-        window = TaskWindow(data)
-        window.show()
-
-        app.exec_()
+        
+        return data
     
     def begin(self, data):
         print("Begin...")
         self.mainWindow.close()
         self.window = TaskWindow(data)
         self.window.show()
+
+    
 
 
 if __name__ == '__main__':
