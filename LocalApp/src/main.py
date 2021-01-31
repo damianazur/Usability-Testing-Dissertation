@@ -5,26 +5,9 @@ import win32gui as win32gui
 
 from functools import partial
 
-from PyQt5.QtCore import Qt
-import PyQt5.QtCore as QtCore
-import PyQt5.QtGui as QPalette
-from PyQt5.QtGui import QFont, QStandardItemModel, QStandardItem
-from PyQt5.QtWidgets import (
-    QMainWindow, 
-    QPushButton, 
-    QApplication, 
-    QLabel, 
-    QLineEdit, 
-    QVBoxLayout, 
-    QHBoxLayout, 
-    QWidget, 
-    QDialogButtonBox, 
-    QGroupBox, 
-    QFormLayout, 
-    QComboBox, 
-    QSpinBox, 
-    QListWidget, 
-    QScrollArea)
+from PyQt5.QtCore import *
+from PyQt5.QtGui import *
+from PyQt5.QtWidgets import *
 
 
 class InitialWindow(QWidget):
@@ -141,7 +124,7 @@ class TaskWindow(QWidget):
         self.sequenceDataItem = sequenceDataItem
 
         self.mainLayout = QVBoxLayout()
-        self.mainLayout.setContentsMargins(0, 0, 0, 0)
+        self.mainLayout.setContentsMargins(0, 0, 0, 3)
         self.setLayout(self.mainLayout)
 
         self.renderTaskWindow()
@@ -153,7 +136,7 @@ class TaskWindow(QWidget):
         self.screenW = GetSystemMetrics(0)
         self.screenH = GetSystemMetrics(1)
         self.windowW = 300
-        self.windowH = 170
+        self.windowH = 200
         self.windowPaddingLeft = 30
         self.windowsPaddingTop = 70
 
@@ -171,7 +154,7 @@ class TaskWindow(QWidget):
         self.setWindowFlag(Qt.FramelessWindowHint) 
         self.setGeometry(self.initX, self.initY, self.windowW, self.windowH)
         self.setStyleSheet("font-size: 14px;")
-        self.dragPos = QtCore.QPoint(self.pos().x(), self.pos().y())
+        self.dragPos = QPoint(self.pos().x(), self.pos().y())
         self.hideButtonDragged = False
 
         # Hide button
@@ -190,27 +173,27 @@ class TaskWindow(QWidget):
 
         # Create instruction text body
         stepIndex = 1
-        stepString = "Task: " + sequenceDataItem["taskName"] + "\n\n"
+        stepString = "Task: " + sequenceDataItem["taskName"] + "\n"
         for step in jsonSteps:
-            stepString += str(stepIndex) + ".\n" + (str(step["value"]) + " ") * 20 + "\n\n"
+            stepString += "\n" + str(stepIndex) + ".    " + (str(step["value"]) + " ") + "\n"
             stepIndex += 1
 
 
         # Set the text
         taskLayout = ScrollLabel(self) 
         taskLayout.setText(stepString) 
-        taskLayout.setGeometry(0, 40, 300, 200) 
+        taskLayout.setGeometry(0, 40, 300, 0) 
         taskLayout.setContentsMargins(0, 0, 0, 0)
 
         # Add "Finish Task" button
         hbox = QHBoxLayout()
-        nextTaskButton = QPushButton("Finish Task", self)
-        nextTaskButton.clicked.connect(self.nextTask)
-        nextTaskButton.resize(nextTaskButton.sizeHint())
-        nextTaskButton.setStyleSheet("background-color: rgb(32, 207, 76);")
-        nextTaskButton.setFixedWidth(100)
+        finishTaskButton = QPushButton("Finish Task", self)
+        finishTaskButton.clicked.connect(self.finishTaskButton)
+        finishTaskButton.resize(finishTaskButton.sizeHint())
+        finishTaskButton.setStyleSheet("background-color: rgb(32, 207, 76);")
+        finishTaskButton.setFixedWidth(100)
         hbox.setAlignment(Qt.AlignCenter)
-        hbox.addWidget(nextTaskButton)
+        hbox.addWidget(finishTaskButton)
         taskLayout.lay.addLayout(hbox)
         self.taskLayout = taskLayout
 
@@ -219,10 +202,10 @@ class TaskWindow(QWidget):
 
     def hideButtonPress(self):
         _, _, (x,y) = win32gui.GetCursorInfo()
-        self.dragPos = QtCore.QPoint(x, y)
+        self.dragPos = QPoint(x, y)
 
     def hideButtonDrag(self, event):
-        if event.buttons() == QtCore.Qt.LeftButton:
+        if event.buttons() == Qt.LeftButton:
             self.hideButtonDragged = True
             self.move(self.pos() + event.globalPos() - self.dragPos)
             self.dragPos = event.globalPos()
@@ -246,6 +229,7 @@ class TaskWindow(QWidget):
             y = int(self.pos().y())
             self.setGeometry(x, y, 0, 0)
             self.taskLayout.hide()
+            self.mainLayout.setContentsMargins(0, 0, 0, 0)
 
         elif (currentState == "Show"):
             self.hideButton.setText('Hide')
@@ -254,6 +238,7 @@ class TaskWindow(QWidget):
             y = int(self.pos().y())
             self.setGeometry(x, y, 0, 0)
             self.taskLayout.show()
+            self.mainLayout.setContentsMargins(0, 0, 0, 3)
             
 
     # Clicking on the body of the window before it is dragged and repositioned
@@ -263,15 +248,15 @@ class TaskWindow(QWidget):
     
     # When the user drags the window
     def mouseMoveEvent(self, event):
-        if event.buttons() == QtCore.Qt.LeftButton:
+        if event.buttons() == Qt.LeftButton:
             self.move(self.pos() + event.globalPos() - self.dragPos)
             self.dragPos = event.globalPos()
             self.previousTaskPos = self.pos()
     
     
     # User clicked finish task
-    def nextTask(self, e):
-        self.parent.nextTask()
+    def finishTaskButton(self, e):
+        self.parent.nextSequenceItem(None)
 
 
 # Scroll Label is used for the body of the task
@@ -284,6 +269,8 @@ class ScrollLabel(QScrollArea):
         self.setWidget(content) 
   
         self.lay = QVBoxLayout(content) 
+        # self.lay.setAlignment(Qt.AlignLeft | Qt.AlignTop) 
+        self.lay.setContentsMargins(15, 0, 15, 10)
         self.label = QLabel(content) 
 
         self.label.setAlignment(Qt.AlignLeft | Qt.AlignTop) 
@@ -294,46 +281,294 @@ class ScrollLabel(QScrollArea):
         self.label.setText(text) 
 
 
+class QuestionWindow(QWidget):
+    def __init__(self, parent, sequenceDataItem):
+        QWidget.__init__(self, None, Qt.WindowStaysOnTopHint)
+
+        print("sequenceDataItem", sequenceDataItem)
+
+        self.parent = parent
+        self.sequenceDataItem = sequenceDataItem
+
+        self.mainLayout = QVBoxLayout()
+
+        shadow = QGraphicsDropShadowEffect(self,
+            blurRadius=20.0,
+            color= QColor(105, 105, 105),
+            offset= QPointF(2.0, 2.0)
+        )
+        self.setGraphicsEffect(shadow)
+
+        self.mainLayout.setContentsMargins(20, 20, 20, 20)
+        self.setAttribute(Qt.WA_TranslucentBackground)
+        self.setLayout(self.mainLayout)
+
+        self.renderQuestionWindow()
+
+
+    def renderQuestionWindow(self):
+        # Setting dimensions
+        self.screenW = GetSystemMetrics(0)
+        self.screenH = GetSystemMetrics(1)
+        self.windowW = 500
+        self.windowH = 350
+
+        self.initX = self.screenW/2 - self.windowW/2
+        self.initY = self.screenH/3 - self.windowH/2
+
+        self.dragPos = QPoint(self.initX, self.initY + self.windowH)
+
+        self.buttonWidth = 100
+        self.buttonHeight = 25
+
+        # Configurations
+        self.setWindowFlag(Qt.FramelessWindowHint) 
+        self.setGeometry(self.initX, self.initY, self.windowW, self.windowH)
+        self.setStyleSheet("font-size: 14px;")
+
+    # Clicking on the body of the window before it is dragged and repositioned
+    # The click position needs to be saved to know where to move the window to
+    def mousePressEvent(self, event):
+        self.dragPos = event.globalPos()
+    
+
+    # When the user drags the window
+    def mouseMoveEvent(self, event):
+        if event.buttons() == Qt.LeftButton:
+            self.move(self.pos() + event.globalPos() - self.dragPos)
+            self.dragPos = event.globalPos()
+
+
+class TextQuestionWindow(QuestionWindow):
+    def __init__(self, parent, sequenceDataItem):
+        # QuestionWindow.__init__(self, parent, sequenceDataItem)
+        super().__init__(parent, sequenceDataItem)
+        self.renderQuestion(sequenceDataItem)
+
+
+    def renderQuestion(self, sequenceDataItem):
+        questionConfigs = json.loads(sequenceDataItem["questionConfigsJSON"])
+
+        questionText = questionConfigs["questionText"]
+
+        # Set the text
+        taskLayout = ScrollLabel(self) 
+        taskLayout.setGeometry(0, 40, 400, 0)
+        taskLayout.setContentsMargins(0, 0, 0, 0)
+
+        answerForm = QFormLayout()
+        questionLabel = QLabel("Question:")
+        questionLabel.setStyleSheet("font-size: 16px;")
+        questionLabel.setContentsMargins(0, 0, 0, 0)
+
+        hr = QFrame()
+        hr.setFrameShape(QFrame.HLine)
+        hr.setStyleSheet("color: gray")
+
+        questionLabel2 = QLabel(questionText)
+        questionLabel2.setContentsMargins(0, 0, 0, 10)
+        questionLabel2.setWordWrap(True) 
+        # questionLabel2.setStyleSheet("border-top: 1px solid gray")
+
+        answerLabel = QLabel("Your answer:")
+        self.answerInput = QLineEdit()
+        self.answerInput = QTextEdit()
+        self.answerInput.setFixedHeight(100)
+
+        hr2 = QLabel("")
+        hr2.setContentsMargins(30, 0, 0, 0)
+
+        # Add "Submit Question" button
+        submitButton = QPushButton("Submit", self)
+        submitButton.clicked.connect(self.submitButtonPress)
+        submitButton.resize(submitButton.sizeHint())
+        submitButton.setStyleSheet("background-color: rgb(32, 207, 76);")
+        submitButton.setFixedWidth(100)
+
+        answerForm.addRow(questionLabel)
+        answerForm.addRow(hr)
+        answerForm.addRow(questionLabel2)
+        answerForm.addRow(answerLabel)
+        answerForm.addRow(self.answerInput)
+        answerForm.addRow(hr2)
+        answerForm.addRow(submitButton)
+        answerForm.setContentsMargins(0, 0, 0, 15)
+
+        taskLayout.lay.addLayout(answerForm)
+
+        self.taskLayout = taskLayout
+        self.mainLayout.addWidget(self.taskLayout)
+
+
+    def submitButtonPress(self):
+        answerJSON = {
+            "answer": self.answerInput.toPlainText()
+        }
+
+        returnData = {
+            "answerJSON": answerJSON,
+            "questionId": self.sequenceDataItem["questionId"]
+        }
+        self.parent.nextSequenceItem(returnData)
+
+
+class MultipleChoiceQuestionWindow(QuestionWindow):
+    def __init__(self, parent, sequenceDataItem):
+        super().__init__(parent, sequenceDataItem)
+        self.renderQuestion(sequenceDataItem)
+
+
+    def renderQuestion(self, sequenceDataItem):
+        questionConfigs = json.loads(sequenceDataItem["questionConfigsJSON"])
+        questionText = questionConfigs["questionText"]
+        choices = questionConfigs["choices"]
+
+        # Set the text
+        taskLayout = ScrollLabel(self) 
+        taskLayout.setGeometry(0, 40, 200, 0)
+
+        answerForm = QFormLayout()
+        questionLabel = QLabel("Multiple-Choice Question:")
+        questionLabel.setStyleSheet("font-size: 16px;")
+        questionLabel.setContentsMargins(0, 0, 0, 0)
+        questionLabel.setFixedWidth(420)
+
+        hr = QFrame()
+        hr.setFrameShape(QFrame.HLine)
+        hr.setStyleSheet("color: gray")
+
+        questionLabel2 = QLabel(questionText)
+        questionLabel2.setContentsMargins(0, 0, 0, 10)
+        questionLabel2.setWordWrap(True) 
+
+        answerLabel = QLabel("Select one answer")
+        radioButtonLayout = QVBoxLayout()
+        radioButtonLayout.setContentsMargins(0, 0, 0, 0)
+
+        for choice in choices:
+            button = QRadioButton(str(choice["value"]))
+            button.toggled.connect(self.radioSelect)
+            radioButtonLayout.addWidget(button)
+
+        hr2 = QLabel("")
+        hr2.setContentsMargins(30, 0, 0, 0)
+
+        # Add "Submit Question" button
+        submitButton = QPushButton("Submit", self)
+        submitButton.clicked.connect(self.submitButtonPress)
+        submitButton.resize(submitButton.sizeHint())
+        submitButton.setStyleSheet("background-color: rgb(32, 207, 76);")
+        submitButton.setFixedWidth(100)
+        submitButton.hide()
+        self.submitButton = submitButton
+
+        answerForm.addRow(questionLabel)
+        answerForm.addRow(hr)
+        answerForm.addRow(questionLabel2)
+        answerForm.addRow(answerLabel)
+        answerForm.addRow(radioButtonLayout)
+        answerForm.addRow(hr2)
+        answerForm.addRow(self.submitButton)
+        answerForm.setContentsMargins(0, 0, 0, 15)
+
+        taskLayout.lay.addLayout(answerForm)
+        taskLayout.lay.setAlignment(Qt.AlignLeft | Qt.AlignTop) 
+
+        self.taskLayout = taskLayout
+        self.mainLayout.addWidget(self.taskLayout)
+
+
+    def radioSelect(self):
+        self.submitButton.show()
+
+        radioButton =  self.sender()
+        if radioButton.isChecked():
+            self.choiceSelected = radioButton.text()
+            print("Selected: ", radioButton.text())
+
+
+    def submitButtonPress(self):
+        answerJSON = {
+            "answer": self.choiceSelected
+        }
+
+        returnData = {
+            "answerJSON": answerJSON,
+            "questionId": self.sequenceDataItem["questionId"]
+        }
+        self.parent.nextSequenceItem(returnData)
+
+
 class MainProgram():
     def __init__(self):
         app = QApplication([])
         app.setStyle('Fusion')
+        
+        self.answers = []
+        self.previousTaskPos = None
+        self.sequenceIndex = None
+        self.data = None
 
         # self.mainWindow = InitialWindow(self)
         # self.mainWindow.show()
 
         self.data = self.getDebugData()
-        self.previousTaskPos = None
-        self.sequenceIndex = 0
         self.loadNextSequenceItem()
 
         app.exec_()
 
 
-    def nextTask(self):
-        print("Next Task")
+    def nextSequenceItem(self, returnData):
+        print("NEXT SEQUENCE ITEM: ")
+        if returnData != None:
+            print("RETURN: ", returnData)
+
         if (self.sequenceIndex < len(self.data["sequenceData"]) - 1):
             self.previousWindow = self.window
-            self.previousTaskPos = self.window.pos()
-            self.sequenceIndex += 1
+
+            if "stepsJSON" in self.data["sequenceData"][self.sequenceIndex].keys():
+                self.previousTaskPos = self.window.pos()
+
             self.loadNextSequenceItem()
         else:
             print("TEST FINISHED!")
 
     
     def loadNextSequenceItem(self):
+        if self.sequenceIndex == None:
+            self.sequenceIndex = 0
+        else:
+            self.sequenceIndex += 1
+
+        print("SEQUENCE NUM: ", self.sequenceIndex)
+
         # Create instruction text body
         sequenceDataItem = self.data["sequenceData"][self.sequenceIndex]
 
-        while "stepsJSON" not in sequenceDataItem.keys() and self.sequenceIndex < len(self.data["sequenceData"]) - 1:
-            sequenceDataItem = self.data["sequenceData"][self.sequenceIndex]
-            self.sequenceIndex += 1
+        # If the sequence item is a task
+        if "stepsJSON" in sequenceDataItem.keys():
+            print("Creating Task: ", sequenceDataItem)
+            self.window = TaskWindow(self, sequenceDataItem, self.previousTaskPos)
+            self.window.show()
 
-        print("Creating Task: ", sequenceDataItem)
+        # If the sequence item is a question
+        elif "questionConfigsJSON" in sequenceDataItem.keys():
+            questionConfigsJSON = json.loads(sequenceDataItem["questionConfigsJSON"])
+            questionType = questionConfigsJSON["questionType"]
+            print("Creating Question: ", questionType)
 
-        self.window = TaskWindow(self, sequenceDataItem, self.previousTaskPos)
-        self.window.show()
+            if questionType == "text":
+                print("Text Question")
+                self.window = TextQuestionWindow(self, sequenceDataItem)
+                self.window.show()
 
+            elif questionType == "multiple-choice":
+                # self.loadNextSequenceItem()
+                self.window = MultipleChoiceQuestionWindow(self, sequenceDataItem)
+                self.window.show()
+                
+
+        # Close the previous window
         try:
             self.previousWindow.close()
         except AttributeError:
@@ -349,13 +584,13 @@ class MainProgram():
         
         return data
     
+
     def begin(self, data):
         print("Begin...")
         self.mainWindow.close()
-        self.window = TaskWindow(data)
-        self.window.show()
+        self.data = data
+        self.loadNextSequenceItem()
 
-    
 
 
 if __name__ == '__main__':
