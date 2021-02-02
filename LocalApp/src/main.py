@@ -1,5 +1,6 @@
 import requests
 import json
+import os
 from win32api import GetSystemMetrics
 import win32gui as win32gui
 
@@ -313,8 +314,8 @@ class QuestionWindow(QWidget):
         self.windowW = 500
         self.windowH = 350
 
-        self.initX = self.screenW/2 - self.windowW/2
-        self.initY = self.screenH/3 - self.windowH/2
+        self.initX = int(self.screenW/2 - self.windowW/2)
+        self.initY = int(self.screenH/3 - self.windowH/2)
 
         self.dragPos = QPoint(self.initX, self.initY + self.windowH)
 
@@ -499,6 +500,112 @@ class MultipleChoiceQuestionWindow(QuestionWindow):
         self.parent.nextSequenceItem(returnData)
 
 
+class RecordingWindow(QWidget):
+    def __init__(self, parent):
+        QWidget.__init__(self, None, Qt.WindowStaysOnTopHint)
+
+        self.parent = parent
+
+        self.setAttribute(Qt.WA_TranslucentBackground)
+
+        self.renderBorder()
+        self.renderRecordingOptions()
+
+
+    def renderBorder(self):
+        # Setting dimensions
+        self.screenW = GetSystemMetrics(0)
+        self.screenH = GetSystemMetrics(1)
+
+        # Configurations
+        self.setWindowFlag(Qt.FramelessWindowHint) 
+        self.setGeometry(0, 0, self.screenW - 0, self.screenH - 0)
+
+        redFrame = QFrame(self)
+        redFrame.setGeometry(0, 0, self.screenW - 0, self.screenH - 0)
+        redFrame.setStyleSheet("border: 2px solid red;")
+
+    
+    def renderRecordingOptions(self):
+        self.mainLayout = QHBoxLayout()
+        self.mainLayout.setContentsMargins(0, 0, 0, 0)
+        self.mainLayout.setAlignment(Qt.AlignCenter | Qt.AlignBottom) 
+        self.mainLayout.setSpacing(0)
+        self.setStyleSheet("font-size: 16px;")
+
+        frame = QWidget(self)
+        width = 200
+        height = 40
+        frame.setFixedSize(width, height)
+        frame.setStyleSheet("background-color: rgb(211,211,211);")
+
+        innerLayout = QHBoxLayout()
+        innerLayout.setContentsMargins(0, 0, 15, 0)
+
+        label = QLabel("Recording")
+        label.setFixedHeight(height)
+        label.setContentsMargins(10, 0, 5, 0)
+
+        recordingIconLabel = QLabel(self) 
+        recIcon = QPixmap("C:/Users/New User/Desktop/Fourth Year/Usability_Testing_FYP/LocalApp/src/RecordingIcon20x20.png") 
+        recIcon = recIcon.scaled(20, 20, Qt.KeepAspectRatio)
+        recordingIconLabel.setPixmap(recIcon) 
+        recordingIconLabel.resize(
+            recIcon.width(), 
+            recIcon.height()) 
+
+        stopButton = QPushButton("STOP", self)
+        stopButton.clicked.connect(self.stopRecording)
+        stopButton.resize(stopButton.sizeHint())
+        stopButton.setStyleSheet("background-color: rgb(255,51,51); margin: 0; padding: 2; font-size: 14px;")
+        stopButton.setFixedWidth(60)
+
+        minimizeButton = QPushButton(self)
+
+        leftArrowIcon = QIcon("C:/Users/New User/Desktop/Fourth Year/Usability_Testing_FYP/LocalApp/src/LeftArrow40x80.png") 
+        minimizeButton.setIcon(leftArrowIcon) 
+        minimizeButton.setIconSize(QSize(15,35))
+        minimizeButton.clicked.connect(self.minimize)
+        minimizeButton.resize(minimizeButton.sizeHint())
+        minimizeButton.setStyleSheet("background-color: gray; border: 1px solid gray")
+        minimizeButton.setFixedWidth(20)
+        minimizeButton.setFixedHeight(height)
+
+        self.minimizeButton = minimizeButton
+
+        frame.setLayout(innerLayout)
+        innerLayout.addWidget(label)
+        innerLayout.addWidget(recordingIconLabel)
+        innerLayout.addWidget(stopButton)
+
+        self.frame = frame
+        
+        self.mainLayout.addWidget(frame)
+        self.mainLayout.addWidget(minimizeButton)
+        self.setLayout(self.mainLayout)
+
+    
+    def stopRecording():
+        pass
+
+
+    def minimize(self):
+        self.frame.hide()
+
+
+    # Clicking on the body of the window before it is dragged and repositioned
+    # The click position needs to be saved to know where to move the window to
+    def mousePressEvent(self, event):
+        self.dragPos = event.globalPos()
+    
+    # When the user drags the window
+    def mouseMoveEvent(self, event):
+        if event.buttons() == Qt.LeftButton:
+            self.frame.move(self.frame.pos().x() + event.globalPos().x() - self.dragPos.x(), self.frame.pos().y())
+            self.minimizeButton.move(self.minimizeButton.pos().x() + event.globalPos().x() - self.dragPos.x(), self.minimizeButton.pos().y())
+            self.dragPos = event.globalPos()
+
+
 class MainProgram():
     def __init__(self):
         app = QApplication([])
@@ -512,8 +619,11 @@ class MainProgram():
         # self.mainWindow = InitialWindow(self)
         # self.mainWindow.show()
 
-        self.data = self.getDebugData()
-        self.loadNextSequenceItem()
+        # self.data = self.getDebugData()
+        # self.loadNextSequenceItem()
+
+        self.window = RecordingWindow(self)
+        self.window.show()
 
         app.exec_()
 
