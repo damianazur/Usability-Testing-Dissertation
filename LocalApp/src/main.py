@@ -1,6 +1,8 @@
 import requests
 import json
 import os
+
+from ScreenRecorder import *
 from win32api import GetSystemMetrics
 import win32gui as win32gui
 
@@ -9,6 +11,7 @@ from functools import partial
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
+import threading
 
 
 class InitialWindow(QWidget):
@@ -504,12 +507,25 @@ class RecordingWindow(QWidget):
     def __init__(self, parent):
         QWidget.__init__(self, None, Qt.WindowStaysOnTopHint)
 
-        self.parent = parent
+        self.mainLayout = QHBoxLayout()
+        self.mainLayout.setContentsMargins(0, 0, 0, 0)
+        self.mainLayout.setSpacing(0)
+        self.setStyleSheet("font-size: 16px;")
 
+        self.parent = parent
+        self.isMinimized = False
         self.setAttribute(Qt.WA_TranslucentBackground)
 
         self.renderBorder()
         self.renderRecordingOptions()
+
+        self.screenRecorder = ScreenRecorder()
+        x = threading.Thread(target=self.startRecorder, args=(self.screenRecorder,))
+        x.start()
+
+
+    def startRecorder(self, screenRecorder):
+        screenRecorder.begin()
 
 
     def renderBorder(self):
@@ -527,27 +543,26 @@ class RecordingWindow(QWidget):
 
     
     def renderRecordingOptions(self):
-        self.mainLayout = QHBoxLayout()
-        self.mainLayout.setContentsMargins(0, 0, 0, 0)
-        self.mainLayout.setAlignment(Qt.AlignCenter | Qt.AlignBottom) 
-        self.mainLayout.setSpacing(0)
-        self.setStyleSheet("font-size: 16px;")
-
         frame = QWidget(self)
-        width = 200
-        height = 40
-        frame.setFixedSize(width, height)
+        
+        self.frameWidth = 200
+        self.frameHeight = 40
+        frameX = self.screenW / 2 - self.frameWidth/2
+        frameY = self.screenH - self.frameHeight
+
+        frame.setFixedSize(self.frameWidth, self.frameHeight)
+        frame.move(frameX, frameY)
         frame.setStyleSheet("background-color: rgb(211,211,211);")
 
         innerLayout = QHBoxLayout()
         innerLayout.setContentsMargins(0, 0, 15, 0)
 
         label = QLabel("Recording")
-        label.setFixedHeight(height)
+        label.setFixedHeight(self.frameHeight)
         label.setContentsMargins(10, 0, 5, 0)
 
         recordingIconLabel = QLabel(self) 
-        recIcon = QPixmap("C:/Users/New User/Desktop/Fourth Year/Usability_Testing_FYP/LocalApp/src/RecordingIcon20x20.png") 
+        recIcon = QPixmap("./assets/RecordingIcon20x20.png") 
         recIcon = recIcon.scaled(20, 20, Qt.KeepAspectRatio)
         recordingIconLabel.setPixmap(recIcon) 
         recordingIconLabel.resize(
@@ -562,35 +577,54 @@ class RecordingWindow(QWidget):
 
         minimizeButton = QPushButton(self)
 
-        leftArrowIcon = QIcon("C:/Users/New User/Desktop/Fourth Year/Usability_Testing_FYP/LocalApp/src/LeftArrow40x80.png") 
+        leftArrowIcon = QIcon("./assets/LeftArrow40x80.png") 
         minimizeButton.setIcon(leftArrowIcon) 
         minimizeButton.setIconSize(QSize(15,35))
+        minimizeButton.pressed.connect(self.minimizeButtonPress)
         minimizeButton.clicked.connect(self.minimize)
         minimizeButton.resize(minimizeButton.sizeHint())
-        minimizeButton.setStyleSheet("background-color: gray; border: 1px solid gray")
+        minimizeButton.setStyleSheet("background-color: gray; border: 1px solid gray;")
         minimizeButton.setFixedWidth(20)
-        minimizeButton.setFixedHeight(height)
+        minimizeButton.setFixedHeight(self.frameHeight)
+        minimizeButton.mouseMoveEvent = self.minimizeButtonDrag
+        minimizeButton.move(frameX + self.frameWidth, frameY)
+        self.minimizeButtonDragged = False
 
         self.minimizeButton = minimizeButton
 
-        frame.setLayout(innerLayout)
         innerLayout.addWidget(label)
         innerLayout.addWidget(recordingIconLabel)
         innerLayout.addWidget(stopButton)
+        self.innerLayout = innerLayout
+        frame.setLayout(self.innerLayout)
 
         self.frame = frame
-        
-        self.mainLayout.addWidget(frame)
-        self.mainLayout.addWidget(minimizeButton)
-        self.setLayout(self.mainLayout)
-
     
-    def stopRecording():
-        pass
+
+    def stopRecording(self):
+        print("STOPPING RECORDING!")
+        self.screenRecorder.quit = True
+        self.close()
 
 
     def minimize(self):
-        self.frame.hide()
+        if not self.minimizeButtonDragged:
+            if self.isMinimized:
+                self.frame.show()
+                self.isMinimized = False
+            else:
+                self.frame.hide()
+                self.isMinimized = True
+
+
+    def minimizeButtonPress(self):
+        _, _, (x,y) = win32gui.GetCursorInfo()
+        self.minimizeButtonDragged = False
+        self.dragPos = QPoint(x, y)
+
+    def minimizeButtonDrag(self, event):
+        self.minimizeButtonDragged = True
+        self.mouseMoveEvent(event)
 
 
     # Clicking on the body of the window before it is dragged and repositioned
@@ -616,16 +650,17 @@ class MainProgram():
         self.sequenceIndex = None
         self.data = None
 
-        # self.mainWindow = InitialWindow(self)
-        # self.mainWindow.show()
+        self.mainWindow = InitialWindow(self)
+        self.mainWindow.show()
 
         # self.data = self.getDebugData()
         # self.loadNextSequenceItem()
 
-        self.window = RecordingWindow(self)
-        self.window.show()
-
         app.exec_()
+
+
+    def stopRecording(self):
+        pass
 
 
     def nextSequenceItem(self, returnData):
@@ -697,6 +732,9 @@ class MainProgram():
 
     def begin(self, data):
         print("Begin...")
+        self.recordingWindow = RecordingWindow(self)
+        self.recordingWindow.show()
+
         self.mainWindow.close()
         self.data = data
         self.loadNextSequenceItem()
