@@ -1,11 +1,18 @@
 package com.disazure.usabcheck.security.services;
 
+import java.util.Calendar;
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.disazure.usabcheck.dao.AnswerDao;
 import com.disazure.usabcheck.dao.QuestionDao;
 import com.disazure.usabcheck.dao.TaskDao;
 import com.disazure.usabcheck.dao.TestDao;
+import com.disazure.usabcheck.dao.TestInstanceDao;
+import com.disazure.usabcheck.dao.TimeStampDao;
+import com.disazure.usabcheck.entity.UsabilityTestInstance;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -16,13 +23,17 @@ import com.google.gson.JsonParser;
 public class UsabilityTestService {
 	@Autowired
 	private TestDao testDao;
-	
 	@Autowired
 	private TaskDao taskDao;
-	
 	@Autowired
 	private QuestionDao questionDao;
-
+	@Autowired
+	private TestInstanceDao testInstanceDao;
+	@Autowired
+	private AnswerDao answerDao;
+	@Autowired
+	private TimeStampDao timeStampDao;
+	
 	public String getTestsWithDetailsByTestId(int researcherId, int testId) {
 		String result = "";
 		
@@ -77,5 +88,37 @@ public class UsabilityTestService {
 		String result = usabTestObject.toString();
 		
 		return result;
+	}
+	
+	
+	public String createUsabilityTestInstance(Map<String, String> json) throws JsonProcessingException {
+		JsonParser jsonParser = new JsonParser();
+		
+		String referenceCode = json.get("referenceCode");
+		String ferCameraDataStr = json.get("ferCameraData");
+		String sequenceTimeStampStr = json.get("sequenceTimeStamp");
+		String questionAnswersStr = json.get("questionAnswers");
+		
+		JsonArray ferCamData = jsonParser.parse(ferCameraDataStr).getAsJsonArray();
+		JsonArray sequenceTimeStamp = jsonParser.parse(sequenceTimeStampStr).getAsJsonArray();
+		JsonArray questionAnswers = jsonParser.parse(questionAnswersStr).getAsJsonArray();
+		
+		int testId = testDao.getIdByReferenceCode(referenceCode);
+		java.sql.Date currentDate = new java.sql.Date(Calendar.getInstance().getTime().getTime());
+		UsabilityTestInstance newUsabTestInst = new UsabilityTestInstance(testId, currentDate.toString());
+		
+		int instanceId = testInstanceDao.create(newUsabTestInst);
+		int answersRes = answerDao.create(instanceId, questionAnswers);
+		int ferTimeStamps = timeStampDao.create(instanceId, ferCamData, "emotion");
+		
+//		String retrievedAnswers = answerDao.getByTestId(11, 29);
+//		System.out.println("#'# " + retrievedAnswers);
+		
+		System.out.println(referenceCode);
+		System.out.println(ferCamData);
+		System.out.println(sequenceTimeStamp);
+		System.out.println(questionAnswers);
+		
+		return "OK";
 	}
 }

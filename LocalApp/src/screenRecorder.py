@@ -9,6 +9,7 @@ from PIL import ImageGrab
 
 class ScreenRecorder:
   def __init__(self):
+    self.currentTime = 0
     screenW = GetSystemMetrics(0)
     screenH = GetSystemMetrics(1)
     self.screenSize = (screenW, screenH)
@@ -69,7 +70,9 @@ class ScreenRecorder:
 
 
   def startRecording(self, out, fps):
+    print("Recording Starting!")
     start_time = time.time()
+    # print(start_time)
     currentFrameCount = 0
 
     while True:
@@ -78,6 +81,9 @@ class ScreenRecorder:
 
       if (currentFrameCount < shouldHaveFrames):
         img = pyautogui.screenshot()
+
+        self.currentTime = abs(start_time - time.time())
+        # print(self.currentTime)
         # img = ImageGrab.grab()
         # img = imageio.imread('<screen>')
         
@@ -116,4 +122,5 @@ class ScreenRecorder:
     cv2.destroyAllWindows()
     out.release()
 
-# ScreenRecorder()
+
+# ScreenRecorder().begin()

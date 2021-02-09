@@ -3,6 +3,7 @@ import json
 import os
 
 from ScreenRecorder import *
+from FacialExpressionRecog import *
 from win32api import GetSystemMetrics
 import win32gui as win32gui
 
@@ -260,7 +261,7 @@ class TaskWindow(QWidget):
     
     # User clicked finish task
     def finishTaskButton(self, e):
-        self.parent.nextSequenceItem(None)
+        self.parent.nextSequenceItem(None, "Task")
 
 
 # Scroll Label is used for the body of the task
@@ -413,7 +414,7 @@ class TextQuestionWindow(QuestionWindow):
             "answerJSON": answerJSON,
             "questionId": self.sequenceDataItem["questionId"]
         }
-        self.parent.nextSequenceItem(returnData)
+        self.parent.nextSequenceItem(returnData, "Question Answer")
 
 
 class MultipleChoiceQuestionWindow(QuestionWindow):
@@ -500,7 +501,47 @@ class MultipleChoiceQuestionWindow(QuestionWindow):
             "answerJSON": answerJSON,
             "questionId": self.sequenceDataItem["questionId"]
         }
-        self.parent.nextSequenceItem(returnData)
+        self.parent.nextSequenceItem(returnData, "Question Answer")
+
+
+class UploadDataWindow(QWidget):
+    def __init__(self, parent):
+        QWidget.__init__(self, None, Qt.WindowStaysOnTopHint)
+        self.parent = parent
+
+        # Window configurations
+        self.setGeometry(400, 350, 500, 250)
+        self.setWindowTitle("UsabCheck")
+        self.setStyleSheet("font-size: 14px;")
+        
+        # Layout
+        self.mainLayout = QVBoxLayout()
+        self.mainLayout.setContentsMargins(20, 20, 200, 0)
+        self.createTestEnterLayout()
+
+        self.displayTestLayout = QGroupBox()
+        self.setLayout(self.mainLayout)
+
+
+    # Creates the first part of the form where the user enters a test reference code
+    def createTestEnterLayout(self):
+        layout = QFormLayout()
+        
+        btn = QPushButton("Submit", self)
+        btn.clicked.connect(self.uploadData)
+        btn.resize(btn.sizeHint())
+        btn.setStyleSheet("background-color: rgb(32, 123, 207);")
+        btn.setFixedWidth(100)
+
+        layout.addRow(btn)
+        layout.setContentsMargins(0, 0, 0, 30)
+
+        self.mainLayout.addLayout(layout)
+    
+
+    # When the user submits the code get the data
+    def uploadData(self, e):
+        self.parent.uploadData()
 
 
 class RecordingWindow(QWidget):
@@ -520,12 +561,20 @@ class RecordingWindow(QWidget):
         self.renderRecordingOptions()
 
         self.screenRecorder = ScreenRecorder()
-        x = threading.Thread(target=self.startRecorder, args=(self.screenRecorder,))
-        x.start()
+        screenRecThread = threading.Thread(target=self.startRecorder, args=(self.screenRecorder,))
+        screenRecThread.start()
 
+        self.fer = FacialExpressionRecog("Model 1", self.screenRecorder)
+        ferThread = threading.Thread(target=self.startFER, args=(self.fer,))
+        ferThread.start()
+        
 
     def startRecorder(self, screenRecorder):
         screenRecorder.begin()
+
+
+    def startFER(self, fer):
+        fer.begin()
 
 
     def renderBorder(self):
@@ -601,9 +650,17 @@ class RecordingWindow(QWidget):
         self.frame = frame
     
 
+    def stopProcesses(self):
+        self.fer.running = False
+        self.fer.cap.release()
+        self.screenRecorder.quit = True
+
+
     def stopRecording(self):
         print("STOPPING RECORDING!")
-        self.screenRecorder.quit = True
+        self.stopProcesses()
+
+        self.parent.onRecordingStopped()
         self.close()
 
 
@@ -646,6 +703,7 @@ class MainProgram():
         app.setStyle('Fusion')
         
         self.answers = []
+        self.sequenceTimeStamp = []
         self.previousTaskPos = None
         self.sequenceIndex = None
         self.data = None
@@ -659,16 +717,66 @@ class MainProgram():
         app.exec_()
 
 
-    def stopRecording(self):
-        pass
+    # When usability test/recording is forcefully stopped
+    def onRecordingStopped(self):
+        ferCameraData = self.recordingWindow.fer.ferCameraData
+        for timeStamp in ferCameraData:
+            print(timeStamp)
+        self.recordingWindow.close()
+        self.window.close()
 
 
-    def nextSequenceItem(self, returnData):
+    def testFinishedSuccessfully(self):
+        self.recordingWindow.stopProcesses()
+        self.ferCameraData = self.recordingWindow.fer.ferCameraData
+        # for timeStamp in self.ferCameraData:
+        #     print(timeStamp)
+        self.recordingWindow.close()
+        self.window.close()
+
+        self.uploadDataWindow = UploadDataWindow(self)
+        self.uploadDataWindow.show()
+
+
+    def uploadData(self):
+        print("Uploading Data")
+        sendData = self.packageData()
+        print(sendData)
+
+        request = requests.post("http://localhost:8090/api/localapp/sendTestResults", data=sendData)
+        print(request)
+
+
+    def packageData(self):
+        # print(self.ferCameraData)
+        # print(self.answers)
+        # print(self.sequenceTimeStamp)
+        # print(self.data)
+
+        packagedData = {
+            "referenceCode": self.data["referenceCode"],
+            "ferCameraData":  json.dumps(self.ferCameraData),
+            "sequenceTimeStamp":  json.dumps(self.sequenceTimeStamp),
+            "questionAnswers":  json.dumps(self.answers)
+        }
+
+        return packagedData
+
+    def nextSequenceItem(self, returnData, returnDataType):
+        if self.sequenceIndex > 0:
+            sequenceTimeStamp = {
+                "time": self.recordingWindow.screenRecorder.currentTime,
+                "sequenceNum": self.sequenceIndex - 1
+            }
+            self.sequenceTimeStamp.append(sequenceTimeStamp)
+
         print("NEXT SEQUENCE ITEM: ")
         if returnData != None:
             print("RETURN: ", returnData)
+            if returnDataType == "Question Answer":
+                self.answers.append(returnData)
 
-        if (self.sequenceIndex < len(self.data["sequenceData"]) - 1):
+        if self.sequenceIndex < len(self.data["sequenceData"]) - 1:
             self.previousWindow = self.window
 
             if "stepsJSON" in self.data["sequenceData"][self.sequenceIndex].keys():
@@ -677,6 +785,7 @@ class MainProgram():
             self.loadNextSequenceItem()
         else:
             print("TEST FINISHED!")
+            self.testFinishedSuccessfully()
 
     
     def loadNextSequenceItem(self):

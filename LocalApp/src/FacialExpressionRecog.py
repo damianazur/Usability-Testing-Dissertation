@@ -11,66 +11,104 @@ config.gpu_options.allow_growth = True
 sess = tf.compat.v1.Session(config=config)
 
 
+class FacialExpressionRecog():
+  def __init__(self, selectedModel, screenRecorder):
+    selectedModel = "Model 1"
 
-if __name__ == '__main__':
-  print("----------- Starting FER ----------- ")
-  
-  selectedModel = "Model 1"
-
-  if selectedModel == "Model 1":
-      classifier = load_model(r'./models/Model1.h5')
-      labels = ["Angry", "Disgust", "Fear", "Happy", "Neutral", "Sad", "Surprise"]
-      
-  elif selectedModel == "Model 2":
-      classifier = model_from_json(open("Model2.json", "r").read())
-      classifier.load_weights('Model2_Weights.h5')
-      labels = ["Angry", "Disgust", "Fear", "Happy", "Sad", "Surprise", "Neutral"]
-  else:
-      raise "No existing model selected"
+    if selectedModel == "Model 1":
+        self.classifier = load_model(r'./models/Model1.h5')
+        self.labels = ["Angry", "Disgust", "Fear", "Happy", "Neutral", "Sad", "Surprise"]
+        
+    elif selectedModel == "Model 2":
+        self.classifier = model_from_json(open("Model2.json", "r").read())
+        self.classifier.load_weights('Model2_Weights.h5')
+        self.labels = ["Angry", "Disgust", "Fear", "Happy", "Sad", "Surprise", "Neutral"]
+    else:
+        raise "No existing model selected"
 
 
-  faceDetector = cv2.CascadeClassifier(r'./models/haarcascade_frontalface_default.xml')
+    self.faceDetector = cv2.CascadeClassifier(r'./models/haarcascade_frontalface_default.xml')
+    self.screenRecorder = screenRecorder
+    self.cap = cv2.VideoCapture(0)
+    # self.begin()
 
-  cap = cv2.VideoCapture(0)
 
-  while True:
-      # Get frame from camera
-      ret, frame = cap.read()
+  def begin(self):
+    self.running = True
 
-      # Convert to grayscale
-      gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    self.ferCameraData = []
+    previousLabel = None
+    minEmotionTime = 0.5
 
-      # Detect the face
-      faces = faceDetector.detectMultiScale(gray, 1.3, 5)
-      
-      # Iterate over the faces (bounding boxes)
-      for (x, y, w, h) in faces:
-          # Draw the rectangle bounding box of face
-          cv2.rectangle(frame, (x,y), (x+w, y+h),(255,0,0), 2)
-          croppedFace = gray[y:y+h, x:x+w]
-          # Resize the face to the size the classifier expects (48 x 48)
-          croppedFace = cv2.resize(croppedFace, (48,48), interpolation=cv2.INTER_AREA)
+    while self.running:
+        # Get frame from camera
+        ret, frame = self.cap.read()
 
-          # If a face has been detected and the image has pixel values
-          if np.sum([croppedFace]) != 0:
-              roi = croppedFace.astype('float')/255.0
-              roi = img_to_array(roi)
-              roi = np.expand_dims(roi,axis=0)
+        # Convert to grayscale
+        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
-              preds = classifier.predict(roi)[0]
-              label=labels[preds.argmax()]
-              label_position = (20,60)
+        # Detect the face
+        faces = self.faceDetector.detectMultiScale(gray, 1.3, 5)
+        
+        # If camera does not detect a face, set the end time of the last face expression
+        if len(faces) == 0:
+          if len(self.ferCameraData) != 0:
+            currentIndex = len(self.ferCameraData) - 1
+            currentTime = self.screenRecorder.currentTime
+            if "endTime" not in self.ferCameraData[currentIndex].keys():
+              self.ferCameraData[currentIndex]["endTime"] = currentTime
 
-              cv2.putText(img=frame, text=label, org=label_position,
-                  fontFace=cv2.FONT_HERSHEY_COMPLEX , fontScale=2, color=[255, 0, 0], lineType=cv2.LINE_AA, thickness=3)
-          else:
-              cv2.putText(frame,'No Face Detected',(20,60),cv2.FONT_HERSHEY_SIMPLEX,2,(0,255,0),2)
-      
-      cv2.imshow('Facial Expression Detector', frame)
+        # Iterate over the faces (bounding boxes)
+        for (x, y, w, h) in faces:
+            # Draw the rectangle bounding box of face
+            cv2.rectangle(frame, (x,y), (x+w, y+h),(255,0,0), 2)
+            croppedFace = gray[y:y+h, x:x+w]
+            # Resize the face to the size the classifier expects (48 x 48)
+            croppedFace = cv2.resize(croppedFace, (48,48), interpolation=cv2.INTER_AREA)
 
-      # If the q letter is pressed then exit the program
-      if cv2.waitKey(1) & 0xFF == ord('q'):
-          break
+            # If a face has been detected and the image has pixel values
+            if np.sum([croppedFace]) != 0:
+                roi = croppedFace.astype('float')/255.0
+                roi = img_to_array(roi)
+                roi = np.expand_dims(roi,axis=0)
 
-  cap.release()
-  cv2.destroyAllWindows()
+                preds = self.classifier.predict(roi)[0]
+                label = self.labels[preds.argmax()]
+                label_position = (20,60)
+
+                currentTime = self.screenRecorder.currentTime
+
+                # If camera does not detect a face, set the end time of the last face expression
+                if (len(self.ferCameraData) != 0 and previousLabel != label):
+                  currentIndex = len(self.ferCameraData) - 1
+                  if "endTime" not in self.ferCameraData[currentIndex].keys():
+                    self.ferCameraData[currentIndex]["endTime"] = currentTime
+                
+                if previousLabel != label:
+                  newTimeStamp = {
+                    "startTime": str(currentTime),
+                    "label": label
+                  }
+                  self.ferCameraData.append(newTimeStamp)
+                  previousLabel = label
+
+                cv2.putText(img=frame, text=label, org=label_position,
+                    fontFace=cv2.FONT_HERSHEY_COMPLEX , fontScale=2, color=[255, 0, 0], lineType=cv2.LINE_AA, thickness=3)
+            else:
+                cv2.putText(frame,'No Face Detected',(20,60),cv2.FONT_HERSHEY_SIMPLEX,2,(0,255,0),2)
+        
+        cv2.imshow('Facial Expression Detector', frame)
+
+        # If the q letter is pressed then exit the program
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
+
+    self.cap.release()
+    cv2.destroyAllWindows()
+
+
+# if __name__ == '__main__':
+#   print("----------- Starting FER ----------- ")
+#   fer = FacialExpressionRecog("Model 1", "Screen Rec")
+#   fer.begin()
+
