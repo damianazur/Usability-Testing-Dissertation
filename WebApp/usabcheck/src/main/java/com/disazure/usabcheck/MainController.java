@@ -210,4 +210,23 @@ public class MainController {
 		
 		return new ResponseEntity<String>(result, HttpStatus.OK);
 	}
+	
+	
+	@RequestMapping(value = "/getTasks", method = RequestMethod.POST)
+	public ResponseEntity<?> getTasks(@RequestBody Map<String, String> json) {
+		String token = json.get("token");
+		int testId = Integer.parseInt(json.get("testId"));
+		String username = jwtUtils.getUserNameFromJwtToken(token);
+		int researcherId = resDao.getIdFromUsername(username);
+		
+		String result = "";
+		
+		try {
+			result = taskDao.getByTestId(researcherId, testId);
+		} catch (JsonProcessingException e) {
+			e.printStackTrace();
+		}
+		
+		return new ResponseEntity<String>(result, HttpStatus.OK);
+	}
 }

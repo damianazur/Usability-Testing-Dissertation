@@ -73,6 +73,16 @@ class ServerComponent {
         })
     }
 
+    getTaskList(testId) {
+      const token = JSON.parse(localStorage.getItem('user')).accessToken;
+
+      return axios
+        .post(API_URL + "getTasks", {
+          "token": token,
+          "testId": testId
+        })
+    }
+
   }
   
   export default new ServerComponent();

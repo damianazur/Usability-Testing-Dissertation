@@ -95,7 +95,17 @@ export class TestContainer extends Component {
                 window.location.reload();
               }} type="button" className="secondaryButton">View Test Details
             </button>
-            <span style={{float: "right"}}>
+            
+            <button onClick={() => {
+                this.props.history.push({
+                  pathname: 'view-test-results',
+                  state: { testId: test.testId }
+                });
+                window.location.reload();
+              }} type="button" className="secondaryButton">View Test Results
+            </button>
+
+            <span style={{float: "right", marginTop: "7px"}}>
               {this.generateOptionsDropdown(test, this.state.selectedOption)}
             </span>
             <ModalContainer 
