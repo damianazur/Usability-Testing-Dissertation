@@ -5,7 +5,7 @@ export class TestResultOverviewTab extends Component {
     super(props);
 
     this.state = {
-      isShown: false
+      isShown: true
     };
   }
 

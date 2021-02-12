@@ -34,9 +34,23 @@ public class TaskDao {
 				+ "LEFT JOIN researcher using(researcherId) "
 				+ "WHERE testId = ? AND researcherId = ?";
 
-		List<Map<String, Object>> questionList = jdbcTemplate.queryForList(sql, testId, researcherId);
+		List<Map<String, Object>> taskList = jdbcTemplate.queryForList(sql, testId, researcherId);
 		
-	    final String result = mapper.writeValueAsString(questionList);
+	    final String result = mapper.writeValueAsString(taskList);
+	    
+	    return result;
+	}
+	
+	// Do no use the below method if you're not sure the testId has been verified to belong to the user who is making the request.
+	// Use for internal calculations and do not give entry points direct access this method!
+	public String getByTestIdNoSecurity(int testId) throws JsonProcessingException {
+		String sql = ""
+				+ "SELECT taskId, taskName, testId, stepsJSON, sequenceNumber FROM task "
+				+ "WHERE testId = ?";
+
+		List<Map<String, Object>> taskList = jdbcTemplate.queryForList(sql, testId);
+		
+	    final String result = mapper.writeValueAsString(taskList);
 	    
 	    return result;
 	}

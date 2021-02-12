@@ -762,14 +762,19 @@ class MainProgram():
 
         return packagedData
 
-    def nextSequenceItem(self, returnData, returnDataType):
-        if self.sequenceIndex > 0:
-            sequenceTimeStamp = {
-                "time": self.recordingWindow.screenRecorder.currentTime,
-                "sequenceNum": self.sequenceIndex - 1
-            }
-            self.sequenceTimeStamp.append(sequenceTimeStamp)
+    
+    def addSequenceStamp(self):
+        print("SEQ INX", self.sequenceIndex, self.data["sequenceData"][self.sequenceIndex])
+        
+        sequenceTimeStamp = {
+            "startTime": str(self.recordingWindow.screenRecorder.currentTime),
+            "label": str(self.sequenceIndex),
+            "endTime": "N/A"
+        }
+        self.sequenceTimeStamp.append(sequenceTimeStamp)
 
+
+    def nextSequenceItem(self, returnData, returnDataType):
         print("NEXT SEQUENCE ITEM: ")
         if returnData != None:
             print("RETURN: ", returnData)
@@ -795,6 +800,7 @@ class MainProgram():
             self.sequenceIndex += 1
 
         print("SEQUENCE NUM: ", self.sequenceIndex)
+        self.addSequenceStamp()
 
         # Create instruction text body
         sequenceDataItem = self.data["sequenceData"][self.sequenceIndex]

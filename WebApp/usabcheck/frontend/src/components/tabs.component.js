@@ -92,7 +92,6 @@ export class TabGenerator extends Component {
       <div>
         {this.state.tabButtons}
         <div className="tabBody">
-        
         {this.state.createdComponentList.length > 0 ? (
           <div>
             {this.state.createdComponentList}

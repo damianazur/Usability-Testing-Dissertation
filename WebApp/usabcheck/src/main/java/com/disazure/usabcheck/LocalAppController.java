@@ -39,7 +39,7 @@ public class LocalAppController {
 	
 	@RequestMapping(value = "/sendTestResults", method = RequestMethod.POST)
 	public ResponseEntity<?> sendTestResults(@RequestParam  Map<String, String> json) {
-		System.out.println("Test Results" + json);
+		System.out.println("######## Test Results" + json);
 				
 		String result = "";
 		try {

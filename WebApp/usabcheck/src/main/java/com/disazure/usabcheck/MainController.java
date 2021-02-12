@@ -229,4 +229,41 @@ public class MainController {
 		
 		return new ResponseEntity<String>(result, HttpStatus.OK);
 	}
+	
+	@RequestMapping(value = "/getQuestionAndAnswers", method = RequestMethod.POST)
+	public ResponseEntity<?> getQuestionAndAnswers(@RequestBody Map<String, String> json) {
+		String token = json.get("token");
+		int testId = Integer.parseInt(json.get("testId"));
+		String username = jwtUtils.getUserNameFromJwtToken(token);
+		int researcherId = resDao.getIdFromUsername(username);
+
+		JsonObject result = new JsonObject();
+		try {
+			result = usabilityTestService.getQuestionAndAnswers(researcherId, testId);
+		} catch (JsonProcessingException e) {
+			e.printStackTrace();
+		}
+		
+		return new ResponseEntity<String>(result.toString(), HttpStatus.OK);
+	}
+	
+	@RequestMapping(value = "/getTasksAndGrades", method = RequestMethod.POST)
+	public ResponseEntity<?> getTasksAndGrades(@RequestBody Map<String, String> json) {
+		String token = json.get("token");
+		int testId = Integer.parseInt(json.get("testId"));
+		String username = jwtUtils.getUserNameFromJwtToken(token);
+		int researcherId = resDao.getIdFromUsername(username);
+
+		JsonObject result = new JsonObject();
+		try {
+			result = usabilityTestService.getTasksAndGrades(researcherId, testId);
+		} catch (JsonProcessingException e) {
+			e.printStackTrace();
+		}
+		
+		return new ResponseEntity<String>(result.toString(), HttpStatus.OK);
+	}
+	
+	
+	
 }

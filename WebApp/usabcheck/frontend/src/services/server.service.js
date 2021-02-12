@@ -83,6 +83,26 @@ class ServerComponent {
         })
     }
 
+    getTasksAndGrades(testId) {
+      const token = JSON.parse(localStorage.getItem('user')).accessToken;
+
+      return axios
+        .post(API_URL + "getTasksAndGrades", {
+          "token": token,
+          "testId": testId
+        })
+    }
+
+    getQuestionAndAnswers(testId) {
+      const token = JSON.parse(localStorage.getItem('user')).accessToken;
+
+      return axios
+        .post(API_URL + "getQuestionAndAnswers", {
+          "token": token,
+          "testId": testId
+        })
+    }
+
   }
   
   export default new ServerComponent();
