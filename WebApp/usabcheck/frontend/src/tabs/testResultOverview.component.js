@@ -140,19 +140,19 @@ export class TestResultOverviewTab extends Component {
   getPieChartOptions() {
     var options = {
       chart: {
-        type: 'pie',
+        type: 'pie'
       },
       plotOptions: {
         pie: {
           startAngle: 0,
           endAngle: 360,
           expandOnClick: true,
-          offsetX: 0,
-          offsetY: 70,
-          customScale: 1.3,
+          offsetX: -10,
+          offsetY: 20,
+          customScale: 0.9,
           dataLabels: {
-              offset: 40,
-              minAngleToShowLabel: 10
+              offset: -10,
+              minAngleToShowLabel: 0
           }, 
         },
       },
@@ -160,7 +160,7 @@ export class TestResultOverviewTab extends Component {
         enabled: true,
         textAnchor: 'end',
         style: {
-          fontSize: '12px',
+          fontSize: '18px',
           colors: ["#000000"],
           fontWeight: 'bold',
         },
@@ -170,8 +170,8 @@ export class TestResultOverviewTab extends Component {
       },
       legend: {
         fontSize: "15px",
-        position: 'bottom',
-        horizontalAlign: 'left',
+        horizontalAlign: 'right',
+        width: 200,
       }
     };
 
@@ -219,6 +219,7 @@ export class TestResultOverviewTab extends Component {
       Object.keys(labelsAndCount).forEach(function(key) {
         labels.push(key);
         series.push(labelsAndCount[key]);
+        
       });
       options.labels = labels
 
@@ -226,13 +227,17 @@ export class TestResultOverviewTab extends Component {
       console.log("Creating Chart!", options, options.labels, series);
 
       var pieChart = 
-      <Chart
-        key={i}
-        options={options}
-        series={series}
-        type="pie"
-        className="genericChart pieChart"
-      />
+      <div className="pieChartContainer">
+        <Chart
+          key={i}
+          options={options}
+          series={series}
+          type="pie"
+          className="genericChart pieChart"
+        />
+       
+      </div>
+
       answerChartList.push(
         pieChart
       );
