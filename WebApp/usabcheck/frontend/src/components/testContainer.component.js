@@ -99,7 +99,7 @@ export class TestContainer extends Component {
             <button onClick={() => {
                 this.props.history.push({
                   pathname: 'view-test-results',
-                  state: { testId: test.testId }
+                  state: { testId: test.testId, testName: test.testName }
                 });
                 window.location.reload();
               }} type="button" className="secondaryButton">View Test Results

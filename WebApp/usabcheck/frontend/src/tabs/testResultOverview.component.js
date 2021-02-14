@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
-import DropdownGenerator from "components/dropdownGenerator.component";
 import Server from "services/server.service";
-import ApexCharts from 'apexcharts'
+// import ApexCharts from 'apexcharts'
 import Chart from "react-apexcharts";
 
 export class TestResultOverviewTab extends Component {
@@ -13,7 +12,11 @@ export class TestResultOverviewTab extends Component {
       taskGradeData: {},
       questionAnswerData: {},
       taskChartList: [],
-      answerChartList: []
+      overallChart: [],
+      answerChartList: [],
+      textAnswerList: [],
+      emotionChart: [],
+      participantCount: "N/A"
     };
   }
 
@@ -28,7 +31,8 @@ export class TestResultOverviewTab extends Component {
       console.log(response.data);
       this.setState({
         taskGradeData: response.data}, () => {
-          this.renderTaskCharts();
+          this.renderTaskCharts("chartPerTask", "taskChartList");
+          this.renderTaskCharts("overall", "overallChart");
         });
     });
   }
@@ -43,7 +47,7 @@ export class TestResultOverviewTab extends Component {
     });
   }
 
-  renderTaskCharts() {
+  getTaskSettings() {
     var colors = ['#55FF32', '#ff3232', '#B2B2B2'];
     var strokeColors = ['#4FE52D', '#E52D2D', '#999999'];
 
@@ -98,19 +102,32 @@ export class TestResultOverviewTab extends Component {
         }
       }
     }
-  
+
+    return options;
+  }
+
+  renderTaskCharts(type, listName) {
+    var options = this.getTaskSettings()
     console.log(this.state.taskGradeData);
 
     var taskChartList = [];
     var tasks = this.state.taskGradeData["tasks"];
     var grades = this.state.taskGradeData["grades"];
+    var gradeCount = {
+      "Pass": 0,
+      "Fail": 0,
+      "Not Graded": 0
+    }
+
     for (let i = 0; i < tasks.length; i++) {
       var task = tasks[i];
-
-      var gradeCount = {
-        "Pass": 0,
-        "Fail": 0,
-        "Not Graded": 0
+      
+      if (type == "chartPerTask") {
+        var gradeCount = {
+          "Pass": 0,
+          "Fail": 0,
+          "Not Graded": 0
+        }
       }
 
       for (let j = 0; j < grades.length; j++) {
@@ -123,18 +140,41 @@ export class TestResultOverviewTab extends Component {
       var series = [{
         data: [gradeCount["Pass"], gradeCount["Fail"], gradeCount["Not Graded"]]
       }];
+      
+      if (type == "chartPerTask") {
+        taskChartList.push(
+        <div key={i} style={{display: "inline-block", "marginRight": "30px"}}>
+          <h3 className="chartHeading">
+          [{task["sequenceNumber"] + 1}] {task.taskName}
+          </h3>
+          <Chart
+              options={options}
+              series={series}
+              type="bar"
+              className="genericChart barChart"
+            />
+        </div>
+        );
+      }
+    }
 
+    if (type == "overall") {
       taskChartList.push(
+      <div key={0} style={{display: "inline-block", "marginRight": "30px"}}>
+        <h3 className="chartHeading">
+          Success Rate Across All Tasks
+        </h3>
         <Chart
           options={options}
           series={series}
           type="bar"
           className="genericChart barChart"
         />
+      </div>
       );
     }
 
-    this.setState({taskChartList: taskChartList});
+    this.setState({[listName]: taskChartList});
   }
 
   getPieChartOptions() {
@@ -148,8 +188,8 @@ export class TestResultOverviewTab extends Component {
           endAngle: 360,
           expandOnClick: true,
           offsetX: -10,
-          offsetY: 20,
-          customScale: 0.9,
+          offsetY: 10,
+          customScale: 1,
           dataLabels: {
               offset: -10,
               minAngleToShowLabel: 0
@@ -160,7 +200,7 @@ export class TestResultOverviewTab extends Component {
         enabled: true,
         textAnchor: 'end',
         style: {
-          fontSize: '18px',
+          fontSize: '15px',
           colors: ["#000000"],
           fontWeight: 'bold',
         },
@@ -178,92 +218,117 @@ export class TestResultOverviewTab extends Component {
     return options;
   }
 
+  createTextAnswerBox(answers, question) {
+    var answerList = [];
+
+    for (let j = 0; j < answers.length; j++) {
+      var answerObj = answers[j];
+      if (answerObj["questionId"] === question["questionId"]) {
+        var answer = JSON.parse(answerObj["answerJSON"])["answer"];
+        answerList.push(
+          <div key={j}>
+            <span style={{"fontWeight": "none"}}>{answer}</span>
+            <hr style={{"margin": "5px 0 5px"}}></hr>
+          </div>
+        );
+      }
+    }
+
+    console.log(answerList);
+
+    return(
+      <div>
+        {answerList}
+      </div>
+    )
+  }
+
+  createMultipleChoicePieChart(options, answers, question) {
+    var questionConfigsJSON = JSON.parse(question["questionConfigsJSON"]);
+
+    // Create a dictionary with all the answer options and their count
+    var labelsAndCount = {};
+    var choices = questionConfigsJSON["choices"];
+    for (let n = 0; n < choices.length; n++) {
+      let choice = choices[n]["value"];
+      labelsAndCount[choice] = 0;
+    }
+    // Iterate over answers and if the questionId matches then increment the value of the answer
+    for (let j = 0; j < answers.length; j++) {
+      var answerObj = answers[j];
+      if (answerObj["questionId"] === question["questionId"]) {
+        var answer = JSON.parse(answerObj["answerJSON"])["answer"];
+        labelsAndCount[answer] += 1;
+      }
+    }
+
+    var series = [];
+    var labels = [];
+    Object.keys(labelsAndCount).forEach(function(key) {
+      labels.push(key);
+      series.push(labelsAndCount[key]);
+    });
+    options.labels = labels
+
+    console.log("Creating Chart!", options, options.labels, series);
+
+    var pieChart = 
+      <Chart
+        options={options}
+        series={series}
+        type="pie"
+        className="genericChart pieChart"
+      />
+    
+    return pieChart;
+  }
+
   renderAnswerCharts() {
     var answerChartList = [];
+    var textAnswerList = [];
     var questions = this.state.questionAnswerData["questions"];
     var answers = this.state.questionAnswerData["answers"];
 
     // Iterate over questions
     for (let i = 0; i < questions.length; i++) {
       var options = this.getPieChartOptions();
-      // if (i == 2) {
-      //   continue;
-      // }
-
       var question = questions[i];
       var questionConfigsJSON = JSON.parse(question["questionConfigsJSON"]);
       
       // Show multiple choice questions
-      if (questionConfigsJSON["questionType"] != "multiple-choice") {
-        continue;
-      }
+      if (questionConfigsJSON["questionType"] === "multiple-choice") {
+        var pieChart = this.createMultipleChoicePieChart(options, answers, question);
 
-      // Create a dictionary with all the answer options and their count
-      var labelsAndCount = {};
-      var choices = questionConfigsJSON["choices"];
-      for (let n = 0; n < choices.length; n++) {
-        let choice = choices[n]["value"];
-        labelsAndCount[choice] = 0;
-      }
-      // Iterate over answers and if the questionId matches then increment the value of the answer
-      for (let j = 0; j < answers.length; j++) {
-        var answer = answers[j];
-        if (answer["questionId"] === question["questionId"]) {
-          var answer = JSON.parse(answer["answerJSON"])["answer"];
-          labelsAndCount[answer] += 1;
-        }
-      }
+        answerChartList.push(
+          <div key={i} className="pieChartContainer">
+            <h3 className="chartHeading">
+              [{question["sequenceNumber"] + 1}] Question: <i>{questionConfigsJSON["questionText"]}</i>
+              {pieChart}
+            </h3>
+          </div>
+        );
 
-      var series = [];
-      var labels = [];
-      Object.keys(labelsAndCount).forEach(function(key) {
-        labels.push(key);
-        series.push(labelsAndCount[key]);
+      } else if (questionConfigsJSON["questionType"] === "text") {
+        var textAnswerBox = this.createTextAnswerBox(answers, question);
         
-      });
-      options.labels = labels
+        console.log(textAnswerBox);
 
-
-      console.log("Creating Chart!", options, options.labels, series);
-
-      var pieChart = 
-      <div className="pieChartContainer">
-        <Chart
-          key={i}
-          options={options}
-          series={series}
-          type="pie"
-          className="genericChart pieChart"
-        />
-       
-      </div>
-
-      answerChartList.push(
-        pieChart
-      );
-      
-      // answerChartList[answerChartList.length - 1].updateOptions(options);
-      // answerChartList[answerChartList.length - 1].props.options.labels = labels;
-      // console.log(answerChartList[answerChartList.length - 1]);
+        textAnswerList.push(
+          <div key={i} className="pieChartContainer">
+            <h3 className="chartHeading">
+              [{question["sequenceNumber"] + 1}] Question: <i>{questionConfigsJSON["questionText"]}</i>
+              <h4  style={{display: "block", textAlign: "left", margin: "5px 0 5px"}}>Answers: </h4>
+              <div style={{"backgroundColor": "white", "padding": "5px 15px 15px", overflow: "auto", maxHeight: "300px"}}>
+                {textAnswerBox}
+              </div>
+            </h3>
+          </div>
+        );
+      }
     }
 
     this.setState({answerChartList: answerChartList});
-    
-    // var series = [44, 55, 13, 43, 22];
-    // let answerChartList = [];
-    // var numCharts = 3
-    // for (let i = 0; i < numCharts; i++) {
-    //   answerChartList.push(
-    //     <Chart
-    //       options={options}
-    //       series={series}
-    //       type="pie"
-    //       className="genericChart pieChart"
-    //     />
-    //   );
-    // }
-
-    // this.setState({answerChartList: answerChartList});
+    this.setState({textAnswerList: textAnswerList});
   }
 
   render() {
@@ -273,22 +338,39 @@ export class TestResultOverviewTab extends Component {
           <div>
             <h2>Details</h2>
             <hr className="hr2"></hr>
+            <h3>Participants{}</h3>
 
-            <h2>Overall Success Rate</h2>
+            <div>
+              {this.state.emotionChart}
+            </div>
+            
+            <br></br>
+            <h2>Overall Task Success Rate</h2>
             <hr className="hr2"></hr>
+            <div className="chartHolder">
+              {this.state.overallChart}
+            </div>
 
-            <h2>Overall Task Performance</h2>
+            <br></br>
+            <h2>Individual Task Performance</h2>
             <hr className="hr2"></hr>
             <div className="chartHolder">
               {this.state.taskChartList}
             </div>
 
-            <h2>Overall Question Answers</h2>
+            <br></br>
+            <h2>Multiple-Choice Question Answers</h2>
             <hr className="hr2"></hr>
             <div className="chartHolder">
               {this.state.answerChartList}
             </div>
 
+            <br></br>
+            <h2>Text Question Answers</h2>
+            <hr className="hr2"></hr>
+            <div className="chartHolder">
+              {this.state.textAnswerList}
+            </div>
           </div>
         ) : ( 
           null

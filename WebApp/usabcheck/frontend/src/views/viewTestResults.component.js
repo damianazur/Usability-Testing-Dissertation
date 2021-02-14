@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 
-import Server from "services/server.service";
 import TabGenerator from "components/tabs.component"
 import TestResultOverviewTab from "tabs/testResultOverview.component"
 import TestResultRecordingsTab from "tabs/testResultRecordings.component"
@@ -25,7 +24,7 @@ export class ViewTestResults extends Component {
     
     return (
       <div className="mainPageDiv">
-          <h1>Test X: Results</h1>
+          <h1>Test Results: {this.props.location.state.testName}</h1>
           <hr></hr>
           <div className="post-content">  
             <TabGenerator
