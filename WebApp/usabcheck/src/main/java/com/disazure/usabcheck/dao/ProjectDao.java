@@ -30,8 +30,6 @@ public class ProjectDao {
 		
 	    final String result = mapper.writeValueAsString(projectsList);
 	    
-	    System.out.println("### Result: " + result);
-	    
 	    return result;
 	}
 	

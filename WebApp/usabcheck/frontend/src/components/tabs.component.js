@@ -6,7 +6,7 @@ export class TabGenerator extends Component {
 
     this.state = {
       tabButtons: [],
-      tabIndex: "0",
+      tabIndex: "1",
       createdComponentList: []
     };
   }
@@ -22,7 +22,7 @@ export class TabGenerator extends Component {
     }
 
     console.log(components);
-    this.renderTabButtons("0");
+    this.renderTabButtons("1");
     this.createTabContent(components);
   }
 
@@ -46,7 +46,7 @@ export class TabGenerator extends Component {
     this.setState({
       createdComponentList: createdComponentList
     }, () => {
-      this.renderTab(0);
+      this.renderTab(1);
     });
   }
 

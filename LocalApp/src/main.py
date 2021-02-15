@@ -4,8 +4,10 @@ import os
 
 from ScreenRecorder import *
 from FacialExpressionRecog import *
+from VideoUploading import *
 from win32api import GetSystemMetrics
 import win32gui as win32gui
+from datetime import datetime
 
 from functools import partial
 
@@ -504,46 +506,6 @@ class MultipleChoiceQuestionWindow(QuestionWindow):
         self.parent.nextSequenceItem(returnData, "Question Answer")
 
 
-class UploadDataWindow(QWidget):
-    def __init__(self, parent):
-        QWidget.__init__(self, None, Qt.WindowStaysOnTopHint)
-        self.parent = parent
-
-        # Window configurations
-        self.setGeometry(400, 350, 500, 250)
-        self.setWindowTitle("UsabCheck")
-        self.setStyleSheet("font-size: 14px;")
-        
-        # Layout
-        self.mainLayout = QVBoxLayout()
-        self.mainLayout.setContentsMargins(20, 20, 200, 0)
-        self.createTestEnterLayout()
-
-        self.displayTestLayout = QGroupBox()
-        self.setLayout(self.mainLayout)
-
-
-    # Creates the first part of the form where the user enters a test reference code
-    def createTestEnterLayout(self):
-        layout = QFormLayout()
-        
-        btn = QPushButton("Submit", self)
-        btn.clicked.connect(self.uploadData)
-        btn.resize(btn.sizeHint())
-        btn.setStyleSheet("background-color: rgb(32, 123, 207);")
-        btn.setFixedWidth(100)
-
-        layout.addRow(btn)
-        layout.setContentsMargins(0, 0, 0, 30)
-
-        self.mainLayout.addLayout(layout)
-    
-
-    # When the user submits the code get the data
-    def uploadData(self, e):
-        self.parent.uploadData()
-
-
 class RecordingWindow(QWidget):
     def __init__(self, parent):
         QWidget.__init__(self, None, Qt.WindowStaysOnTopHint)
@@ -560,7 +522,10 @@ class RecordingWindow(QWidget):
         self.renderBorder()
         self.renderRecordingOptions()
 
-        self.screenRecorder = ScreenRecorder()
+
+        self.videoFileName = "UsabTest-" + datetime.today().strftime('%Y-%m-%d-%H-%M-%S') +".avi"
+        
+        self.screenRecorder = ScreenRecorder(self.videoFileName)
         screenRecThread = threading.Thread(target=self.startRecorder, args=(self.screenRecorder,))
         screenRecThread.start()
 
@@ -697,6 +662,47 @@ class RecordingWindow(QWidget):
             self.dragPos = event.globalPos()
 
 
+class UploadDataWindow(QWidget):
+    def __init__(self, parent):
+        QWidget.__init__(self, None, Qt.WindowStaysOnTopHint)
+        self.parent = parent
+
+        # Window configurations
+        self.setGeometry(400, 350, 500, 250)
+        self.setWindowTitle("UsabCheck")
+        self.setStyleSheet("font-size: 14px;")
+        
+        # Layout
+        self.mainLayout = QVBoxLayout()
+        self.mainLayout.setContentsMargins(20, 20, 200, 0)
+        self.createTestEnterLayout()
+
+        self.displayTestLayout = QGroupBox()
+        self.setLayout(self.mainLayout)
+
+
+    # Creates the first part of the form where the user enters a test reference code
+    def createTestEnterLayout(self):
+        layout = QFormLayout()
+        
+        btn = QPushButton("Submit", self)
+        btn.clicked.connect(self.uploadDataToBackend)
+        btn.resize(btn.sizeHint())
+        btn.setStyleSheet("background-color: rgb(32, 123, 207);")
+        btn.setFixedWidth(100)
+
+       
+        layout.addRow(btn)
+        layout.setContentsMargins(0, 0, 0, 30)
+
+        self.mainLayout.addLayout(layout)
+    
+
+    # When the user submits the code get the data
+    def uploadDataToBackend(self, e):
+        self.parent.uploadData()
+
+
 class MainProgram():
     def __init__(self):
         app = QApplication([])
@@ -729,6 +735,8 @@ class MainProgram():
     def testFinishedSuccessfully(self):
         self.recordingWindow.stopProcesses()
         self.ferCameraData = self.recordingWindow.fer.ferCameraData
+        self.videoFileName = self.recordingWindow.videoFileName
+        
         # for timeStamp in self.ferCameraData:
         #     print(timeStamp)
         self.recordingWindow.close()
@@ -743,8 +751,22 @@ class MainProgram():
         sendData = self.packageData()
         print(sendData)
 
-        request = requests.post("http://localhost:8090/api/localapp/sendTestResults", data=sendData)
-        print(request)
+        saveTestRequest = requests.post("http://localhost:8090/api/localapp/saveTestResults", data=sendData)
+        testInstanceRef = saveTestRequest.text
+        print(saveTestRequest, testInstanceRef)
+
+        videoUploader = VideoUploader(self.videoFileName)
+        videoId = videoUploader.upload()
+        print("Video ID: ", videoId)
+        
+        videoLinkData = {
+            "testInstanceRef": testInstanceRef,
+            "videoId": videoId
+        }
+        saveVideoLinkRequest = requests.post("http://localhost:8090/api/localapp/saveVideoLink", data=videoLinkData)
+        print(saveVideoLinkRequest)
+
+
 
 
     def packageData(self):

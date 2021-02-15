@@ -8,14 +8,14 @@ import imageio
 from PIL import ImageGrab
 
 class ScreenRecorder:
-  def __init__(self):
+  def __init__(self, fileName):
     self.currentTime = 0
     screenW = GetSystemMetrics(0)
     screenH = GetSystemMetrics(1)
     self.screenSize = (screenW, screenH)
     fourcc = cv2.VideoWriter_fourcc(*"XVID")
     self.fps = 30.0
-    self.out = cv2.VideoWriter("./videos/output.avi", fourcc, self.fps, (self.screenSize))
+    self.out = cv2.VideoWriter("./videos/"+fileName, fourcc, self.fps, (self.screenSize))
     self.quit = False
 
     self.mouseImg = cv2.imread("./assets/cursor.png")

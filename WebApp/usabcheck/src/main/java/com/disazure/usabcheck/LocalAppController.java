@@ -37,9 +37,8 @@ public class LocalAppController {
 		return new ResponseEntity<String>(result, HttpStatus.OK);
 	}
 	
-	@RequestMapping(value = "/sendTestResults", method = RequestMethod.POST)
-	public ResponseEntity<?> sendTestResults(@RequestParam  Map<String, String> json) {
-		System.out.println("######## Test Results" + json);
+	@RequestMapping(value = "/saveTestResults", method = RequestMethod.POST)
+	public ResponseEntity<?> saveTestResults(@RequestParam  Map<String, String> json) {
 				
 		String result = "";
 		try {
@@ -49,6 +48,21 @@ public class LocalAppController {
 		}
 		System.out.println(result);
 		
-		return new ResponseEntity<String>("OK", HttpStatus.OK);
+		return new ResponseEntity<String>(result, HttpStatus.OK);
+	}
+	
+	@RequestMapping(value = "/saveVideoLink", method = RequestMethod.POST)
+	public ResponseEntity<?> saveVideoLink(@RequestParam  Map<String, String> json) {
+		String testInstanceRef = json.get("testInstanceRef");
+		String videoId = json.get("videoId");
+		
+		int result = -1;
+		try {
+			result = usabilityTestService.saveVideoLink(testInstanceRef, videoId);
+		} catch (JsonProcessingException e) {
+			e.printStackTrace();
+		}
+		
+		return new ResponseEntity<String>(Integer.toString(result), HttpStatus.OK);
 	}
 }

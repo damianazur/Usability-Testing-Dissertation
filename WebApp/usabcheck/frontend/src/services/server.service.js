@@ -103,6 +103,26 @@ class ServerComponent {
         })
     }
 
+    getTestInstances(testId) {
+      const token = JSON.parse(localStorage.getItem('user')).accessToken;
+
+      return axios
+        .post(API_URL + "getTestInstances", {
+          "token": token,
+          "testId": testId
+        })
+    }
+
+    getVideoTimeStampsByInstanceId(testInstanceId) {
+      const token = JSON.parse(localStorage.getItem('user')).accessToken;
+
+      return axios
+        .post(API_URL + "getVideoTimeStampsByInstanceId", {
+          "token": token,
+          "testInstanceId": testInstanceId
+        })
+    }
+
   }
   
   export default new ServerComponent();

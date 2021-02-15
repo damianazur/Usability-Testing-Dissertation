@@ -6,7 +6,18 @@ export class DropdownGenerator extends Component {
     super(props);
 
     this.state = {
+      displayText: ""
     };
+  }
+
+  componentDidMount() {
+    var initalText = this.props.initalText;
+    this.setState({displayText: initalText});
+  }
+
+  onItemSelect(parentOnSelect, params, selectedText) {
+    this.setState({displayText: selectedText});
+    parentOnSelect(params);
   }
 
   render() {
@@ -17,7 +28,7 @@ export class DropdownGenerator extends Component {
       let params = JSON.stringify(item.params);
 
       menuItems.push(
-        <Dropdown.Item as="button" type="button" key={i} onSelect={item.onSelectFunction} eventKey={params}>{item.name}</Dropdown.Item>
+        <Dropdown.Item as="button" type="button" key={i} onSelect={this.onItemSelect.bind(this, item.onSelectFunction, params, item.name)}>{item.name}</Dropdown.Item>
       );
     }
 
@@ -37,7 +48,7 @@ export class DropdownGenerator extends Component {
         />
 
         <Dropdown.Toggle className="dropDownButton" variant="success" id="dropdown-basic">
-          {this.props.initalText}
+          {this.state.displayText}
         </Dropdown.Toggle>
 
         <Dropdown.Menu>

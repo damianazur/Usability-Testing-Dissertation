@@ -128,7 +128,9 @@ public class UsabilityTestService {
 		System.out.println(sequenceTimeStamp);
 		System.out.println(questionAnswers);
 		
-		return "OK";
+		String instanceReference = testInstanceDao.getReferenceCodeById(instanceId);
+		
+		return instanceReference;
 	}
 	
 	public JsonObject getQuestionAndAnswers(int researcherId, int testId) throws JsonProcessingException {
@@ -155,5 +157,12 @@ public class UsabilityTestService {
 		System.out.println(returnData);
 		
 		return returnData;
+	}
+	
+	public int saveVideoLink(String testInstanceRef, String videoId) throws JsonProcessingException {
+	
+		int result = testInstanceDao.setVideoLink(testInstanceRef, videoId);
+		
+		return result;
 	}
 }

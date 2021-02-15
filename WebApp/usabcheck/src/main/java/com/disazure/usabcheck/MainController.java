@@ -41,19 +41,18 @@ public class MainController {
 	
 	@Autowired
 	private ResearcherDao resDao;
-	
 	@Autowired
 	private ProjectDao proDao;
-	
 	@Autowired
 	private TestDao testDao;
-	
 	@Autowired
 	private TaskDao taskDao;
-	
 	@Autowired
 	private QuestionDao questionDao;
-	
+	@Autowired
+	private TestInstanceDao testInstanceDao;
+	@Autowired
+	private TimeStampDao timeStampDao;
 	@Autowired
 	private UsabilityTestService usabilityTestService;
 	
@@ -264,6 +263,39 @@ public class MainController {
 		return new ResponseEntity<String>(result.toString(), HttpStatus.OK);
 	}
 	
+	@RequestMapping(value = "/getTestInstances", method = RequestMethod.POST)
+	public ResponseEntity<?> getTestInstances(@RequestBody Map<String, String> json) {
+		String token = json.get("token");
+		int testId = Integer.parseInt(json.get("testId"));
+		String username = jwtUtils.getUserNameFromJwtToken(token);
+		int researcherId = resDao.getIdFromUsername(username);
+
+		String result = "";
+		try {
+			result = testInstanceDao.getByTestId(researcherId, testId);
+		} catch (JsonProcessingException e) {
+			e.printStackTrace();
+		}
+		
+		return new ResponseEntity<String>(result, HttpStatus.OK);
+	}
+	
+	@RequestMapping(value = "/getVideoTimeStampsByInstanceId", method = RequestMethod.POST)
+	public ResponseEntity<?> getVideoTimeStampsByInstanceId(@RequestBody Map<String, String> json) {
+		String token = json.get("token");
+		int testInstanceId = Integer.parseInt(json.get("testInstanceId"));
+		String username = jwtUtils.getUserNameFromJwtToken(token);
+		int researcherId = resDao.getIdFromUsername(username);
+
+		String result = "";
+		try {
+			result = timeStampDao.getByInstanceId(researcherId, testInstanceId);
+		} catch (JsonProcessingException e) {
+			e.printStackTrace();
+		}
+		
+		return new ResponseEntity<String>(result, HttpStatus.OK);
+	}
 	
 	
 }

@@ -11,24 +11,25 @@ export class TestResultOverviewTab extends Component {
       isShown: true,
       taskGradeData: {},
       questionAnswerData: {},
+      instanceData: [],
+
       taskChartList: [],
       overallChart: [],
       answerChartList: [],
       textAnswerList: [],
-      emotionChart: [],
-      participantCount: "N/A"
     };
   }
 
   async componentDidMount() {
-    console.log("Props", this.props);
+    // console.log("Props", this.props);
+    this.updateInstanceData(this.props.testId);
     this.updateTaskGrades(this.props.testId);
     this.updateQuestionAnswers(this.props.testId);
   }
 
   updateTaskGrades(testId) {
     Server.getTasksAndGrades(testId).then(response => {
-      console.log(response.data);
+      // console.log(response.data);
       this.setState({
         taskGradeData: response.data}, () => {
           this.renderTaskCharts("chartPerTask", "taskChartList");
@@ -39,11 +40,20 @@ export class TestResultOverviewTab extends Component {
 
   updateQuestionAnswers(testId) {
     Server.getQuestionAndAnswers(testId).then(response => {
-      console.log(response.data);
+      // console.log(response.data);
       this.setState({
         questionAnswerData: response.data}, () => {
           this.renderAnswerCharts();
         });
+    });
+  }
+
+  updateInstanceData(testId) {
+    Server.getTestInstances(testId).then(response => {
+      // console.log(response.data);
+      this.setState({
+        instanceData: response.data}
+      )
     });
   }
 
@@ -106,14 +116,14 @@ export class TestResultOverviewTab extends Component {
     return options;
   }
 
-  renderTaskCharts(type, listName) {
-    var options = this.getTaskSettings()
-    console.log(this.state.taskGradeData);
-
-    var taskChartList = [];
+  parseTaskGradeData() {
+    var parsedChartData = {
+      totalGradeCount: {},
+      individualTaskCounts: []
+    };
     var tasks = this.state.taskGradeData["tasks"];
     var grades = this.state.taskGradeData["grades"];
-    var gradeCount = {
+    var totalGradeCount = {
       "Pass": 0,
       "Fail": 0,
       "Not Graded": 0
@@ -122,55 +132,82 @@ export class TestResultOverviewTab extends Component {
     for (let i = 0; i < tasks.length; i++) {
       var task = tasks[i];
       
-      if (type == "chartPerTask") {
-        var gradeCount = {
-          "Pass": 0,
-          "Fail": 0,
-          "Not Graded": 0
-        }
+      var individualTaskCount = {
+        "Task": task,
+        "Pass": 0,
+        "Fail": 0,
+        "Not Graded": 0
       }
 
       for (let j = 0; j < grades.length; j++) {
         var grade = grades[j];
         if (grade["taskId"] === task["taskId"]) {
           var gradeName = grade["grade"];
-          gradeCount[gradeName] += 1;
+          individualTaskCount[gradeName] += 1;
+          totalGradeCount[gradeName] += 1;
         }
       }
-      var series = [{
-        data: [gradeCount["Pass"], gradeCount["Fail"], gradeCount["Not Graded"]]
-      }];
-      
-      if (type == "chartPerTask") {
+
+      parsedChartData["individualTaskCounts"].push(individualTaskCount);
+    }
+
+    parsedChartData["totalGradeCount"] = totalGradeCount
+
+    return parsedChartData;
+  }
+
+  renderTaskCharts(type, listName) {
+    var options = this.getTaskSettings()
+    var parsedChartData = this.parseTaskGradeData();
+
+    var taskChartList = [];    
+
+    if (type == "chartPerTask") {
+      var individualTaskCounts = parsedChartData["individualTaskCounts"]
+
+      for (let i = 0; i < individualTaskCounts.length; i++) {
+        var gradeCount = individualTaskCounts[i]
+
+        // console.log(gradeCount);
+
+        var series = [{
+          data: [gradeCount["Pass"], gradeCount["Fail"], gradeCount["Not Graded"]]
+        }];
+        
         taskChartList.push(
-        <div key={i} style={{display: "inline-block", "marginRight": "30px"}}>
-          <h3 className="chartHeading">
-          [{task["sequenceNumber"] + 1}] {task.taskName}
-          </h3>
-          <Chart
+          <div key={i} style={{display: "inline-block", "marginRight": "30px"}}>
+            <h3 className="chartHeading">
+            [{gradeCount["Task"]["sequenceNumber"] + 1}] {gradeCount["Task"]["taskName"]}
+            </h3>
+            <Chart
               options={options}
               series={series}
               type="bar"
               className="genericChart barChart"
             />
-        </div>
+          </div>
         );
       }
-    }
 
-    if (type == "overall") {
+    } else if (type == "overall") {
+      var totalCount = parsedChartData["totalGradeCount"]
+
+      var series = [{
+        data: [totalCount["Pass"], totalCount["Fail"], totalCount["Not Graded"]]
+      }];
+
       taskChartList.push(
-      <div key={0} style={{display: "inline-block", "marginRight": "30px"}}>
-        <h3 className="chartHeading">
-          Success Rate Across All Tasks
-        </h3>
-        <Chart
-          options={options}
-          series={series}
-          type="bar"
-          className="genericChart barChart"
-        />
-      </div>
+        <div key={0} style={{display: "inline-block", "marginRight": "30px"}}>
+          <h3 className="chartHeading">
+            Success Rate Across All Tasks
+          </h3>
+          <Chart
+            options={options}
+            series={series}
+            type="bar"
+            className="genericChart barChart"
+          />
+        </div>
       );
     }
 
@@ -234,7 +271,7 @@ export class TestResultOverviewTab extends Component {
       }
     }
 
-    console.log(answerList);
+    // console.log(answerList);
 
     return(
       <div>
@@ -270,7 +307,7 @@ export class TestResultOverviewTab extends Component {
     });
     options.labels = labels
 
-    console.log("Creating Chart!", options, options.labels, series);
+    // console.log("Creating Chart!", options, options.labels, series);
 
     var pieChart = 
       <Chart
@@ -301,27 +338,27 @@ export class TestResultOverviewTab extends Component {
 
         answerChartList.push(
           <div key={i} className="pieChartContainer">
-            <h3 className="chartHeading">
+            <h3 className="chartHeading" >
               [{question["sequenceNumber"] + 1}] Question: <i>{questionConfigsJSON["questionText"]}</i>
-              {pieChart}
             </h3>
+            {pieChart}
           </div>
         );
 
       } else if (questionConfigsJSON["questionType"] === "text") {
         var textAnswerBox = this.createTextAnswerBox(answers, question);
         
-        console.log(textAnswerBox);
+        // console.log(textAnswerBox);
 
         textAnswerList.push(
-          <div key={i} className="pieChartContainer">
-            <h3 className="chartHeading">
-              [{question["sequenceNumber"] + 1}] Question: <i>{questionConfigsJSON["questionText"]}</i>
+          <div key={i} className="textAnswerContainer">
+              <h3 className="chartHeading">
+                [{question["sequenceNumber"] + 1}] Question: <i>{questionConfigsJSON["questionText"]}</i>
+              </h3>
               <h4  style={{display: "block", textAlign: "left", margin: "5px 0 5px"}}>Answers: </h4>
-              <div style={{"backgroundColor": "white", "padding": "5px 15px 15px", overflow: "auto", maxHeight: "300px"}}>
+              <div style={{"backgroundColor": "white", "padding": "5px 15px 15px", overflow: "auto", maxHeight: "250px"}}>
                 {textAnswerBox}
               </div>
-            </h3>
           </div>
         );
       }
@@ -338,40 +375,46 @@ export class TestResultOverviewTab extends Component {
           <div>
             <h2>Details</h2>
             <hr className="hr2"></hr>
-            <h3>Participants{}</h3>
+            <h3>No. of Participants: {this.state.instanceData.length}</h3>
+            <hr></hr>
 
-            <div>
-              {this.state.emotionChart}
-            </div>
-            
-            <br></br>
-            <h2>Overall Task Success Rate</h2>
-            <hr className="hr2"></hr>
-            <div className="chartHolder">
-              {this.state.overallChart}
-            </div>
+            {this.state.instanceData.length > 0 ? (
+              <span>
+                <br></br>
+                <h2>Overall Task Success Rate</h2>
+                <hr className="hr2"></hr>
+                <div className="chartHolder">
+                  {this.state.overallChart}
+                </div>
 
-            <br></br>
-            <h2>Individual Task Performance</h2>
-            <hr className="hr2"></hr>
-            <div className="chartHolder">
-              {this.state.taskChartList}
-            </div>
+                <br></br>
+                <h2>Individual Task Performance</h2>
+                <hr className="hr2"></hr>
+                <div className="chartHolder">
+                  {this.state.taskChartList}
+                </div>
 
-            <br></br>
-            <h2>Multiple-Choice Question Answers</h2>
-            <hr className="hr2"></hr>
-            <div className="chartHolder">
-              {this.state.answerChartList}
-            </div>
+                <br></br>
+                <h2>Multiple-Choice Question Answers</h2>
+                <hr className="hr2"></hr>
+                <div className="chartHolder">
+                  {this.state.answerChartList}
+                </div>
 
-            <br></br>
-            <h2>Text Question Answers</h2>
-            <hr className="hr2"></hr>
-            <div className="chartHolder">
-              {this.state.textAnswerList}
-            </div>
-          </div>
+                <br></br>
+                <h2>Text Question Answers</h2>
+                <hr className="hr2"></hr>
+                <div className="chartHolder">
+                  {this.state.textAnswerList}
+                </div>
+              </span>
+            ) : ( 
+              <span>
+                <h3>There is no data to display as no participants have taken the test.</h3>
+                <hr></hr>
+              </span>
+            )}
+          </div>  
         ) : ( 
           null
         )}

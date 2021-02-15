@@ -423,12 +423,12 @@ button {
   border: 1px solid rgb(235, 235, 235);
   padding: 15px 15px 15px 5px;
   margin-bottom: 25px;
-  margin-right: 2%;
+  margin-right: 10px;
   background-color: white;
 }
 
 .barChart {
-  min-width: 350px;
+  min-width: 400px;
 }
 
 .pieChart {
@@ -467,11 +467,9 @@ button {
 
 .pieChartContainer {
   display: inline-block;
-  width: 40%;
   /* padding-right: 10px; */
   /* border: 1px solid rgb(235, 235, 235); */
-  margin-right: 30px;
-  min-width: 500px;
+  margin-right: 40px;
   width: 500px;
 }
 
@@ -484,4 +482,10 @@ button {
 .chartHeading {
   margin-bottom: 10px;
   margin-top: 5px;
+}
+
+.textAnswerContainer {
+  width: calc(50% - 40px);
+  margin-right: 40px;
+  display: inline-block;
 }

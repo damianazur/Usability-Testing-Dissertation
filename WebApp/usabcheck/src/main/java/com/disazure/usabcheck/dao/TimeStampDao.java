@@ -30,18 +30,18 @@ public class TimeStampDao {
     private JdbcTemplate jdbcTemplate;
 	private final ObjectMapper mapper = new ObjectMapper();
 	
-	public String getByTestId(int researcherId, int testId) throws JsonProcessingException {
+	public String getByInstanceId(int researcherId, int instanceId) throws JsonProcessingException {
 		String sql = ""
-				+ "SELECT timeStampId, testInstanceId, type, label, startTime, endTime FROM answer "
+				+ "SELECT timeStampId, testInstanceId, type, label, startTime, endTime FROM videotimestamp "
 				+ "LEFT JOIN testInstance using(testInstanceId) "
 				+ "LEFT JOIN test using(testId) "
 				+ "LEFT JOIN project using(projectId) "
 				+ "LEFT JOIN researcher using(researcherId) "
-				+ "WHERE researcherId = ? AND testId = ?";
+				+ "WHERE researcherId = ? AND testInstanceId = ?";
 		
 
-		List<Map<String, Object>> answerList = jdbcTemplate.queryForList(sql, researcherId, testId);
-		final String jsonString = mapper.writeValueAsString(answerList);
+		List<Map<String, Object>> timeStampList = jdbcTemplate.queryForList(sql, researcherId, instanceId);
+		final String jsonString = mapper.writeValueAsString(timeStampList);
 		
 		System.out.println(jsonString);
 	    return jsonString;

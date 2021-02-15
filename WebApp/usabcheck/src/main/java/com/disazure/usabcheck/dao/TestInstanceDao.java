@@ -26,26 +26,43 @@ public class TestInstanceDao {
 	@Autowired
     private JdbcTemplate jdbcTemplate;
 	
-//	public String getByTestId(int researcherId, int testId) throws JsonProcessingException {
-//		String sql = ""
-//				+ "SELECT testId, testName, projectId, launchedDate, testStatus, referenceCode FROM test "
-//				+ "LEFT JOIN project using(projectId) "
-//				+ "LEFT JOIN researcher using(researcherId) "
-//				+ "WHERE testId = ? AND researcherId = ?";
-//		
-//
-//		Map<String, Object> usabilityTest = jdbcTemplate.queryForMap(sql, testId, researcherId);
-//		String jsonString = new ObjectMapper().writeValueAsString(usabilityTest);
-//		
-//		System.out.println(jsonString);
-//	    return jsonString;
-//	}
+	private final ObjectMapper mapper = new ObjectMapper();
+	
+	public String getByTestId(int researcherId, int testId) throws JsonProcessingException {
+		String sql = ""
+				+ "SELECT testInstanceId, testId, studyDate, videoLocation FROM testinstance "
+				+ "LEFT JOIN test using(testId) "
+				+ "LEFT JOIN project using(projectId) "
+				+ "LEFT JOIN researcher using(researcherId) "
+				+ "WHERE testId = ? AND researcherId = ?";
+		
+		
+		List<Map<String, Object>> testInstances = jdbcTemplate.queryForList(sql,  testId, researcherId);
+		
+		final String jsonString = mapper.writeValueAsString(testInstances);
+	    
+	    return jsonString;
+	}
+	
+	private String generateReferenceCode() {
+        String SALTCHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
+        StringBuilder salt = new StringBuilder();
+        Random random = new Random();
+        
+        while (salt.length() < 8) {
+            int index = (int) (random.nextFloat() * SALTCHARS.length());
+            salt.append(SALTCHARS.charAt(index));
+        }
+        
+        String saltStr = salt.toString();
+        return saltStr;
+    }
 	
 	
 	public int create(UsabilityTestInstance testInstance) {
 		String sql = ""
-				+ "INSERT INTO testInstance (testId, studyDate) "
-				+ "VALUES (?, ?)";
+				+ "INSERT INTO testInstance (testId, studyDate, instanceReference) "
+				+ "VALUES (?, ?, ?)";
 		
 		GeneratedKeyHolder holder = new GeneratedKeyHolder();
 		
@@ -55,18 +72,40 @@ public class TestInstanceDao {
 		        PreparedStatement statement = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
 		        statement.setString(1, Integer.toString(testInstance.getTestId()));
 		        statement.setString(2, testInstance.getStudyDate());
+		        statement.setString(3, generateReferenceCode());
 		        return statement;
 		    }
 		}, holder);
 		
-//		int returnVal = jdbcTemplate.update(sql, testInstance.getTestId(), testInstance.getStudyDate());
-
 		long primaryKey = holder.getKey().longValue();
-		System.out.println("# Primary Key " + primaryKey);
 		
-        return (int) primaryKey;
-		
+        return (int) primaryKey;	
 	}
+	
+	
+	public String getReferenceCodeById(int testInstanceId) throws JsonProcessingException {
+		String sql = ""
+				+ "SELECT instanceReference FROM testInstance "
+				+ "WHERE testInstanceId = ?";
+
+		System.out.println(testInstanceId);
+		
+		String instanceReference = jdbcTemplate.queryForObject(sql, String.class, testInstanceId);
+		
+		return instanceReference;
+	}
+	
+	
+	public int setVideoLink(String testInstanceRef, String videoId) throws JsonProcessingException {
+		String sql = ""
+				+ "UPDATE testinstance SET videoLocation = ?"
+				+ "WHERE testInstanceRef = ?";
+		
+		int result = jdbcTemplate.update(sql, videoId, testInstanceRef);
+		
+		return result;
+	}
+	
 	
 //	public int delete(int testId, String testName, int researcherId) {
 //		// Delete ensures that the researcherId matches. Any user can send a delete request but that doesn't
