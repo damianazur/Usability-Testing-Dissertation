@@ -10,6 +10,7 @@ export class TestResultOverviewTab extends Component {
 
     this.state = {
       isShown: true,
+      videoEmbed: [],
       player: {},
       testInstances: [],
       testInstanceDropdown: [],
@@ -20,8 +21,9 @@ export class TestResultOverviewTab extends Component {
 
   componentDidMount() {
     var testId = this.props.testId;
-    this.updateTestInstances(testId)
-    this.updateVideoTimeStamps(20)
+    this.updateTestInstances(testId);
+    this.updateVideoTimeStamps(20);
+    this.setVideoEmbed();
   }
 
   updateTestInstances(testId) {
@@ -88,22 +90,20 @@ export class TestResultOverviewTab extends Component {
   }
 
 
-  renderVideo(iframe) {     
-    if (this.state.player == {}) {
-      console.log("Hello") 
-      var player = new Vimeo("videoEmbed");
-      player.setCurrentTime(6)
+  setVideoPlayer(iframe) {  
+    console.log("Setting video player");
 
-      player.on('play', function() {
-        console.log('Video started playing');
-      });
-  
-      this.setState({player: player});
-    }
+    var player = new Vimeo("videoEmbed");
+
+    // player.on('play', function() {
+    //   console.log('Video started playing');
+    // });
+
+    this.setState({player: player});
   }
 
-  getVideoEmbed() {
-    console.log("Rendering video");
+  setVideoEmbed() {
+    console.log("Rendering video embed");
 
     var src = "https://player.vimeo.com/video/" + this.state.currentVideoId + "?portrait=0&byline=0&title=0";
 
@@ -111,38 +111,17 @@ export class TestResultOverviewTab extends Component {
       <div id="videoFrameContainer" style={{padding: "56.25% 0 0 0", position: "relative"}}>
         <iframe 
           id="videoEmbed"
-          ref={this.renderVideo.bind(this)}
+          ref={this.setVideoPlayer.bind(this)}
           src={src}
           style={{position:"absolute", top:"0", left:"0", width:"100%", height:"100%"}}
           frameBorder="0" 
           allow="autoplay; fullscreen; picture-in-picture" 
-          allowfullscreen>
+          allowFullScreen>
         </iframe>
       </div>
 
-    //   ref={this.renderVideo.bind(this)}
-    //   id="videoEmbed"
-    //   className="screenRecordingVideo" 
-    //   title="vimeo-player" 
-    //   src={src}
-    //   width="70%" height="auto" 
-    //   frameBorder="0" 
-    //   allowFullScreen>
-    //   ref={this.writeHTML}
-    // </iframe>
-
-    return (iframe)
+    this.setState({videoEmbed: iframe});
   }
-
-  getIframeDetails() {{
-    var emotionBar = document.getElementById('emotionbar')
-
-    // var innerDoc = (iframe.contentDocument) ? iframe.contentDocument : iframe.contentWindow.document;
-    if (emotionBar) {
-      var barWidth = emotionBar.clientWidth;
-      console.log(barWidth)
-    }
-  }}
 
   setVideoTime(startTime) {
     this.state.player.setCurrentTime(startTime);
@@ -152,12 +131,16 @@ export class TestResultOverviewTab extends Component {
     var frameContainer = document.getElementById('videoFrameContainer')
 
     if (frameContainer) {
-      var videoLength = 57;
+      this.state.player.getDuration().then(function(duration) {
+        console.log(duration);
+      });
+
+      var videoLength = 58;
       var frameContainerWidth = frameContainer.clientWidth;
       var emotionBarWidth = frameContainerWidth - 268;
 
       var labelColours = {
-        "Neutral": "gray",
+        "Neutral": "black",
         "Sad": "#0099ff",
         "Happy": "#00ff00",     
         "Angry": "#ff0000",    
@@ -165,7 +148,9 @@ export class TestResultOverviewTab extends Component {
         "Disgust": "#333399",
       }
 
-      var pixelTimeUnit = emotionBarWidth/videoLength
+      var pixelTimeUnit = emotionBarWidth/videoLength;
+
+      console.log(pixelTimeUnit);
 
       var emotionSpanList = [];
       for (let i = 0; i < this.state.videoTimeStamps.length; i++) {
@@ -174,26 +159,30 @@ export class TestResultOverviewTab extends Component {
 
         if (type == "emotion") {
           let startTime = parseFloat(timeStamp["startTime"])
-          let endTime = parseFloat(timeStamp["endTime"])
+          let endTime = parseFloat(timeStamp["endTime"]);
           let label = timeStamp["label"]
           let color = labelColours[label];
           
           let offetX = pixelTimeUnit * startTime;
           let length = pixelTimeUnit * (endTime - startTime);
 
-          emotionSpanList.push(
-            <div key={i} onClick={this.setVideoTime.bind(this, startTime)}
-              style={{
-                position: "absolute",
-                display: "inline-block",
-                left: offetX, 
-                width: length, 
-                height: "10px",
-                backgroundColor: color
-                }}
-              >
-            </div>
-          );
+          console.log(offetX);
+
+          if (!isNaN(length)) {
+            emotionSpanList.push(
+              <div key={i} onClick={this.setVideoTime.bind(this, startTime)}
+                style={{
+                  position: "absolute",
+                  // display: "inline-block",
+                  left: offetX, 
+                  width: length, 
+                  height: "18px",
+                  backgroundColor: color
+                  }}
+                >
+              </div>
+            );
+          }
         }
       }
 
@@ -204,12 +193,12 @@ export class TestResultOverviewTab extends Component {
         id="emotionbar" 
         style={{
           position: "relative", 
-          bottom: "18px", 
-          left: "96px", 
-          width: "calc(90% - 268px)", 
-          height: "12px", 
+          bottom: "-18px", 
+          left: "95px", 
+          width: "calc(90% - 266px)", 
+          height: "20px", 
           backgroundColor: "black",
-          border: "1px solid red",
+          border: "1px solid black",
           zIndex: 2147483647
         }}
         >
@@ -232,7 +221,7 @@ export class TestResultOverviewTab extends Component {
           {this.state.currentVideoId != null ? (
             <div>
               <div id="videoContainer" style={{width: "90%"}}>
-                {this.getVideoEmbed()}
+                {this.state.videoEmbed}
               </div>
               
             </div>
@@ -240,26 +229,8 @@ export class TestResultOverviewTab extends Component {
             null
           )}
 
-          {this.getIframeDetails()}
+          {/* {this.getIframeDetails()} */}
           {this.renderEmotionBar()}
-
-          {/* <iframe 
-            ref={this.renderVideo}
-            id="videoEmbed"
-            className="screenRecordingVideo" 
-            title="vimeo-player" 
-            src="https://player.vimeo.com/video/510894964?portrait=0&byline=0&title=0" 
-            width="640" height="360" 
-            frameBorder="0" 
-            allowFullScreen>
-            ref={this.writeHTML}
-          </iframe> */}
-
-          {/* <div>
-            <ReactPlayer
-              url="https://player.vimeo.com/video/510894964"
-            />
-          </div> */}
         </div>
       ) : ( 
         null
