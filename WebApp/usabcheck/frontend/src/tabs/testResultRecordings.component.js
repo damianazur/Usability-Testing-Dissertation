@@ -15,7 +15,8 @@ export class TestResultOverviewTab extends Component {
       testInstances: [],
       testInstanceDropdown: [],
       videoTimeStamps: [],
-      currentVideoId: "512700005" //"510894964"
+      currentVideoId: "512700005", //"510894964",
+      videoDuration: 0
     };
   }
 
@@ -65,7 +66,14 @@ export class TestResultOverviewTab extends Component {
       console.log('Video started playing');
     });
 
-    this.setState({player: player});
+    this.state.player.getDuration().then(function(duration) {
+      this.setState({
+        player: player,
+        videoDuration: duration
+      });
+    }.bind(this));
+
+    // this.setState({player: player});
   }
 
   createtestInstanceDropdown() {
@@ -95,11 +103,55 @@ export class TestResultOverviewTab extends Component {
 
     var player = new Vimeo("videoEmbed");
 
+    var frameContainer = document.getElementById('videoEmbed')
+    // frameContainer.requestFullscreen();
+
+    player.on('fullscreenchange', function(data) {
+      console.log(data);
+      if (data["fullscreen"] == true) {
+        player.exitFullscreen().then(function() {
+          var videoContainer = document.getElementById('videoContainer')
+          videoContainer.style.position = "absolute";
+          videoContainer.style.top = "0";
+          videoContainer.style.left = "0";
+          
+          var videoRatio = 1.777
+          var screenHeight = window.innerHeight;
+          var screenWidth = window.innerWidth;
+          var heightAtFullWidth = screenWidth/videoRatio
+          var widthPercentage = parseInt(((screenHeight * videoRatio) / screenWidth) * 100) + "%"
+
+          console.log(screenHeight, screenHeight * videoRatio, widthPercentage, heightAtFullWidth);
+          
+          var setWidthPercent = 100;
+          if (heightAtFullWidth > screenHeight) {
+            var desiredWidth = (videoRatio * screenHeight);
+            setWidthPercent = (desiredWidth / screenWidth * 100)
+            console.log(desiredWidth, screenWidth);
+          }
+
+          console.log(setWidthPercent);
+          // videoContainer.style.height =  "100vh"
+          videoContainer.style.width = setWidthPercent + "%"
+          if (parseInt(setWidthPercent) != 100) {
+            console.log(((setWidthPercent - 100) / 2) + "%");
+            videoContainer.style.marginLeft = ((100 - setWidthPercent) / 2) + "%";
+          }
+        }).catch(function(error) {
+        });
+      }
+    });
+
     // player.on('play', function() {
     //   console.log('Video started playing');
     // });
 
-    this.setState({player: player});
+    player.getDuration().then(function(duration) {
+      this.setState({
+        player: player,
+        videoDuration: duration
+      });
+    }.bind(this));
   }
 
   setVideoEmbed() {
@@ -108,7 +160,10 @@ export class TestResultOverviewTab extends Component {
     var src = "https://player.vimeo.com/video/" + this.state.currentVideoId + "?portrait=0&byline=0&title=0";
 
     var iframe =  
-      <div id="videoFrameContainer" style={{padding: "56.25% 0 0 0", position: "relative"}}>
+      <div id="videoFrameContainer" allowFullScreen="true"
+        style={{
+          padding: "56.25% 0 0 0", 
+          position: "relative"}}>
         <iframe 
           id="videoEmbed"
           ref={this.setVideoPlayer.bind(this)}
@@ -116,7 +171,7 @@ export class TestResultOverviewTab extends Component {
           style={{position:"absolute", top:"0", left:"0", width:"100%", height:"100%"}}
           frameBorder="0" 
           allow="autoplay; fullscreen; picture-in-picture" 
-          allowFullScreen>
+          allowFullScreen="true">
         </iframe>
       </div>
 
@@ -130,17 +185,15 @@ export class TestResultOverviewTab extends Component {
   renderEmotionBar() {
     var frameContainer = document.getElementById('videoFrameContainer')
 
-    if (frameContainer) {
-      this.state.player.getDuration().then(function(duration) {
-        console.log(duration);
-      });
+    if (frameContainer && this.state.player) {
+      console.log(this.state.videoDuration);
 
-      var videoLength = 58;
+      var videoLength = this.state.videoDuration;
       var frameContainerWidth = frameContainer.clientWidth;
       var emotionBarWidth = frameContainerWidth - 268;
 
       var labelColours = {
-        "Neutral": "black",
+        "Neutral": "none",
         "Sad": "#0099ff",
         "Happy": "#00ff00",     
         "Angry": "#ff0000",    
@@ -165,6 +218,10 @@ export class TestResultOverviewTab extends Component {
           
           let offetX = pixelTimeUnit * startTime;
           let length = pixelTimeUnit * (endTime - startTime);
+
+          if (length < 1) {
+            length = 1;
+          }
 
           console.log(offetX);
 
@@ -213,14 +270,17 @@ export class TestResultOverviewTab extends Component {
     return (
       <React.Fragment>
       {this.state.isShown ? (
-        <div>
+        <div id="recordingResultMainDiv">
+          <div id="blackBackground"  style={{position:"absolute", top:"0", left:"0", width:"100%", height:"100%", backgroundColor:"black", display:"none"}}>
+
+          </div>
           <div>
             {this.state.testInstanceDropdown}
           </div>
           
           {this.state.currentVideoId != null ? (
             <div>
-              <div id="videoContainer" style={{width: "90%"}}>
+              <div id="videoContainer" style={{}}>
                 {this.state.videoEmbed}
               </div>
               
