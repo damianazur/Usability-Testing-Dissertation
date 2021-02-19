@@ -16,7 +16,8 @@ export class TestResultOverviewTab extends Component {
       testInstanceDropdown: [],
       videoTimeStamps: [],
       currentVideoId: "512700005", //"510894964",
-      videoDuration: 0
+      videoDuration: 0,
+      barSliderWindow: 0
     };
   }
 
@@ -182,88 +183,165 @@ export class TestResultOverviewTab extends Component {
     this.state.player.setCurrentTime(startTime);
   }
 
-  renderEmotionBar() {
-    var frameContainer = document.getElementById('videoFrameContainer')
+  generateEmotionSpanList(pixelTimeUnit, height) {
+    var labelColours = {
+      "Neutral": "none",
+      "Sad": "#0099ff",
+      "Happy": "#00ff00",     
+      "Angry": "#ff0000",    
+      "Fear": "#6600cc",
+      "Disgust": "#333399",
+    }
 
-    if (frameContainer && this.state.player) {
-      console.log(this.state.videoDuration);
+    var emotionSpanList = [];
+    for (let i = 0; i < this.state.videoTimeStamps.length; i++) {
+      let timeStamp = this.state.videoTimeStamps[i];
+      let type = timeStamp["type"]
 
-      var videoLength = this.state.videoDuration;
-      var frameContainerWidth = frameContainer.clientWidth;
-      var emotionBarWidth = frameContainerWidth - 268;
+      if (type == "emotion") {
+        let startTime = parseFloat(timeStamp["startTime"])
+        let endTime = parseFloat(timeStamp["endTime"]);
+        let label = timeStamp["label"]
+        let color = labelColours[label];
+        
+        let offetX = pixelTimeUnit * startTime;
+        let length = pixelTimeUnit * (endTime - startTime);
 
-      var labelColours = {
-        "Neutral": "none",
-        "Sad": "#0099ff",
-        "Happy": "#00ff00",     
-        "Angry": "#ff0000",    
-        "Fear": "#6600cc",
-        "Disgust": "#333399",
-      }
+        if (length < 1) {
+          length = 1;
+        }
 
-      var pixelTimeUnit = emotionBarWidth/videoLength;
-
-      console.log(pixelTimeUnit);
-
-      var emotionSpanList = [];
-      for (let i = 0; i < this.state.videoTimeStamps.length; i++) {
-        let timeStamp = this.state.videoTimeStamps[i];
-        let type = timeStamp["type"]
-
-        if (type == "emotion") {
-          let startTime = parseFloat(timeStamp["startTime"])
-          let endTime = parseFloat(timeStamp["endTime"]);
-          let label = timeStamp["label"]
-          let color = labelColours[label];
-          
-          let offetX = pixelTimeUnit * startTime;
-          let length = pixelTimeUnit * (endTime - startTime);
-
-          if (length < 1) {
-            length = 1;
-          }
-
-          console.log(offetX);
-
-          if (!isNaN(length)) {
-            emotionSpanList.push(
-              <div key={i} onClick={this.setVideoTime.bind(this, startTime)}
-                style={{
-                  position: "absolute",
-                  // display: "inline-block",
-                  left: offetX, 
-                  width: length, 
-                  height: "18px",
-                  backgroundColor: color
-                  }}
-                >
-              </div>
-            );
-          }
+        if (!isNaN(length)) {
+          emotionSpanList.push(
+            <div key={i} onClick={this.setVideoTime.bind(this, startTime)}
+              style={{
+                position: "absolute",
+                left: offetX, 
+                width: length, 
+                height: height,
+                backgroundColor: color
+                }}
+              >
+            </div>
+          );
         }
       }
+    }
 
-      console.log(emotionSpanList);
+    return emotionSpanList;
+  }
 
-      var emotionBar = 
-      <div 
-        id="emotionbar" 
-        style={{
-          position: "relative", 
-          bottom: "-18px", 
-          left: "95px", 
-          width: "calc(90% - 266px)", 
-          height: "20px", 
-          backgroundColor: "black",
-          border: "1px solid black",
-          zIndex: 2147483647
-        }}
-        >
+  renderEmotionBar(type) {
+    var frameContainer = document.getElementById('videoFrameContainer')
+
+    if (frameContainer && this.state.player) {} else {
+      return null;
+    }
+
+    console.log(this.state.videoDuration);
+
+    var videoLength = this.state.videoDuration;
+    var frameContainerWidth = frameContainer.clientWidth;
+    var emotionBarWidth = frameContainerWidth - 266;
+
+    var pixelTimeUnit;
+    var height;
+    if (type == "entire") {
+      pixelTimeUnit = emotionBarWidth/videoLength;
+      height = "18px"
+    } else if (type == "zoomed-in") {
+      pixelTimeUnit = 60;
+      height = "38px";
+    }
+
+    console.log(pixelTimeUnit);
+    var emotionSpanList = this.generateEmotionSpanList(pixelTimeUnit, height);
+
+    var overflow = "";
+    var paddingBottom = "";
+    var barHeight = "";
+    var barWidth = "";
+    var innerBarId = "";
+    var overflowY = "";
+    if (type == "entire") {
+      innerBarId = "innerBarEntire";
+      barHeight = "20px";
+      overflowY = "visible";
+    } else if (type == "zoomed-in") {
+      overflow = "scroll";
+      paddingBottom = "35px";
+      barHeight = "55px";
+      barWidth = pixelTimeUnit * videoLength + "px";
+      innerBarId = "innerBarZoomed";
+      overflowY = "hidden";
+    }
+
+    // console.log("#####", overflow, emotionBarWidth);
+
+    var barStyle = {
+      position: "relative", 
+      bottom: "-18px", 
+      left: "94px", 
+      width: emotionBarWidth + "px", 
+      height: barHeight,
+      backgroundColor: "black",
+      border: "1px solid black",
+      zIndex: 2147483646,
+      overflow: overflow,
+      overflowY: overflowY,
+      paddingBottom: paddingBottom
+    };
+
+    var innerBarStyle =  {
+      width: barWidth,
+      position: "absolute"
+    };
+
+    var innerBar = 
+      <div id={innerBarId} style={innerBarStyle}>
         {emotionSpanList}
       </div>
 
-      return emotionBar;
+    // innerBar.addEventListener('scroll', this.onBarScroll);
+
+    var emotionBar;
+    
+    if (type == "entire") {
+      emotionBar = 
+      <div 
+        id="emotionbar" 
+        style={barStyle}
+        >
+        {innerBar}
+
+        <div style={{position: "absolute", left: "calc(" + this.state.barSliderWindow + "% - 2px)", top: -6, width: "calc(26% + 4px)", height: "30px", border: "2px solid white", zIndex: 3147483648}}>
+
+        </div>
+      </div>
     }
+    else if (type == "zoomed-in") {
+      emotionBar = 
+      <div 
+        id="zoomedBar" 
+        style={barStyle}     
+        onScroll={this.onBarScroll.bind(this)}
+        >
+        {innerBar}
+      </div>
+    }
+    return emotionBar;
+  }
+
+  onBarScroll() {
+    var barWidth = document.getElementById('zoomedBar').clientWidth;
+    var innerBarWidth = document.getElementById('innerBarZoomed').clientWidth;
+    var scrollPos = document.getElementById('zoomedBar').scrollLeft;
+    var start = (scrollPos / innerBarWidth) * 100;
+    var end = barWidth + scrollPos;
+    var percentage = (barWidth / innerBarWidth);
+
+    console.log(barWidth, scrollPos, barWidth + scrollPos, innerBarWidth, percentage.toFixed(2), start);
+    this.setState({barSliderWindow: start});
   }
 
   render() {
@@ -289,8 +367,11 @@ export class TestResultOverviewTab extends Component {
             null
           )}
 
-          {/* {this.getIframeDetails()} */}
-          {this.renderEmotionBar()}
+          <div id="videoBarsContainer"> 
+            {this.renderEmotionBar("entire")}
+            <br></br>
+            {this.renderEmotionBar("zoomed-in")}
+          </div>
         </div>
       ) : ( 
         null

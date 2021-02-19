@@ -489,3 +489,25 @@ button {
   margin-right: 40px;
   display: inline-block;
 }
+
+#videoBarsContainer {
+  background-color: rgb(133, 133, 133);
+  height: 300px;
+  padding-top: 20px;
+  /* margin-top: 5px; */
+}
+
+#zoomedBar::-webkit-scrollbar {
+  width: 20px;
+  background: rgb(26, 26, 26);
+  border: 1px rgb(48, 48, 48) solid;
+}
+
+#zoomedBar::-webkit-scrollbar-thumb {
+  background: gray; 
+  border-radius: 10px;
+}
+
+#zoomedBar::-webkit-scrollbar-thumb:hover {
+  background: rgb(116, 116, 116); 
+}
