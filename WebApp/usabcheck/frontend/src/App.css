@@ -490,11 +490,46 @@ button {
   display: inline-block;
 }
 
+
+
+#videoContainer {
+  overflow: hidden;
+}
+
 #videoBarsContainer {
   background-color: rgb(133, 133, 133);
   height: 300px;
   padding-top: 20px;
-  /* margin-top: 5px; */
+}
+
+.genericVideoBar {
+  position: relative;
+  bottom: -18px;
+  left: 94px;
+  background-color: black;
+  border: 1px solid black;
+  z-index: 2147483646;
+}
+
+#entireEmotionBar {
+  height: 20px;
+  overflow-y: visible;
+}
+
+#barSliderWindow {
+  pointer-events: none;
+  position: absolute;
+  top: -6px;
+  height: 30px;
+  border: 2px solid white;
+  z-index: 3147483648;
+}
+
+#zoomedBar {
+  overflow: scroll;
+  padding-bottom: 35px;
+  height: 55px;
+  overflow-y: hidden;
 }
 
 #zoomedBar::-webkit-scrollbar {
@@ -510,4 +545,8 @@ button {
 
 #zoomedBar::-webkit-scrollbar-thumb:hover {
   background: rgb(116, 116, 116); 
+}
+
+#blackBackground {
+  background-color: black;
 }

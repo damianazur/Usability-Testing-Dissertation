@@ -16,8 +16,10 @@ export class TestResultOverviewTab extends Component {
       testInstanceDropdown: [],
       videoTimeStamps: [],
       currentVideoId: "512700005", //"510894964",
+      videoFullScreen: false,
       videoDuration: 0,
-      barSliderWindow: 0
+      barSliderWindowX: 0,
+      barWindowWidth: 0
     };
   }
 
@@ -26,6 +28,12 @@ export class TestResultOverviewTab extends Component {
     this.updateTestInstances(testId);
     this.updateVideoTimeStamps(20);
     this.setVideoEmbed();
+
+    window.addEventListener('resize', this.videoResize.bind(this));
+  }
+
+  componentDidUpdate() {
+    this.onBarScroll("firstRender");
   }
 
   updateTestInstances(testId) {
@@ -33,7 +41,7 @@ export class TestResultOverviewTab extends Component {
       console.log(response.data);
       this.setState({
         testInstances: response.data}, () => {
-          this.createtestInstanceDropdown();
+          this.generateInstanceDropdown();
         });
     });
   }
@@ -77,7 +85,7 @@ export class TestResultOverviewTab extends Component {
     // this.setState({player: player});
   }
 
-  createtestInstanceDropdown() {
+  generateInstanceDropdown() {
     let instances = this.state.testInstances;
     let menuItems = [];
 
@@ -98,54 +106,97 @@ export class TestResultOverviewTab extends Component {
     this.setState({"testInstanceDropdown": instanceDropdown});
   }
 
+  videoResize() {
+    if (this.state.videoFullScreen == true) {
+      var videoContainer = document.getElementById('videoContainer');
+      var videoBarsContainer = document.getElementById('videoBarsContainer');
+      var recordingResultMainDiv = document.getElementById('recordingResultMainDiv');
+      var blackBackground = document.getElementById('blackBackground');
+
+      videoContainer.style.position = "absolute";
+      videoContainer.style.top = "0";
+      videoContainer.style.left = "0";
+
+      videoBarsContainer.style.position = "absolute";
+      videoBarsContainer.style.top = "0";
+      videoBarsContainer.style.left = "0";
+
+      var videoRatio = 1.777
+      var screenHeight = window.innerHeight;
+      var screenWidth = window.innerWidth;
+      var heightAtFullWidth = screenWidth/videoRatio
+      var widthPercentage = parseInt(((screenHeight * videoRatio) / screenWidth) * 100) + "%"
+
+      var setWidthPercent = 100;
+      if (heightAtFullWidth > screenHeight) {
+        var desiredWidth = (videoRatio * screenHeight);
+        setWidthPercent = (desiredWidth / screenWidth * 100)
+        console.log(desiredWidth, screenWidth);
+      }
+
+      videoContainer.style.width = setWidthPercent + "%"
+      if (parseInt(setWidthPercent) != 100) {
+        console.log(((setWidthPercent - 100) / 2) + "%");
+        videoContainer.style.marginLeft = ((100 - setWidthPercent) / 2) + "%";
+        videoBarsContainer.style.marginLeft = ((100 - setWidthPercent) / 2) + "%";
+      }
+      
+      var videoEmbed = document.getElementById('videoEmbed');
+      var videoWidthPx = videoEmbed.clientWidth;
+      var videHeightPx = videoEmbed.clientHeight;
+      videoBarsContainer.style.width = videoWidthPx + "px";
+      videoBarsContainer.style.top = videHeightPx + "px";
+      this.onBarScroll();
+
+      recordingResultMainDiv.style.height = videHeightPx + videoBarsContainer.clientHeight - 360 + "px";
+
+      blackBackground.style.display = "";
+      blackBackground.style.height = videHeightPx +  "px";
+
+    } else if (this.state.videoFullScreen == false) {
+      var clearStyleList = ["videoContainer", "videoBarsContainer"];
+
+      clearStyleList.forEach(function(elementName) {
+        var element = document.getElementById(elementName);
+        element.style.position = "";
+        element.style.top = "";
+        element.style.left = "";
+        element.style.marginLeft = "";
+        element.style.width = "";
+      }.bind(this));
+
+      var blackBackground = document.getElementById('blackBackground');
+      blackBackground.style.display = "none";
+
+      this.onBarScroll();
+    }
+  } 
 
   setVideoPlayer(iframe) {  
-    console.log("Setting video player");
-
     var player = new Vimeo("videoEmbed");
 
-    var frameContainer = document.getElementById('videoEmbed')
-    // frameContainer.requestFullscreen();
-
+    var debounce = 2;
     player.on('fullscreenchange', function(data) {
-      console.log(data);
+      if (debounce < 3) {
+        debounce += 1;
+        return;
+      } else {
+        debounce = 0;
+      }
+
       if (data["fullscreen"] == true) {
+        this.setState({videoFullScreen: !this.state.videoFullScreen});
+        console.log(this.state.videoFullScreen);
+        debounce = 0;
+
         player.exitFullscreen().then(function() {
-          var videoContainer = document.getElementById('videoContainer')
-          videoContainer.style.position = "absolute";
-          videoContainer.style.top = "0";
-          videoContainer.style.left = "0";
-          
-          var videoRatio = 1.777
-          var screenHeight = window.innerHeight;
-          var screenWidth = window.innerWidth;
-          var heightAtFullWidth = screenWidth/videoRatio
-          var widthPercentage = parseInt(((screenHeight * videoRatio) / screenWidth) * 100) + "%"
+          this.videoResize();
 
-          console.log(screenHeight, screenHeight * videoRatio, widthPercentage, heightAtFullWidth);
-          
-          var setWidthPercent = 100;
-          if (heightAtFullWidth > screenHeight) {
-            var desiredWidth = (videoRatio * screenHeight);
-            setWidthPercent = (desiredWidth / screenWidth * 100)
-            console.log(desiredWidth, screenWidth);
-          }
-
-          console.log(setWidthPercent);
-          // videoContainer.style.height =  "100vh"
-          videoContainer.style.width = setWidthPercent + "%"
-          if (parseInt(setWidthPercent) != 100) {
-            console.log(((setWidthPercent - 100) / 2) + "%");
-            videoContainer.style.marginLeft = ((100 - setWidthPercent) / 2) + "%";
-          }
-        }).catch(function(error) {
+        }.bind(this)).catch(function(error) {
+          console.log(error);
         });
       }
-    });
-
-    // player.on('play', function() {
-    //   console.log('Video started playing');
-    // });
+    }.bind(this));
 
     player.getDuration().then(function(duration) {
       this.setState({
@@ -161,7 +212,7 @@ export class TestResultOverviewTab extends Component {
     var src = "https://player.vimeo.com/video/" + this.state.currentVideoId + "?portrait=0&byline=0&title=0";
 
     var iframe =  
-      <div id="videoFrameContainer" allowFullScreen="true"
+      <div id="videoFrameContainer" allowFullScreen
         style={{
           padding: "56.25% 0 0 0", 
           position: "relative"}}>
@@ -172,7 +223,7 @@ export class TestResultOverviewTab extends Component {
           style={{position:"absolute", top:"0", left:"0", width:"100%", height:"100%"}}
           frameBorder="0" 
           allow="autoplay; fullscreen; picture-in-picture" 
-          allowFullScreen="true">
+          allowFullScreen>
         </iframe>
       </div>
 
@@ -234,114 +285,106 @@ export class TestResultOverviewTab extends Component {
   renderEmotionBar(type) {
     var frameContainer = document.getElementById('videoFrameContainer')
 
-    if (frameContainer && this.state.player) {} else {
+    // if video has not yet rendered and the player for the video was not yet created
+    if (frameContainer && this.state.player && this.state.videoDuration != 0) {} else {
       return null;
     }
 
-    console.log(this.state.videoDuration);
-
     var videoLength = this.state.videoDuration;
     var frameContainerWidth = frameContainer.clientWidth;
-    var emotionBarWidth = frameContainerWidth - 266;
+    var emotionBarWidth = frameContainerWidth - 266; // 266 is a consistent size of the labels next to the bar in vimeo
 
+    // Generate the emotion strips that go inside the bar
     var pixelTimeUnit;
-    var height;
+    var emotionStripHeight;
     if (type == "entire") {
       pixelTimeUnit = emotionBarWidth/videoLength;
-      height = "18px"
+      emotionStripHeight = "18px"
     } else if (type == "zoomed-in") {
       pixelTimeUnit = 60;
-      height = "38px";
+      emotionStripHeight = "38px";
     }
+    var emotionSpanList = this.generateEmotionSpanList(pixelTimeUnit, emotionStripHeight);
 
-    console.log(pixelTimeUnit);
-    var emotionSpanList = this.generateEmotionSpanList(pixelTimeUnit, height);
-
-    var overflow = "";
-    var paddingBottom = "";
-    var barHeight = "";
-    var barWidth = "";
-    var innerBarId = "";
-    var overflowY = "";
-    if (type == "entire") {
-      innerBarId = "innerBarEntire";
-      barHeight = "20px";
-      overflowY = "visible";
-    } else if (type == "zoomed-in") {
-      overflow = "scroll";
-      paddingBottom = "35px";
-      barHeight = "55px";
-      barWidth = pixelTimeUnit * videoLength + "px";
-      innerBarId = "innerBarZoomed";
-      overflowY = "hidden";
-    }
-
-    // console.log("#####", overflow, emotionBarWidth);
-
-    var barStyle = {
-      position: "relative", 
-      bottom: "-18px", 
-      left: "94px", 
-      width: emotionBarWidth + "px", 
-      height: barHeight,
-      backgroundColor: "black",
-      border: "1px solid black",
-      zIndex: 2147483646,
-      overflow: overflow,
-      overflowY: overflowY,
-      paddingBottom: paddingBottom
-    };
-
-    var innerBarStyle =  {
-      width: barWidth,
-      position: "absolute"
-    };
-
-    var innerBar = 
-      <div id={innerBarId} style={innerBarStyle}>
-        {emotionSpanList}
-      </div>
-
-    // innerBar.addEventListener('scroll', this.onBarScroll);
-
+    // Create the requested emotion bar
     var emotionBar;
-    
     if (type == "entire") {
-      emotionBar = 
-      <div 
-        id="emotionbar" 
-        style={barStyle}
-        >
-        {innerBar}
+      emotionBar = this.createEntireBar(emotionSpanList, emotionBarWidth);
 
-        <div style={{position: "absolute", left: "calc(" + this.state.barSliderWindow + "% - 2px)", top: -6, width: "calc(26% + 4px)", height: "30px", border: "2px solid white", zIndex: 3147483648}}>
+    } else if (type == "zoomed-in"){
+      var innerBarWidth = (pixelTimeUnit * videoLength) + "px";
+      // console.log(innerBarWidth);
+      var innerBarStyle =  {
+        width: innerBarWidth,
+        position: "absolute"
+      };
+      emotionBar = this.createZoomedBar(emotionSpanList, emotionBarWidth, innerBarStyle);
+    }
 
-        </div>
-      </div>
-    }
-    else if (type == "zoomed-in") {
-      emotionBar = 
-      <div 
-        id="zoomedBar" 
-        style={barStyle}     
-        onScroll={this.onBarScroll.bind(this)}
-        >
-        {innerBar}
-      </div>
-    }
     return emotionBar;
   }
 
-  onBarScroll() {
-    var barWidth = document.getElementById('zoomedBar').clientWidth;
-    var innerBarWidth = document.getElementById('innerBarZoomed').clientWidth;
-    var scrollPos = document.getElementById('zoomedBar').scrollLeft;
-    var start = (scrollPos / innerBarWidth) * 100;
-    var end = barWidth + scrollPos;
-    var percentage = (barWidth / innerBarWidth);
+  createEntireBar(emotionSpanList, emotionBarWidth) {
+    var barStyle = {
+      width: emotionBarWidth + "px", 
+    };
 
-    console.log(barWidth, scrollPos, barWidth + scrollPos, innerBarWidth, percentage.toFixed(2), start);
-    this.setState({barSliderWindow: start});
+    var emotionBar = 
+      <div className="genericVideoBar" id="entireEmotionBar" style={barStyle}>
+        <div id="innerBarEntire" style={{position: "absolute"}}></div>
+        {emotionSpanList}
+
+        <div id="barSliderWindow" style={{
+          left: "calc(" + this.state.barSliderWindowX + "% - 2px)", 
+          width: "calc(" + this.state.barWindowWidth + "% + 6px)"
+          }}>
+        </div>
+      </div>
+
+    return emotionBar;
+  }
+
+  createZoomedBar(emotionSpanList, emotionBarWidth, innerBarStyle) {
+    var barStyle = {
+      width: emotionBarWidth + "px", 
+    };
+
+    var emotionBar = 
+      <div className="genericVideoBar" id="zoomedBar" style={barStyle} onScroll={this.onBarScroll.bind(this)}>
+        <div id="innerBarZoomed" style={innerBarStyle}>
+          {emotionSpanList}
+        </div>
+      </div>
+
+    return emotionBar;
+  }
+
+  onBarScroll(caller) {
+    var zoomedBar = document.getElementById('zoomedBar');
+    var innerBar = document.getElementById('innerBarZoomed');
+
+    if (!zoomedBar) {
+      return;
+    }
+    if (caller == "firstRender") {
+      if (this.state.barWindowWidth != 0) {
+        return;
+      }
+    }
+    var innerBarWidth = innerBar.clientWidth;
+    if (innerBarWidth == 0){
+      return;
+    }
+
+    var barWidth = zoomedBar.clientWidth;
+    var scrollPos = zoomedBar.scrollLeft;
+    var barWindowStart = (scrollPos / innerBarWidth) * 100;
+    var barWindowWidthPercentage = (barWidth / innerBarWidth) * 100;
+
+    this.setState({
+      barSliderWindowX: barWindowStart,
+      barWindowWidth: barWindowWidthPercentage
+    });
   }
 
   render() {
@@ -349,9 +392,13 @@ export class TestResultOverviewTab extends Component {
       <React.Fragment>
       {this.state.isShown ? (
         <div id="recordingResultMainDiv">
-          <div id="blackBackground"  style={{position:"absolute", top:"0", left:"0", width:"100%", height:"100%", backgroundColor:"black", display:"none"}}>
-
+          {/* <div
+            id="blackBackground" 
+            style={{position:"absolute", top:"0", left:"0", width:"100%", height:"100%", zIndex: 0, backgroundColor:"black"}}>
+          </div> */}
+          <div id="blackBackground"  style={{position:"absolute", top:"0", left:"0", width:"100%", height:"100%", display: "none"}}>
           </div>
+
           <div>
             {this.state.testInstanceDropdown}
           </div>
@@ -361,7 +408,6 @@ export class TestResultOverviewTab extends Component {
               <div id="videoContainer" style={{}}>
                 {this.state.videoEmbed}
               </div>
-              
             </div>
           ) : (
             null
