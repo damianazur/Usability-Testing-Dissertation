@@ -497,8 +497,10 @@ button {
 }
 
 #videoBarsContainer {
-  background-color: rgb(133, 133, 133);
-  height: 300px;
+  /* background-color: rgb(133, 133, 133); */
+  /* background-color: rgb(177 177 177); */
+  background-color: rgb(240, 240, 240);
+  height: 400px;
   padding-top: 20px;
 }
 
@@ -509,10 +511,16 @@ button {
   background-color: black;
   border: 1px solid black;
   z-index: 2147483646;
+  top: 0px;
 }
 
 #entireEmotionBar {
   height: 20px;
+  overflow-y: visible;
+}
+
+#entireTaskBar {
+  height: 16px;
   overflow-y: visible;
 }
 
@@ -521,8 +529,23 @@ button {
   position: absolute;
   top: -6px;
   height: 30px;
-  border: 2px solid white;
-  z-index: 3147483648;
+  border: 2px solid rgb(0, 0, 0);
+  background-color: rgb(85, 85, 85);
+  z-index: -1;
+}
+
+.barLabels {
+  margin: 0px;
+  padding: 0px; 
+  color: black;
+}
+
+.timelineSpan:hover {
+  filter: brightness(85%);
+}
+
+#blackBackground {
+  background-color: black;
 }
 
 #zoomedBar {
@@ -535,18 +558,88 @@ button {
 #zoomedBar::-webkit-scrollbar {
   width: 20px;
   background: rgb(26, 26, 26);
-  border: 1px rgb(48, 48, 48) solid;
+  /* border: 1px rgb(78, 78, 78) solid; */
 }
 
 #zoomedBar::-webkit-scrollbar-thumb {
   background: gray; 
-  border-radius: 10px;
+  border-radius: 5px;
+  background-clip: padding-box;
+  border: 3px solid transparent;
 }
 
 #zoomedBar::-webkit-scrollbar-thumb:hover {
   background: rgb(116, 116, 116); 
+  background-clip: padding-box;
+  border: 3px solid transparent;
 }
 
-#blackBackground {
-  background-color: black;
+#zoomedBar::-webkit-scrollbar-button {
+  background-color: #bbbbbb;
+  border: 1px rgb(78, 78, 78) solid;
+}
+
+
+#zoomedBar::-webkit-scrollbar-button:single-button {
+  background-color: rgb(43, 43, 43);
+  display: block;
+  background-size: 10px;
+  background-repeat: no-repeat;
+}
+
+/* Right */
+#zoomedBar::-webkit-scrollbar-button:single-button:horizontal:increment {
+  height: 12px;
+  width: 20px;
+  background-position: 6px 2px;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' fill='rgb(96, 96, 96)'><polygon points='0,0 0,100 50,50'/></svg>");
+}
+
+#zoomedBar::-webkit-scrollbar-button:single-button:horizontal:increment:hover {
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' fill='rgb(112, 112, 112)'><polygon points='0,0 0,100 50,50'/></svg>");
+}
+
+#zoomedBar::-webkit-scrollbar-button:single-button:horizontal:increment:active {
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' fill='rgb(128, 128, 128)'><polygon points='0,0 0,100 50,50'/></svg>");
+}
+
+/* Left */
+#zoomedBar::-webkit-scrollbar-button:single-button:horizontal:decrement {
+  height: 12px;
+  width: 20px;
+  background-position: 6px 2px;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' fill='rgb(96, 96, 96)'><polygon points='0,50 50,100 50,0'/></svg>");
+
+}
+
+#zoomedBar::-webkit-scrollbar-button:single-button:horizontal:decrement:hover {
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' fill='rgb(112, 112, 112)'><polygon points='0,50 50,100 50,0'/></svg>");
+}
+
+#zoomedBar::-webkit-scrollbar-button:single-button:horizontal:decrement:active {
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' fill='rgb(128, 128, 128)'><polygon points='0,50 50,100 50,0'/></svg>");
+}
+
+
+
+.legendContainer {
+  margin-top: 8px;
+  margin-left: 78px;
+}
+
+.legendColorBox {
+  margin-left: 20px;
+  width: 15px;
+  height: 15px;
+  display: inline-block;
+}
+
+.legendText {
+  height: 15px;
+  display: inline-block;
+  margin-left: 5px;
+  vertical-align: top;
+  line-height: 15px;
+  font-weight: 700;
+  color: black;
 }
