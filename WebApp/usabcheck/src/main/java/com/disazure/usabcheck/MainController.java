@@ -55,6 +55,8 @@ public class MainController {
 	private TimeStampDao timeStampDao;
 	@Autowired
 	private UsabilityTestService usabilityTestService;
+	@Autowired
+	private TaskGradeDao taskGradeDao;
 	
 	@Autowired
 	JwtUtils jwtUtils;
@@ -263,6 +265,23 @@ public class MainController {
 		return new ResponseEntity<String>(result.toString(), HttpStatus.OK);
 	}
 	
+	@RequestMapping(value = "/getTaskGradesByInstanceId", method = RequestMethod.POST)
+	public ResponseEntity<?> getTaskGradesByInstanceId(@RequestBody Map<String, String> json) {
+		String token = json.get("token");
+		int testInstanceId = Integer.parseInt(json.get("testInstanceId"));
+		String username = jwtUtils.getUserNameFromJwtToken(token);
+		int researcherId = resDao.getIdFromUsername(username);
+
+		String result = "";
+		try {
+			result = usabilityTestService.getTaskGradesByInstanceId(researcherId, testInstanceId);
+		} catch (JsonProcessingException e) {
+			e.printStackTrace();
+		}
+		
+		return new ResponseEntity<String>(result, HttpStatus.OK);
+	}
+	
 	@RequestMapping(value = "/getTestInstances", method = RequestMethod.POST)
 	public ResponseEntity<?> getTestInstances(@RequestBody Map<String, String> json) {
 		String token = json.get("token");
@@ -297,5 +316,22 @@ public class MainController {
 		return new ResponseEntity<String>(result, HttpStatus.OK);
 	}
 	
+	@RequestMapping(value = "/updateTaskGrade", method = RequestMethod.POST)
+	public ResponseEntity<?> updateTaskGrade(@RequestBody Map<String, String> json) {
+		String token = json.get("token");
+		int taskGradeId = Integer.parseInt(json.get("taskGradeId"));
+		String grade = json.get("grade");
+		String username = jwtUtils.getUserNameFromJwtToken(token);
+		int researcherId = resDao.getIdFromUsername(username);
+
+		int result = -1;
+		try {
+			result = taskGradeDao.updateGrade(researcherId, taskGradeId, grade);
+		} catch (JsonProcessingException e) {
+			e.printStackTrace();
+		}
+		
+		return new ResponseEntity<String>(Integer.toString(result), HttpStatus.OK);
+	}
 	
 }

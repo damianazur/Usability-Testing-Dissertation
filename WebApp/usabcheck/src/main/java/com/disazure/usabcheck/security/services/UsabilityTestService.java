@@ -159,6 +159,13 @@ public class UsabilityTestService {
 		return returnData;
 	}
 	
+	public String getTaskGradesByInstanceId(int researcherId, int testInstanceId) throws JsonProcessingException {
+		JsonParser jsonParser = new JsonParser();
+		String grades = taskGradeDao.getByTestInstanceId(researcherId, testInstanceId);
+		
+		return grades;
+	}
+	
 	public int saveVideoLink(String testInstanceRef, String videoId) throws JsonProcessingException {
 	
 		int result = testInstanceDao.setVideoLink(testInstanceRef, videoId);

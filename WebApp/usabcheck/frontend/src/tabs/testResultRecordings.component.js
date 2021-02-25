@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
-import ReactPlayer from "react-player";
 import Vimeo from "@vimeo/player";
 import DropdownGenerator from "components/dropdownGenerator.component";
 import Server from "services/server.service";
+import TaskGrading from "components/taskGrading.component";
 
 export class TestResultOverviewTab extends Component {
   constructor(props) {
@@ -10,6 +10,7 @@ export class TestResultOverviewTab extends Component {
 
     this.state = {
       isShown: true,
+
       videoEmbed: [],
       player: {},
       testInstances: [],
@@ -21,7 +22,11 @@ export class TestResultOverviewTab extends Component {
       videoDuration: 0,
       barSliderWindowX: 0,
       barWindowWidth: 0,
-      infoVisible: true
+      infoVisible: true,
+      selectedTestInstaceId: 20,
+
+      taskGradeData: [],
+      taskGradeBoxes: []
     };
   }
 
@@ -31,6 +36,8 @@ export class TestResultOverviewTab extends Component {
     this.getVideoTimeStamps(20);
     this.getTestDetails(testId);
     this.setVideoEmbed();
+
+    this.getTaskGradesByInstanceId(this.state.selectedTestInstaceId);
 
     window.addEventListener('resize', this.onVideoResize.bind(this));
   }
@@ -68,6 +75,16 @@ export class TestResultOverviewTab extends Component {
     });
   }
 
+  getTaskGradesByInstanceId(testInstanceId) {
+    Server.getTaskGradesByInstanceId(testInstanceId).then(response => {
+      console.log(response.data);
+      this.setState({
+        taskGradeData: response.data}, () => {
+          this.generateTaskGrading()
+        });
+    });
+  }
+
   onInstanceSelect(params) {
     console.log(params)
 
@@ -90,7 +107,8 @@ export class TestResultOverviewTab extends Component {
     this.state.player.getDuration().then(function(duration) {
       this.setState({
         player: player,
-        videoDuration: duration
+        videoDuration: duration,
+        selectedTestInstaceId: paramsJson["testInstanceId"]
       });
     }.bind(this));
 
@@ -129,7 +147,7 @@ export class TestResultOverviewTab extends Component {
       videoContainer.style.top = "0";
       videoContainer.style.left = "0";
 
-      videoBarsContainer.style.position = "absolute";
+      videoBarsContainer.style.position = "relative";
       videoBarsContainer.style.top = "0";
       videoBarsContainer.style.left = "0";
 
@@ -160,7 +178,7 @@ export class TestResultOverviewTab extends Component {
       videoBarsContainer.style.top = videHeightPx + "px";
       this.onBarScroll();
 
-      recordingResultMainDiv.style.height = videHeightPx + videoBarsContainer.clientHeight - 360 + "px";
+      // recordingResultMainDiv.style.height = videHeightPx + videoBarsContainer.clientHeight - 360 + "px";
 
       blackBackground.style.display = "";
       blackBackground.style.height = videHeightPx +  "px";
@@ -538,6 +556,7 @@ export class TestResultOverviewTab extends Component {
 
   toggleHidableInfo(a) {
     var toToggle = document.getElementsByClassName('hidableInfo');
+    var spacers = document.getElementsByClassName('spacer');
     
     var newStatus;
     if (this.state.infoVisible) {
@@ -548,8 +567,34 @@ export class TestResultOverviewTab extends Component {
     for (var i = 0; i < toToggle.length; i++) {
       toToggle[i].style.display = newStatus;
     }
+    for (var i = 0; i < spacers.length; i++) {
+      spacers[i].style.display = "inline-block";
+    }
+
+
 
     this.setState({infoVisible: !this.state.infoVisible});
+  }
+
+  generateTaskGrading() {
+    var taskGradeBoxes = [];
+    var selectedTestInstaceId = this.state.selectedTestInstaceId;
+
+    console.log(this.state.taskGradeData);
+
+    var key = 0;
+    this.state.taskGradeData.forEach(function(taskData) {
+      taskGradeBoxes.push(
+        <TaskGrading
+          key={key}
+          data={taskData}
+          >
+        </TaskGrading>
+      )
+      key += 1;
+    }.bind(this));
+
+    this.setState({taskGradeBoxes: taskGradeBoxes});
   }
 
   render() {
@@ -574,26 +619,35 @@ export class TestResultOverviewTab extends Component {
             null
           )}
 
-          <div id="videoBarsContainer"> 
-            <h2 className="barLabels hidableInfo" style={{textAlign: "center"}}>Entire Video Timeline</h2>
-            <h3 className="barLabels hidableInfo" style={{textAlign: "left", marginLeft: "95px", marginBottom: "5px"}}>Emotions</h3>
-            {this.renderTimelineBar("entire")}
-            <div className="legendContainer hidableInfo">
-              {this.renderLegend("emotion")}
-            </div>
+          <div className="dividerContainer">
+            <label>Show Labels</label><input style={{marginLeft: "10px"}} type="checkbox" defaultChecked={this.state.infoVisible} onChange={this.toggleHidableInfo.bind(this)} />
+            <div id="videoBarsContainer"> 
+              <h2 className="barLabels hidableInfo" style={{textAlign: "center"}}>Entire Video Timeline</h2>
+              <h3 className="barLabels hidableInfo" style={{textAlign: "left", marginLeft: "95px", marginBottom: "5px"}}>Emotions</h3>
+              {this.renderTimelineBar("entire")}
+              <div className="legendContainer hidableInfo">
+                {this.renderLegend("emotion")}
+              </div>
 
-            <h3 className="barLabels hidableInfo" style={{textAlign: "left", marginLeft: "95px", marginBottom: "5px", marginTop: "10px"}}>Tasks</h3>
-            {this.renderTimelineBar("task")}
-            <div className="legendContainer hidableInfo">
-              {this.renderLegend("task")}
+              <h3 className="barLabels hidableInfo" style={{textAlign: "left", marginLeft: "95px", marginBottom: "5px", marginTop: "10px"}}>Tasks</h3>
+              <span className="spacer" style={{"display": "none", margin: "0px", height: "0px", padding: "0px"}}></span>
+              {this.renderTimelineBar("task")}
+              <div className="legendContainer hidableInfo">
+                {this.renderLegend("task")}
+              </div>
+              
+              <br></br>
+              <h2 className="barLabels hidableInfo" style={{textAlign: "center"}}>Zoomed-in Emotions Timeline</h2>
+              {this.renderTimelineBar("zoomed-in")}
             </div>
-
-            <br></br>
-            <h2 className="barLabels hidableInfo" style={{textAlign: "center"}}>Zoomed-in Emotions Timeline</h2>
-            {this.renderTimelineBar("zoomed-in")}
           </div>
-          
-          <input type="checkbox" defaultChecked={this.state.infoVisible} onChange={this.toggleHidableInfo.bind(this)} />
+
+          <div className="dividerContainer">
+            <div id="taskGradingContainer">
+              <h2 style={{textAlign: "center"}}>Task Grading</h2>
+              {this.state.taskGradeBoxes}
+            </div>
+          </div>
         </div>
       ) : ( 
         null

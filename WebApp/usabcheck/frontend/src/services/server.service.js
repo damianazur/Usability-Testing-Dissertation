@@ -93,6 +93,16 @@ class ServerComponent {
         })
     }
 
+    getTaskGradesByInstanceId(testInstanceId) {
+      const token = JSON.parse(localStorage.getItem('user')).accessToken;
+
+      return axios
+        .post(API_URL + "getTaskGradesByInstanceId", {
+          "token": token,
+          "testInstanceId": testInstanceId
+        })
+    }
+
     getQuestionAndAnswers(testId) {
       const token = JSON.parse(localStorage.getItem('user')).accessToken;
 
@@ -123,6 +133,16 @@ class ServerComponent {
         })
     }
 
+    updateTaskGrade(taskGradeId, grade) {
+      const token = JSON.parse(localStorage.getItem('user')).accessToken;
+
+      return axios
+        .post(API_URL + "updateTaskGrade", {
+          "token": token,
+          "taskGradeId": taskGradeId,
+          "grade": grade
+        })
+    }
   }
   
   export default new ServerComponent();

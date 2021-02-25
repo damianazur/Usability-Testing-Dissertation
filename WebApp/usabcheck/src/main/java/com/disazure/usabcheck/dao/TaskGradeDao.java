@@ -45,8 +45,26 @@ public class TaskGradeDao {
 		
 		System.out.println(jsonString);
 	    return jsonString;
-	}
+	}	 
 	
+	public String getByTestInstanceId(int researcherId, int testInstanceId) throws JsonProcessingException {
+		String sql = ""
+				+ "SELECT taskGradeId, testGradeId, taskId, taskName, stepsJSON, sequenceNumber, grade FROM taskGrade "
+				+ "LEFT JOIN task using(taskId) "
+				+ "LEFT JOIN test using(testId) "
+				+ "LEFT JOIN project using(projectId) "
+				+ "LEFT JOIN researcher using(researcherId) "
+				+ "LEFT JOIN testgrade using (testgradeId) "
+				+ "LEFT JOIN testinstance using(testInstanceId)"
+				+ "WHERE researcherId = ? AND testInstanceId = ?";
+		
+
+		List<Map<String, Object>> taskGradeList = jdbcTemplate.queryForList(sql, researcherId, testInstanceId);
+		final String jsonString = mapper.writeValueAsString(taskGradeList);
+		
+		System.out.println(jsonString);
+	    return jsonString;
+	}
 	
 	public int create(int testGradeId, JsonArray taskList) {
 		String sql = ""
@@ -63,5 +81,38 @@ public class TaskGradeDao {
 		
         return 0;
 		
+	}
+	
+	public boolean verifyResearcher(int researcherId, int taskGradeId) {
+		String sql = ""
+				+ "SELECT researcherId FROM taskgrade "
+				+ "JOIN task using(taskId) "
+				+ "JOIN test using(testId) "
+				+ "JOIN project using(projectId) "
+				+ "JOIN researcher using(researcherId) "
+				+ "WHERE researcherId = ? AND taskGradeId = ?";
+		
+		int resId = jdbcTemplate.queryForObject(sql, Integer.class, researcherId, taskGradeId);
+		
+		if (resId == researcherId) {
+			return true;
+		}
+		
+		return false;
+	}
+	
+	public int updateGrade(int researcherId, int taskGradeId, String grade) throws JsonProcessingException {
+		if (!verifyResearcher(researcherId, taskGradeId)) {
+			return -1;
+		}
+		
+		String sql = ""
+				+ "UPDATE taskGrade "
+				+ "SET grade = ? "
+				+ "WHERE taskGradeId = ?";
+		
+		int returnVal = jdbcTemplate.update(sql, grade, taskGradeId);
+		
+		return returnVal;
 	}
 }

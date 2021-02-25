@@ -491,6 +491,15 @@ button {
 }
 
 
+#recordingResultMainDiv {
+  overflow: auto;
+}
+
+.dividerContainer {
+  padding-left: 94px;
+  padding-right: 94px;
+  background-color: rgb(240, 240, 240);
+}
 
 #videoContainer {
   overflow: hidden;
@@ -499,15 +508,15 @@ button {
 #videoBarsContainer {
   /* background-color: rgb(133, 133, 133); */
   /* background-color: rgb(177 177 177); */
-  background-color: rgb(240, 240, 240);
-  height: 400px;
+  position: relative;
   padding-top: 20px;
+  padding-bottom: 30px;
 }
 
 .genericVideoBar {
   position: relative;
   bottom: -18px;
-  left: 94px;
+  /* left: 94px; */
   background-color: black;
   border: 1px solid black;
   z-index: 2147483646;
@@ -642,4 +651,39 @@ button {
   line-height: 15px;
   font-weight: 700;
   color: black;
+}
+
+#taskGradingContainer {
+  padding-top: 5px;
+  padding-bottom: 30px;
+  margin-top: 20px;
+  overflow: auto;
+}
+
+.gradingButtons {
+  height: 25px;
+  border-radius: 8px;
+  line-height: 15px;
+  padding: 0px 20px 0px;
+  background-color: rgb(216, 216, 216);
+  border: 1px solid rgb(117, 117, 117);
+  font-size: 16px;
+  font-weight: 550;
+  margin-right: 10px;
+}
+
+.gradingButtons:hover {
+  filter: brightness(90%);
+}
+
+.taskGradeBox {
+  width: 47%;
+  margin-right: 1.5%;
+  margin-left: 1.5%;
+  font-size: 16px;
+  background-color: white;
+  padding: 15px 15px 30px;
+  border: 1px solid gray;
+  margin-bottom: 20px;
+  display: inline-block;
 }
