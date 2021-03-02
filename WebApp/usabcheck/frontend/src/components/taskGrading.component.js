@@ -51,16 +51,18 @@ export class TaskGrading extends Component {
       }
     ];
 
+    var key = 0;
     buttonDataList.forEach(buttonData => {
       var style = {};
       if (currentGrade == buttonData.buttonLabel) {
         style = buttonData.style;
       }
       buttons.push (
-        <button onClick={this.setGrade.bind(this, data.taskGradeId, buttonData.buttonLabel)} className="gradingButtons" style={style}>
+        <button key={key} onClick={this.setGrade.bind(this, data.taskGradeId, buttonData.buttonLabel)} className="gradingButtons" style={style}>
           {buttonData.buttonLabel}
         </button>
       )
+      key += 1;
     });
 
     return buttons;
@@ -74,15 +76,18 @@ export class TaskGrading extends Component {
 
     var taskStepsList = [];
 
+    var key = 0;
     for (let i = 0; i < stepsJSON.length; i++) {
       taskStepsList.push(
-        <label style={{display: "block", textAlign:"left", paddingLeft: "10px"}}>{stepsJSON[i]["value"]}</label>
+        <label key={key} style={{display: "block", textAlign:"left", paddingLeft: "10px"}}>{stepsJSON[i]["value"]}</label>
       )
+      key += 1;
     }
     for (let i = 0; i < stepsJSON.length; i++) {
       taskStepsList.push(
-        <label style={{display: "block", textAlign:"left", paddingLeft: "10px"}}>{stepsJSON[i]["value"]}</label>
+        <label key={key} style={{display: "block", textAlign:"left", paddingLeft: "10px"}}>{stepsJSON[i]["value"]}</label>
       )
+      key += 1;
     }
 
     return taskStepsList;
@@ -93,10 +98,10 @@ export class TaskGrading extends Component {
     console.log(data);
   
     return (
-      <div class="taskGradeBox">
+      <div className="taskGradeBox">
         Task: <h4 style={{display: 'inline-block', margin: "0 0 20px"}}>{data.taskName}</h4>
         <div>
-          <div readonly style={{width: "95%", height: "100px", border: "1px solid gray", borderRadius: "3px", marginBottom: "15px", overflow: "auto"}}>
+          <div readOnly style={{width: "95%", height: "100px", border: "1px solid gray", borderRadius: "3px", marginBottom: "15px", overflow: "auto"}}>
             {this.generateTaskText()}
           </div>
         </div>

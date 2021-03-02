@@ -513,6 +513,10 @@ button {
   padding-bottom: 30px;
 }
 
+#recordingResultMainDiv-contentBody {
+  width: 100%;
+}
+
 .genericVideoBar {
   position: relative;
   bottom: -18px;

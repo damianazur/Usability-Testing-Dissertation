@@ -139,17 +139,13 @@ export class TestResultOverviewTab extends Component {
   onVideoResize() {
     if (this.state.videoFullScreen == true) {
       var videoContainer = document.getElementById('videoContainer');
-      var videoBarsContainer = document.getElementById('videoBarsContainer');
+      var contentBody = document.getElementById('recordingResultMainDiv-contentBody');
       var recordingResultMainDiv = document.getElementById('recordingResultMainDiv');
       var blackBackground = document.getElementById('blackBackground');
 
       videoContainer.style.position = "absolute";
       videoContainer.style.top = "0";
       videoContainer.style.left = "0";
-
-      videoBarsContainer.style.position = "relative";
-      videoBarsContainer.style.top = "0";
-      videoBarsContainer.style.left = "0";
 
       var videoRatio = 1.777
       var screenHeight = window.innerHeight;
@@ -164,18 +160,25 @@ export class TestResultOverviewTab extends Component {
         console.log(desiredWidth, screenWidth);
       }
 
-      videoContainer.style.width = setWidthPercent + "%"
+      videoContainer.style.width = setWidthPercent + "%";
+      var marginLeft = ((100 - setWidthPercent) / 2) + "%";
       if (parseInt(setWidthPercent) != 100) {
         console.log(((setWidthPercent - 100) / 2) + "%");
-        videoContainer.style.marginLeft = ((100 - setWidthPercent) / 2) + "%";
-        videoBarsContainer.style.marginLeft = ((100 - setWidthPercent) / 2) + "%";
+        videoContainer.style.marginLeft = marginLeft
+        // videoBarsContainer.style.marginLeft = ((100 - setWidthPercent) / 2) + "%";
       }
       
       var videoEmbed = document.getElementById('videoEmbed');
       var videoWidthPx = videoEmbed.clientWidth;
       var videHeightPx = videoEmbed.clientHeight;
-      videoBarsContainer.style.width = videoWidthPx + "px";
-      videoBarsContainer.style.top = videHeightPx + "px";
+      // videoBarsContainer.style.width = videoWidthPx + "px";
+      // videoBarsContainer.style.top = videHeightPx + "px";
+
+      contentBody.style.position = "absolute";
+      contentBody.style.top = videHeightPx + "px";
+      contentBody.style.left = "0";
+      contentBody.style.paddingLeft = marginLeft;
+
       this.onBarScroll();
 
       // recordingResultMainDiv.style.height = videHeightPx + videoBarsContainer.clientHeight - 360 + "px";
@@ -184,7 +187,7 @@ export class TestResultOverviewTab extends Component {
       blackBackground.style.height = videHeightPx +  "px";
 
     } else if (this.state.videoFullScreen == false) {
-      var clearStyleList = ["videoContainer", "videoBarsContainer"];
+      var clearStyleList = ["videoContainer", "recordingResultMainDiv-contentBody"];
 
       clearStyleList.forEach(function(elementName) {
         var element = document.getElementById(elementName);
@@ -520,13 +523,15 @@ export class TestResultOverviewTab extends Component {
         {label: "Disgust", color: "#333399"}
       ];
 
+      var key = 0;
       legendDataList.forEach(function(item) {
         legendList.push(
-          <div style={{marginTop: "5px", display: "inline-block"}}>
+          <div key={key} style={{marginTop: "5px", display: "inline-block"}}>
             <span style={{backgroundColor: item.color}} className="legendColorBox"></span>
             <span className="legendText">{item.label}</span>
           </div>
         )
+        key += 1;
       }.bind(this));
 
     } else if (type == "task") {
@@ -536,13 +541,15 @@ export class TestResultOverviewTab extends Component {
         {label: "Multiple-Choice Question", color: "rgb(255, 127, 127)"},
       ];
 
+      var key = 0;
       legendDataList.forEach(function(item) {
         legendList.push(
-          <div style={{marginTop: "5px", display: "inline-block"}}>
+          <div key={key} style={{marginTop: "5px", display: "inline-block"}}>
             <span style={{backgroundColor: item.color}} className="legendColorBox"></span>
             <span className="legendText">{item.label}</span>
           </div>
         )
+        key += 1;
       }.bind(this));
     }
 
@@ -602,50 +609,54 @@ export class TestResultOverviewTab extends Component {
       <React.Fragment>
       {this.state.isShown ? (
         <div id="recordingResultMainDiv">
-          <div id="blackBackground"  style={{position:"absolute", top:"0", left:"0", width:"100%", height:"100%", display: "none"}}>
+          <div>
+            <div id="blackBackground"  style={{position:"absolute", top:"0", left:"0", width:"100%", height:"100%", display: "none"}}>
+            </div>
+
+            <div style={{marginBottom: "20px"}}>
+              {this.state.testInstanceDropdown}
+            </div>
+            
+            {this.state.currentVideoId != null ? (
+              <div>
+                <div id="videoContainer" style={{}}>
+                  {this.state.videoEmbed}
+                </div>
+              </div>
+            ) : (
+              null
+            )}
           </div>
 
-          <div style={{marginBottom: "20px"}}>
-            {this.state.testInstanceDropdown}
-          </div>
-          
-          {this.state.currentVideoId != null ? (
-            <div>
-              <div id="videoContainer" style={{}}>
-                {this.state.videoEmbed}
+          <div id="recordingResultMainDiv-contentBody">
+            <div className="dividerContainer">
+              <label>Show Labels</label><input style={{marginLeft: "10px"}} type="checkbox" defaultChecked={this.state.infoVisible} onChange={this.toggleHidableInfo.bind(this)} />
+              <div id="videoBarsContainer"> 
+                <h2 className="barLabels hidableInfo" style={{textAlign: "center"}}>Entire Video Timeline</h2>
+                <h3 className="barLabels hidableInfo" style={{textAlign: "left", marginLeft: "95px", marginBottom: "5px"}}>Emotions</h3>
+                {this.renderTimelineBar("entire")}
+                <div className="legendContainer hidableInfo">
+                  {this.renderLegend("emotion")}
+                </div>
+
+                <h3 className="barLabels hidableInfo" style={{textAlign: "left", marginLeft: "95px", marginBottom: "5px", marginTop: "10px"}}>Tasks</h3>
+                <span className="spacer" style={{"display": "none", margin: "0px", height: "0px", padding: "0px"}}></span>
+                {this.renderTimelineBar("task")}
+                <div className="legendContainer hidableInfo">
+                  {this.renderLegend("task")}
+                </div>
+                
+                <br></br>
+                <h2 className="barLabels hidableInfo" style={{textAlign: "center"}}>Zoomed-in Emotions Timeline</h2>
+                {this.renderTimelineBar("zoomed-in")}
               </div>
             </div>
-          ) : (
-            null
-          )}
 
-          <div className="dividerContainer">
-            <label>Show Labels</label><input style={{marginLeft: "10px"}} type="checkbox" defaultChecked={this.state.infoVisible} onChange={this.toggleHidableInfo.bind(this)} />
-            <div id="videoBarsContainer"> 
-              <h2 className="barLabels hidableInfo" style={{textAlign: "center"}}>Entire Video Timeline</h2>
-              <h3 className="barLabels hidableInfo" style={{textAlign: "left", marginLeft: "95px", marginBottom: "5px"}}>Emotions</h3>
-              {this.renderTimelineBar("entire")}
-              <div className="legendContainer hidableInfo">
-                {this.renderLegend("emotion")}
+            <div className="dividerContainer">
+              <div id="taskGradingContainer">
+                <h2 style={{textAlign: "center"}}>Task Grading</h2>
+                {this.state.taskGradeBoxes}
               </div>
-
-              <h3 className="barLabels hidableInfo" style={{textAlign: "left", marginLeft: "95px", marginBottom: "5px", marginTop: "10px"}}>Tasks</h3>
-              <span className="spacer" style={{"display": "none", margin: "0px", height: "0px", padding: "0px"}}></span>
-              {this.renderTimelineBar("task")}
-              <div className="legendContainer hidableInfo">
-                {this.renderLegend("task")}
-              </div>
-              
-              <br></br>
-              <h2 className="barLabels hidableInfo" style={{textAlign: "center"}}>Zoomed-in Emotions Timeline</h2>
-              {this.renderTimelineBar("zoomed-in")}
-            </div>
-          </div>
-
-          <div className="dividerContainer">
-            <div id="taskGradingContainer">
-              <h2 style={{textAlign: "center"}}>Task Grading</h2>
-              {this.state.taskGradeBoxes}
             </div>
           </div>
         </div>

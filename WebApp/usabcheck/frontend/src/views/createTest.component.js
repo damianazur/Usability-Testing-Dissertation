@@ -96,7 +96,7 @@ export default class CreateTest extends Component {
     sequenceList.push(
       <div key={key} style={{marginBottom: "5px"}}>
         <div style={{height: "0"}}>
-          <button style={{backgroundColor: "transparent", position: "relative", left: "calc(90% + 10px)", transform: "translate(0, 25px)"}}>
+          <button type="button" style={{backgroundColor: "transparent", position: "relative", left: "calc(90% + 10px)", transform: "translate(0, 25px)"}}>
             <img 
               onClick={this.shiftItem.bind(this, sequenceListName, refListName, key, "UP")}
               src={`${process.env.PUBLIC_URL}/UpArrow.png`} 
@@ -109,7 +109,7 @@ export default class CreateTest extends Component {
           </button>
         </div>
         <div style={{height: "0"}}>
-          <button style={{backgroundColor: "transparent", position: "relative", left: "calc(90% + 10px)", transform: "translate(0, 50px)"}}>
+          <button type="button" style={{backgroundColor: "transparent", position: "relative", left: "calc(90% + 10px)", transform: "translate(0, 50px)"}}>
             <img 
               onClick={this.shiftItem.bind(this, sequenceListName, refListName, key, "DOWN")}
               src={`${process.env.PUBLIC_URL}/DownArrow.png`} 
@@ -149,7 +149,7 @@ export default class CreateTest extends Component {
 
   onProjectCreate(e) {
     e.preventDefault();
-    // console.log("CREATE TEST ", e.target.testName.value);
+    console.log("CREATE TEST ", e.target.testName.value);
 
     let testName = e.target.testName.value;
     let testSequenceData = [];
