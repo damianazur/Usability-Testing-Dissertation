@@ -30,7 +30,7 @@ export class TaskGrading extends Component {
   }
 
   generateButtons() {
-    console.log(this.state.currentGrade);
+    // console.log(this.state.currentGrade);
 
     var buttons = [];
 
@@ -70,9 +70,9 @@ export class TaskGrading extends Component {
 
   generateTaskText() {
     var data = this.props.data;
-    console.log(data);
+    // console.log(data);
     var stepsJSON = JSON.parse(data.stepsJSON);
-    console.log(stepsJSON);
+    // console.log(stepsJSON);
 
     var taskStepsList = [];
 
@@ -95,7 +95,7 @@ export class TaskGrading extends Component {
 
   render() {
     var data = this.props.data;
-    console.log(data);
+    // console.log(data);
   
     return (
       <div className="taskGradeBox">

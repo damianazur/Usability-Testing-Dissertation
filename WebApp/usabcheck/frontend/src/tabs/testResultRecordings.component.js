@@ -3,10 +3,13 @@ import Vimeo from "@vimeo/player";
 import DropdownGenerator from "components/dropdownGenerator.component";
 import Server from "services/server.service";
 import TaskGrading from "components/taskGrading.component";
+import VideoBars from "components/videoBars.component";
 
 export class TestResultOverviewTab extends Component {
   constructor(props) {
     super(props);
+
+    this._videoBars = React.createRef();
 
     this.state = {
       isShown: true,
@@ -20,13 +23,11 @@ export class TestResultOverviewTab extends Component {
       currentVideoId: "512700005", //"510894964",
       videoFullScreen: false,
       videoDuration: 0,
-      barSliderWindowX: 0,
-      barWindowWidth: 0,
-      infoVisible: true,
       selectedTestInstaceId: 20,
 
       taskGradeData: [],
-      taskGradeBoxes: []
+      taskGradeBoxes: [],
+      videoBars: []
     };
   }
 
@@ -36,16 +37,16 @@ export class TestResultOverviewTab extends Component {
     this.getVideoTimeStamps(20);
     this.getTestDetails(testId);
     this.setVideoEmbed();
-
     this.getTaskGradesByInstanceId(this.state.selectedTestInstaceId);
 
     window.addEventListener('resize', this.onVideoResize.bind(this));
   }
 
   componentDidUpdate() {
-    this.onBarScroll("firstRender");
+    
   }
 
+  // Get Data from Server
   getTestInstances(testId) {
     Server.getTestInstances(testId).then(response => {
       console.log(response.data);
@@ -56,6 +57,7 @@ export class TestResultOverviewTab extends Component {
     });
   }
 
+  // Get Data from Server
   getTestDetails(testId) {
     Server.getTestsWithDetails(testId).then(response => {
       console.log(response.data);
@@ -65,16 +67,16 @@ export class TestResultOverviewTab extends Component {
     });
   }
 
+  // Get Data from Server
   getVideoTimeStamps(testInstanceId) {
-    console.log(testInstanceId);
     Server.getVideoTimeStampsByInstanceId(testInstanceId).then(response => {
-      console.log(response.data);
       this.setState({
         videoTimeStamps: response.data
       });
     });
   }
 
+  // Get Data from Server
   getTaskGradesByInstanceId(testInstanceId) {
     Server.getTaskGradesByInstanceId(testInstanceId).then(response => {
       console.log(response.data);
@@ -85,25 +87,22 @@ export class TestResultOverviewTab extends Component {
     });
   }
 
+  // Instance of a test selected from dropdown
   onInstanceSelect(params) {
     console.log(params)
 
+    // Get video ID
     var paramsJson = JSON.parse(params)
     var testInstanceObj = paramsJson["testInstance"]
-
     var videoId = testInstanceObj["videoLocation"]
     var videoId = videoId.replace('/videos/', '');
 
+    // Set videoID and get data
     this.setState({currentVideoId: videoId})
-    console.log(testInstanceObj["testInstanceId"])
     this.getVideoTimeStamps(testInstanceObj["testInstanceId"]);
 
+    // Initialize player
     var player = new Vimeo("videoEmbed");
-    player.setCurrentTime(6)
-    player.on('play', function() {
-      console.log('Video started playing');
-    });
-
     this.state.player.getDuration().then(function(duration) {
       this.setState({
         player: player,
@@ -111,10 +110,9 @@ export class TestResultOverviewTab extends Component {
         selectedTestInstaceId: paramsJson["testInstanceId"]
       });
     }.bind(this));
-
-    // this.setState({player: player});
   }
 
+  // Dropdown for selecting test instance
   generateInstanceDropdown() {
     let instances = this.state.testInstances;
     let menuItems = [];
@@ -138,55 +136,58 @@ export class TestResultOverviewTab extends Component {
 
   onVideoResize() {
     if (this.state.videoFullScreen == true) {
+      // Get the elements
       var videoContainer = document.getElementById('videoContainer');
       var contentBody = document.getElementById('recordingResultMainDiv-contentBody');
-      var recordingResultMainDiv = document.getElementById('recordingResultMainDiv');
       var blackBackground = document.getElementById('blackBackground');
-
-      videoContainer.style.position = "absolute";
-      videoContainer.style.top = "0";
-      videoContainer.style.left = "0";
-
+      
+      // Get variables used in calculations
       var videoRatio = 1.777
       var screenHeight = window.innerHeight;
       var screenWidth = window.innerWidth;
       var heightAtFullWidth = screenWidth/videoRatio
-      var widthPercentage = parseInt(((screenHeight * videoRatio) / screenWidth) * 100) + "%"
 
+      // Get the width of the video so that it fills either the width or height of the screen
+      // but does not exceed either
       var setWidthPercent = 100;
       if (heightAtFullWidth > screenHeight) {
         var desiredWidth = (videoRatio * screenHeight);
         setWidthPercent = (desiredWidth / screenWidth * 100)
-        console.log(desiredWidth, screenWidth);
       }
 
+      // The video goes to the top left corner
+      videoContainer.style.position = "absolute";
+      videoContainer.style.top = "0";
+      videoContainer.style.left = "0";
       videoContainer.style.width = setWidthPercent + "%";
+
+      // A margin is calculated to center the video if the width of the video
+      // is less than the screen size
       var marginLeft = ((100 - setWidthPercent) / 2) + "%";
       if (parseInt(setWidthPercent) != 100) {
         console.log(((setWidthPercent - 100) / 2) + "%");
         videoContainer.style.marginLeft = marginLeft
-        // videoBarsContainer.style.marginLeft = ((100 - setWidthPercent) / 2) + "%";
       }
       
       var videoEmbed = document.getElementById('videoEmbed');
-      var videoWidthPx = videoEmbed.clientWidth;
       var videHeightPx = videoEmbed.clientHeight;
-      // videoBarsContainer.style.width = videoWidthPx + "px";
-      // videoBarsContainer.style.top = videHeightPx + "px";
 
+      // The content below the video is set to absolute position and positioned inline with the video
       contentBody.style.position = "absolute";
       contentBody.style.top = videHeightPx + "px";
       contentBody.style.left = "0";
       contentBody.style.paddingLeft = marginLeft;
 
-      this.onBarScroll();
+      // The emotion/task bars are resized and adjusted
+      // The on bar scroll function achieves this
+      this._videoBars.current.onBarScroll();
 
-      // recordingResultMainDiv.style.height = videHeightPx + videoBarsContainer.clientHeight - 360 + "px";
-
+      // Set the black 
       blackBackground.style.display = "";
       blackBackground.style.height = videHeightPx +  "px";
 
     } else if (this.state.videoFullScreen == false) {
+      // When exiting fullscreen clear the CSS
       var clearStyleList = ["videoContainer", "recordingResultMainDiv-contentBody"];
 
       clearStyleList.forEach(function(elementName) {
@@ -201,7 +202,8 @@ export class TestResultOverviewTab extends Component {
       var blackBackground = document.getElementById('blackBackground');
       blackBackground.style.display = "none";
 
-      this.onBarScroll();
+      // Update the video bars
+      this._videoBars.current.onBarScroll();
     }
   } 
 
@@ -209,7 +211,13 @@ export class TestResultOverviewTab extends Component {
     var player = new Vimeo("videoEmbed");
 
     var debounce = 2;
+    // On fullscreen we want to exit fullscreen and fit the video to the browser window
+    // making it a "fake" sort of fullscreen. This allows for scrolling down to the video bars and
+    // other content
     player.on('fullscreenchange', function(data) {
+      // The debounce is used because when entering/exiting fullscreen the 
+      // event fullscreenchange is fired a few times. This is used to ignore the 
+      // duplicate events
       if (debounce < 3) {
         debounce += 1;
         return;
@@ -217,9 +225,9 @@ export class TestResultOverviewTab extends Component {
         debounce = 0;
       }
 
+      // When user enters fullscreen, exit fullscreen
       if (data["fullscreen"] == true) {
         this.setState({videoFullScreen: !this.state.videoFullScreen});
-        console.log(this.state.videoFullScreen);
         debounce = 0;
 
         player.exitFullscreen().then(function() {
@@ -231,6 +239,7 @@ export class TestResultOverviewTab extends Component {
       }
     }.bind(this));
 
+    // Save video durating which will be used in the calculations
     player.getDuration().then(function(duration) {
       this.setState({
         player: player,
@@ -240,8 +249,6 @@ export class TestResultOverviewTab extends Component {
   }
 
   setVideoEmbed() {
-    console.log("Rendering video embed");
-
     var src = "https://player.vimeo.com/video/" + this.state.currentVideoId + "?portrait=0&byline=0&title=0";
 
     var iframe =  
@@ -263,324 +270,9 @@ export class TestResultOverviewTab extends Component {
     this.setState({videoEmbed: iframe});
   }
 
+  // Used to jump to a time in the video when the user clicks on the bars
   setVideoTime(startTime) {
     this.state.player.setCurrentTime(startTime);
-  }
-
-  generateEmotionSpanList(pixelTimeUnit, height) {
-    var labelColours = {
-      "Neutral": "none",
-      "Sad": "#0099ff",
-      "Happy": "#00ff00",     
-      "Angry": "#ff0000",    
-      "Fear": "#6600cc",
-      "Disgust": "#333399",
-      "Surprise": "#FFD800"
-    }
-
-    var emotionSpanList = [];
-    for (let i = 0; i < this.state.videoTimeStamps.length; i++) {
-      let timeStamp = this.state.videoTimeStamps[i];
-      let type = timeStamp["type"]
-
-      if (type == "emotion") {
-        let startTime = parseFloat(timeStamp["startTime"])
-        let endTime = parseFloat(timeStamp["endTime"]);
-        let label = timeStamp["label"];
-
-        if (label == "Neutral") {
-          continue;
-        }
-
-        let color = labelColours[label];
-        
-        let offetX = pixelTimeUnit * startTime;
-        let length = pixelTimeUnit * (endTime - startTime);
-
-        if (length < 1) {
-          length = 1;
-        }
-
-        if (!isNaN(length)) {
-          emotionSpanList.push(
-            <div key={i} className="timelineSpan" onClick={this.setVideoTime.bind(this, startTime)}
-              style={{
-                position: "absolute",
-                left: offetX, 
-                width: length, 
-                height: height,
-                backgroundColor: color
-                }}
-              >
-            </div>
-          );
-        }
-      }
-    }
-
-    return emotionSpanList;
-  }
-
-  generateTaskSpanList(pixelTimeUnit, height) {
-    var labelColours = {
-      "task": "rgb(127, 201, 255)",
-      "text": "rgb(255, 233, 127)",     
-      "multiple-choice": "rgb(255, 127, 127)"
-    }
-
-    // console.log(this.state.videoTimeStamps.length);
-
-    var spanList = [];
-    for (let i = 0; i < this.state.videoTimeStamps.length; i++) {
-      let timeStamp = this.state.videoTimeStamps[i];
-      let type = timeStamp["type"]
-
-      if (type == "sequence") {
-        // console.log(timeStamp);
-        let startTime = parseFloat(timeStamp["startTime"])
-        let endTime = parseFloat(timeStamp["endTime"]);
-        let sequenceNumber = timeStamp["label"];
-        let sequenceItem = this.state.testDetails.sequenceData.find(item => item.sequenceNumber == sequenceNumber);
-        // let itemType = sequenceItem.questionConfigsJSON.toString();
-        // console.log(sequenceItem);
-        // console.log(endTime);
-        let color;
-        if ("taskId" in sequenceItem) {
-          color = labelColours["task"];
-        } else if ("questionId" in sequenceItem) {
-          let questionConfigsJSON = JSON.parse(sequenceItem["questionConfigsJSON"]);
-          color = labelColours[questionConfigsJSON["questionType"]];
-        }
-        
-        let offetX = pixelTimeUnit * startTime;
-        let length = pixelTimeUnit * (endTime - startTime);
-
-        if (length < 1) {
-          length = 1;
-        }
-
-        if (!isNaN(length)) {
-          spanList.push(
-            <div key={i} className="timelineSpan" onClick={this.setVideoTime.bind(this, startTime)}
-              style={{
-                position: "absolute",
-                left: offetX, 
-                width: length, 
-                height: height,
-                backgroundColor: color,
-                borderRight: "1px solid black"
-                }}
-              >
-            </div>
-          );
-        }
-      }
-    }
-    // console.log("-------------")
-    return spanList;
-  }
-
-  renderTimelineBar(type) {
-    var frameContainer = document.getElementById('videoFrameContainer')
-
-    // if video has not yet rendered and the player for the video was not yet created
-    if (frameContainer && this.state.player && this.state.videoDuration != 0) {} else {
-      return null;
-    }
-
-    var videoLength = this.state.videoDuration;
-    var frameContainerWidth = frameContainer.clientWidth;
-    var timelineBarWidth = frameContainerWidth - 266; // 266 is a consistent size of the labels next to the bar in vimeo
-
-    // Generate the emotion strips that go inside the bar
-    var pixelTimeUnit;
-    var emotionStripHeight;
-    var emotionSpanList;
-    if (type == "entire") {
-      pixelTimeUnit = timelineBarWidth/videoLength;
-      emotionStripHeight = "18px"
-      emotionSpanList = this.generateEmotionSpanList(pixelTimeUnit, emotionStripHeight);
-
-    } else if (type == "zoomed-in") {
-      pixelTimeUnit = 60;
-      emotionStripHeight = "38px";
-      emotionSpanList = this.generateEmotionSpanList(pixelTimeUnit, emotionStripHeight);
-    
-    }  else if (type == "task") {
-      pixelTimeUnit = timelineBarWidth/videoLength;
-      var taskStripHeight = "14px";
-      var taskSpanList = this.generateTaskSpanList(pixelTimeUnit, taskStripHeight);
-    }
-
-
-    // Create the requested emotion bar
-    var timelineBar;
-    if (type == "entire") {
-      timelineBar = this.createEntireBar(emotionSpanList, timelineBarWidth);
-
-    } else if (type == "zoomed-in"){
-      var innerBarWidth = (pixelTimeUnit * videoLength) + "px";
-      // console.log(innerBarWidth);
-      var innerBarStyle =  {
-        width: innerBarWidth,
-        position: "absolute"
-      };
-      timelineBar = this.createZoomedBar(emotionSpanList, timelineBarWidth, innerBarStyle);
-
-    } else if (type == "task"){
-      timelineBar = this.createTaskBar(taskSpanList, timelineBarWidth);
-    }
-
-    return timelineBar;
-  }
-
-  createEntireBar(emotionSpanList, emotionBarWidth) {
-    var barStyle = {
-      width: emotionBarWidth + "px", 
-    };
-
-    var emotionBar = 
-      <div className="genericVideoBar" id="entireEmotionBar" style={barStyle}>
-        <div id="innerBarEntire" style={{position: "absolute"}}></div>
-        {emotionSpanList}
-
-        <div id="barSliderWindow" style={{
-          left: "calc(" + this.state.barSliderWindowX + "% - 2px)", 
-          width: "calc(" + this.state.barWindowWidth + "% + 6px)"
-          }}>
-        </div>
-      </div>
-
-    return emotionBar;
-  }
-
-  createZoomedBar(emotionSpanList, emotionBarWidth, innerBarStyle) {
-    var barStyle = {
-      width: emotionBarWidth + "px", 
-    };
-
-    var emotionBar = 
-      <div className="genericVideoBar" id="zoomedBar" style={barStyle} onScroll={this.onBarScroll.bind(this)}>
-        <div id="innerBarZoomed" style={innerBarStyle}>
-          {emotionSpanList}
-        </div>
-      </div>
-
-    return emotionBar;
-  }
-
-  createTaskBar(taskSpanList, barWidth) {
-    var barStyle = {
-      width: barWidth + "px", 
-    };
-
-    var taskBar = 
-      <div className="genericVideoBar" id="entireTaskBar" style={barStyle}>
-        <div id="innerBarEntire" style={{position: "absolute"}}></div>
-        {taskSpanList}
-      </div>
-    
-    return taskBar;
-  }
-
-  onBarScroll(caller) {
-    var zoomedBar = document.getElementById('zoomedBar');
-    var innerBar = document.getElementById('innerBarZoomed');
-
-    if (!zoomedBar) {
-      return;
-    }
-    if (caller == "firstRender") {
-      if (this.state.barWindowWidth != 0) {
-        return;
-      }
-    }
-    var innerBarWidth = innerBar.clientWidth;
-    if (innerBarWidth == 0){
-      return;
-    }
-
-    var barWidth = zoomedBar.clientWidth;
-    var scrollPos = zoomedBar.scrollLeft;
-    var barWindowStart = (scrollPos / innerBarWidth) * 100;
-    var barWindowWidthPercentage = (barWidth / innerBarWidth) * 100;
-
-    this.setState({
-      barSliderWindowX: barWindowStart,
-      barWindowWidth: barWindowWidthPercentage
-    });
-  }
-
-  renderLegend(type) {
-    var legendList = [];
-    if (type == "emotion") {
-      var legendDataList = [
-        {label: "Happy", color: "#00ff00"},
-        {label: "Sad", color: "#0099ff"},
-        {label: "Angry", color: "#ff0000"},
-        {label: "Surprise", color: "#FFD800"},
-        {label: "Fear", color: "#6600cc"},
-        {label: "Disgust", color: "#333399"}
-      ];
-
-      var key = 0;
-      legendDataList.forEach(function(item) {
-        legendList.push(
-          <div key={key} style={{marginTop: "5px", display: "inline-block"}}>
-            <span style={{backgroundColor: item.color}} className="legendColorBox"></span>
-            <span className="legendText">{item.label}</span>
-          </div>
-        )
-        key += 1;
-      }.bind(this));
-
-    } else if (type == "task") {
-      var legendDataList = [
-        {label: "Task", color: "rgb(127, 201, 255)"},
-        {label: "Text Question", color: "rgb(255, 233, 127)"},
-        {label: "Multiple-Choice Question", color: "rgb(255, 127, 127)"},
-      ];
-
-      var key = 0;
-      legendDataList.forEach(function(item) {
-        legendList.push(
-          <div key={key} style={{marginTop: "5px", display: "inline-block"}}>
-            <span style={{backgroundColor: item.color}} className="legendColorBox"></span>
-            <span className="legendText">{item.label}</span>
-          </div>
-        )
-        key += 1;
-      }.bind(this));
-    }
-
-    return (
-      <div>
-        {legendList}
-      </div>
-    )
-  }
-
-
-  toggleHidableInfo(a) {
-    var toToggle = document.getElementsByClassName('hidableInfo');
-    var spacers = document.getElementsByClassName('spacer');
-    
-    var newStatus;
-    if (this.state.infoVisible) {
-      newStatus = "none";
-    } else {
-      newStatus = "";
-    }
-    for (var i = 0; i < toToggle.length; i++) {
-      toToggle[i].style.display = newStatus;
-    }
-    for (var i = 0; i < spacers.length; i++) {
-      spacers[i].style.display = "inline-block";
-    }
-
-
-
-    this.setState({infoVisible: !this.state.infoVisible});
   }
 
   generateTaskGrading() {
@@ -602,6 +294,34 @@ export class TestResultOverviewTab extends Component {
     }.bind(this));
 
     this.setState({taskGradeBoxes: taskGradeBoxes});
+  }
+
+  renderVideoBars() {
+    // Ensure all the data has been loaded
+    if (this.state.videoTimeStamps.length == 0 
+        || this.state.videoDuration == 0
+        || this.state.testDetails.length == 0
+        || Object.keys(this.state.player).length == 0) {
+      return;
+    }
+
+    var data = {};
+    data.videoTimeStamps = this.state.videoTimeStamps;
+    data.videoDuration = this.state.videoDuration;
+    data.player = this.state.player;
+    data.testDetails = this.state.testDetails;
+
+    var functions = {};
+    functions.setVideoTime = this.setVideoTime.bind(this);
+
+    return (
+      <VideoBars
+        ref={this._videoBars}
+        data={data}
+        functions={functions}
+        >
+      </VideoBars>
+    );
   }
 
   render() {
@@ -630,26 +350,7 @@ export class TestResultOverviewTab extends Component {
 
           <div id="recordingResultMainDiv-contentBody">
             <div className="dividerContainer">
-              <label>Show Labels</label><input style={{marginLeft: "10px"}} type="checkbox" defaultChecked={this.state.infoVisible} onChange={this.toggleHidableInfo.bind(this)} />
-              <div id="videoBarsContainer"> 
-                <h2 className="barLabels hidableInfo" style={{textAlign: "center"}}>Entire Video Timeline</h2>
-                <h3 className="barLabels hidableInfo" style={{textAlign: "left", marginLeft: "95px", marginBottom: "5px"}}>Emotions</h3>
-                {this.renderTimelineBar("entire")}
-                <div className="legendContainer hidableInfo">
-                  {this.renderLegend("emotion")}
-                </div>
-
-                <h3 className="barLabels hidableInfo" style={{textAlign: "left", marginLeft: "95px", marginBottom: "5px", marginTop: "10px"}}>Tasks</h3>
-                <span className="spacer" style={{"display": "none", margin: "0px", height: "0px", padding: "0px"}}></span>
-                {this.renderTimelineBar("task")}
-                <div className="legendContainer hidableInfo">
-                  {this.renderLegend("task")}
-                </div>
-                
-                <br></br>
-                <h2 className="barLabels hidableInfo" style={{textAlign: "center"}}>Zoomed-in Emotions Timeline</h2>
-                {this.renderTimelineBar("zoomed-in")}
-              </div>
+              {this.renderVideoBars()}
             </div>
 
             <div className="dividerContainer">
