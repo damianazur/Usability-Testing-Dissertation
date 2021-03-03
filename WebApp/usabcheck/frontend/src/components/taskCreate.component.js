@@ -78,7 +78,8 @@ export class TaskCreateBox extends Component {
             onChange={this.updateOutputData.bind(this)} 
             placeholder="Task Name" 
             autoComplete="off"
-            type="text"/>
+            type="text"
+            required/>
         
         {this.generateOptionsDropdown()}
 

@@ -21,6 +21,10 @@ export class VideoBars extends Component {
     this.onBarScroll("firstRender");
   }
 
+  componentDidMount() {
+    this.onBarScroll("firstRender");
+  }
+
   // Get the spans that make up the emotion bar
   generateEmotionSpanList(pixelTimeUnit, height) {
     var labelColours = {
@@ -38,12 +42,12 @@ export class VideoBars extends Component {
       let timeStamp = this.state.videoTimeStamps[i];
       let type = timeStamp["type"]
 
-      if (type == "emotion") {
+      if (type === "emotion") {
         let startTime = parseFloat(timeStamp["startTime"])
         let endTime = parseFloat(timeStamp["endTime"]);
         let label = timeStamp["label"];
 
-        if (label == "Neutral") {
+        if (label === "Neutral") {
           continue;
         }
 
@@ -89,11 +93,11 @@ export class VideoBars extends Component {
       let timeStamp = this.state.videoTimeStamps[i];
       let type = timeStamp["type"]
 
-      if (type == "sequence") {
+      if (type === "sequence") {
         let startTime = parseFloat(timeStamp["startTime"])
         let endTime = parseFloat(timeStamp["endTime"]);
         let sequenceNumber = timeStamp["label"];
-        let sequenceItem = this.state.testDetails.sequenceData.find(item => item.sequenceNumber == sequenceNumber);
+        let sequenceItem = this.state.testDetails.sequenceData.find(item => item.sequenceNumber === parseInt(sequenceNumber));
 
         let color;
         if ("taskId" in sequenceItem) {
@@ -136,7 +140,7 @@ export class VideoBars extends Component {
     var frameContainer = document.getElementById('videoFrameContainer')
 
     // if video has not yet rendered and the player for the video was not yet created
-    if (frameContainer && this.state.player && this.state.videoDuration != 0) {} else {
+    if (frameContainer && this.state.player && this.state.videoDuration !== 0) {} else {
       console.log("NULL CONDITION");
       return null;
     }
@@ -149,17 +153,17 @@ export class VideoBars extends Component {
     var pixelTimeUnit;
     var emotionStripHeight;
     var emotionSpanList;
-    if (type == "entire") {
+    if (type === "entire") {
       pixelTimeUnit = timelineBarWidth/videoLength;
       emotionStripHeight = "18px"
       emotionSpanList = this.generateEmotionSpanList(pixelTimeUnit, emotionStripHeight);
 
-    } else if (type == "zoomed-in") {
+    } else if (type === "zoomed-in") {
       pixelTimeUnit = 60;
       emotionStripHeight = "38px";
       emotionSpanList = this.generateEmotionSpanList(pixelTimeUnit, emotionStripHeight);
     
-    }  else if (type == "task") {
+    }  else if (type === "task") {
       pixelTimeUnit = timelineBarWidth/videoLength;
       var taskStripHeight = "14px";
       var taskSpanList = this.generateTaskSpanList(pixelTimeUnit, taskStripHeight);
@@ -167,10 +171,10 @@ export class VideoBars extends Component {
 
     // Create the requested emotion bar
     var timelineBar;
-    if (type == "entire") {
+    if (type === "entire") {
       timelineBar = this.createEntireBar(emotionSpanList, timelineBarWidth);
 
-    } else if (type == "zoomed-in"){
+    } else if (type === "zoomed-in"){
       var innerBarWidth = (pixelTimeUnit * videoLength) + "px";
       // console.log(innerBarWidth);
       var innerBarStyle =  {
@@ -179,7 +183,7 @@ export class VideoBars extends Component {
       };
       timelineBar = this.createZoomedBar(emotionSpanList, timelineBarWidth, innerBarStyle);
 
-    } else if (type == "task"){
+    } else if (type === "task"){
       timelineBar = this.createTaskBar(taskSpanList, timelineBarWidth);
     }
 
@@ -246,13 +250,13 @@ export class VideoBars extends Component {
     if (!zoomedBar) {
       return;
     }
-    if (caller == "firstRender") {
-      if (this.state.barWindowWidth != 0) {
+    if (caller === "firstRender") {
+      if (this.state.barWindowWidth !== 0) {
         return;
       }
     }
     var innerBarWidth = innerBar.clientWidth;
-    if (innerBarWidth == 0){
+    if (innerBarWidth === 0){
       return;
     }
 
@@ -270,7 +274,7 @@ export class VideoBars extends Component {
   // Creates the legend for the emotions bar and the task bar
   renderLegend(type) {
     var legendList = [];
-    if (type == "emotion") {
+    if (type === "emotion") {
       var legendDataList = [
         {label: "Happy", color: "#00ff00"},
         {label: "Sad", color: "#0099ff"},
@@ -289,9 +293,9 @@ export class VideoBars extends Component {
           </div>
         )
         key += 1;
-      }.bind(this));
+      });
 
-    } else if (type == "task") {
+    } else if (type === "task") {
       var legendDataList = [
         {label: "Task", color: "rgb(127, 201, 255)"},
         {label: "Text Question", color: "rgb(255, 233, 127)"},
@@ -307,7 +311,7 @@ export class VideoBars extends Component {
           </div>
         )
         key += 1;
-      }.bind(this));
+      });
     }
 
     return (
@@ -331,7 +335,7 @@ export class VideoBars extends Component {
     for (var i = 0; i < toToggle.length; i++) {
       toToggle[i].style.display = newStatus;
     }
-    for (var i = 0; i < spacers.length; i++) {
+    for (i = 0; i < spacers.length; i++) {
       spacers[i].style.display = "inline-block";
     }
 

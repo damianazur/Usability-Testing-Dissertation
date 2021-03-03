@@ -74,7 +74,8 @@ export class DynamicList extends Component {
             placeholder={this.props.inputPlaceHolder}
             autoComplete="off" 
             className="inputField" 
-            type="text"/>
+            type="text"
+            required/>
 
         </div>
         <div style={{"width": "10%", display:"inline-block"}}>

@@ -4,6 +4,9 @@ import TaskCreateBox from "components/taskCreate.component";
 import TextQuestionCreateBox from "components/textQuestionCreate.component";
 import MutlipleChoiceQuestionBox from "components/mutliplechoiceQuestion.component";
 
+import {NotificationContainer, NotificationManager} from 'react-notifications';
+
+import 'react-notifications/lib/notifications.css';
 import "bootstrap.min.css";
 
 export default class CreateTest extends Component {
@@ -194,21 +197,73 @@ export default class CreateTest extends Component {
 
 
     console.log(uploadData);
-    Server.createTest(uploadData);
+    Server.createTest(uploadData).then(
+      () => {
+        this.props.history.push("/dashboard");
+        window.location.reload();
+      },
+      error => {
+        const resMessage = (
+          error.response &&
+          error.response.data &&
+          error.response.data.message) || 
+          error.message ||
+          error.toString();
+        
+        console.log(error.message);
+
+        this.createNotification("error", error.toString());
+
+        this.setState({
+          loading: false,
+          message: resMessage
+        });
+      }
+    );
   }
+
+  createNotification(type, message) {
+    switch (type) {
+      case 'info':
+        alert = NotificationManager.info(message, 'Info', 3000);
+        break;
+      case 'success':
+        alert = NotificationManager.success(message, 'Success', 3000);
+        break;
+      case 'warning':
+        alert = NotificationManager.warning(message, 'Warning', 3000);
+        break;
+      case 'error':
+        alert = NotificationManager.error(message, 'Error', 5000, () => {
+          console.log("Error callback");
+        });
+        break;
+    }
+
+    // return (
+    //   {alert}
+    // );
+  };
 
   render() {  
     // console.log("RENDER", this.state.testRefs);
     // console.log("SEQUENCE", this.state.testSequenceList);    
     return (
       <div className="mainPageDiv">
+        <div>
+          <button className='btn btn-info'
+            onClick={this.createNotification.bind(this, 'success', "Test Created Successfully!")}>Info
+          </button>
+          <NotificationContainer/>
+        </div>
+
         <h1>Create Usability Test</h1>
         <hr></hr>
 
         <div className="createTest-content">  
           <form onSubmit={this.onProjectCreate.bind(this)}>
             <label>Test Name</label>
-            <input placeholder="Test Name" autoComplete="off" className="inputField2" type="text" name="testName"/>
+            <input placeholder="Test Name" autoComplete="off" className="inputField2" type="text" name="testName" required/>
             
             {/* --------- PRE-TEST QUESTIONS --------- */}
             <h2 style={{marginTop: "50px"}}>Pre-test Questions</h2>

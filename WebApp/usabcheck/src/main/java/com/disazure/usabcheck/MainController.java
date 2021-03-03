@@ -163,7 +163,7 @@ public class MainController {
 				testId = testDao.getIdByTestNameAndProjectId(researcherId, testName, projectId);
 			} catch (JsonProcessingException e) {
 				e.printStackTrace();
-				return new ResponseEntity<String>(Integer.toString(0), HttpStatus.INTERNAL_SERVER_ERROR);
+				return new ResponseEntity<String>(e.toString(), HttpStatus.INTERNAL_SERVER_ERROR);
 			}
 			
 			System.out.println("Newly created testId: " + testId);

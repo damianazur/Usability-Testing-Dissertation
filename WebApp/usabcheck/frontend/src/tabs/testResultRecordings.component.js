@@ -95,7 +95,7 @@ export class TestResultOverviewTab extends Component {
     var paramsJson = JSON.parse(params)
     var testInstanceObj = paramsJson["testInstance"]
     var videoId = testInstanceObj["videoLocation"]
-    var videoId = videoId.replace('/videos/', '');
+    videoId = videoId.replace('/videos/', '');
 
     // Set videoID and get data
     this.setState({currentVideoId: videoId})
@@ -135,7 +135,7 @@ export class TestResultOverviewTab extends Component {
   }
 
   onVideoResize() {
-    if (this.state.videoFullScreen == true) {
+    if (this.state.videoFullScreen === true) {
       // Get the elements
       var videoContainer = document.getElementById('videoContainer');
       var contentBody = document.getElementById('recordingResultMainDiv-contentBody');
@@ -164,7 +164,7 @@ export class TestResultOverviewTab extends Component {
       // A margin is calculated to center the video if the width of the video
       // is less than the screen size
       var marginLeft = ((100 - setWidthPercent) / 2) + "%";
-      if (parseInt(setWidthPercent) != 100) {
+      if (parseInt(setWidthPercent) !== 100) {
         console.log(((setWidthPercent - 100) / 2) + "%");
         videoContainer.style.marginLeft = marginLeft
       }
@@ -186,7 +186,7 @@ export class TestResultOverviewTab extends Component {
       blackBackground.style.display = "";
       blackBackground.style.height = videHeightPx +  "px";
 
-    } else if (this.state.videoFullScreen == false) {
+    } else if (this.state.videoFullScreen === false) {
       // When exiting fullscreen clear the CSS
       var clearStyleList = ["videoContainer", "recordingResultMainDiv-contentBody"];
 
@@ -197,9 +197,9 @@ export class TestResultOverviewTab extends Component {
         element.style.left = "";
         element.style.marginLeft = "";
         element.style.width = "";
-      }.bind(this));
+      });
 
-      var blackBackground = document.getElementById('blackBackground');
+      blackBackground = document.getElementById('blackBackground');
       blackBackground.style.display = "none";
 
       // Update the video bars
@@ -226,7 +226,7 @@ export class TestResultOverviewTab extends Component {
       }
 
       // When user enters fullscreen, exit fullscreen
-      if (data["fullscreen"] == true) {
+      if (data["fullscreen"] === true) {
         this.setState({videoFullScreen: !this.state.videoFullScreen});
         debounce = 0;
 
@@ -277,9 +277,6 @@ export class TestResultOverviewTab extends Component {
 
   generateTaskGrading() {
     var taskGradeBoxes = [];
-    var selectedTestInstaceId = this.state.selectedTestInstaceId;
-
-    console.log(this.state.taskGradeData);
 
     var key = 0;
     this.state.taskGradeData.forEach(function(taskData) {
@@ -291,17 +288,17 @@ export class TestResultOverviewTab extends Component {
         </TaskGrading>
       )
       key += 1;
-    }.bind(this));
+    });
 
     this.setState({taskGradeBoxes: taskGradeBoxes});
   }
 
   renderVideoBars() {
     // Ensure all the data has been loaded
-    if (this.state.videoTimeStamps.length == 0 
-        || this.state.videoDuration == 0
-        || this.state.testDetails.length == 0
-        || Object.keys(this.state.player).length == 0) {
+    if (this.state.videoTimeStamps.length === 0 
+        || this.state.videoDuration === 0
+        || this.state.testDetails.length === 0
+        || Object.keys(this.state.player).length === 0) {
       return;
     }
 

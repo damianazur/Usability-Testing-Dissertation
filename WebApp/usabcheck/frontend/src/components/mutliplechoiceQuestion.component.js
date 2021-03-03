@@ -84,6 +84,7 @@ export class MultipleChoiceQuestionBox extends Component {
             autoComplete="off" 
             className="inputField" 
             type="text"
+            required
         />
 
         <h4 className="createTestInputBox-heading" style={{marginTop: "20px"}}>Answer Choices</h4>  

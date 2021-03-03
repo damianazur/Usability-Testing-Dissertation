@@ -60,6 +60,7 @@ export class TestQuestionBox extends Component {
             autoComplete="off" 
             className="inputField" 
             type="text"
+            required
           />
         </div>
       </div>
