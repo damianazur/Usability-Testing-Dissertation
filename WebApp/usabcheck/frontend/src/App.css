@@ -20,6 +20,11 @@
 body {
   font-size:calc(16px) !important;
   font-family: Helvetica, sans-serif !important; 
+  color: black !important;
+}
+
+.invisible {
+  display: none;
 }
 
 .primaryButton {
@@ -559,7 +564,7 @@ button {
   /* left: 94px; */
   background-color: black;
   border: 1px solid black;
-  z-index: 2147483646;
+  z-index: 10;
   top: 0px;
 }
 
@@ -838,3 +843,11 @@ button {
   content: "";
 }
 /* -------------------------------------- react-notification CSS (END) -------------------------------------- */
+
+
+
+.infoButton {
+  width: 20px;
+  margin-left: 10px;
+  padding-bottom: 5px;
+}

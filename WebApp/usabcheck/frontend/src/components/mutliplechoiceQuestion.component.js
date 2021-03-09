@@ -2,6 +2,9 @@ import React, { Component } from 'react';
 import DropdownGenerator from "components/dropdownGenerator.component";
 import DynamicItemList from "components/dynamicList.component";
 
+import { CreateInfoModals, CreateInfoButton } from 'modal/infoModalUtilities'; 
+import { MultipleChoiceQuestionInfoForm } from 'forms/infoForms';
+
 export class MultipleChoiceQuestionBox extends Component {
   constructor(props) {
     super(props);
@@ -13,6 +16,10 @@ export class MultipleChoiceQuestionBox extends Component {
       type: "task",
       outputData: {}
     };
+  }
+
+  componentDidMount() {
+    this.setInfoModals();
   }
 
   updateOutputData() {
@@ -66,6 +73,22 @@ export class MultipleChoiceQuestionBox extends Component {
     )
   }
 
+  setInfoModals() {
+    var nameFormPair = {
+      "multipleChoiceQuestion": MultipleChoiceQuestionInfoForm
+    }
+    var returnData = CreateInfoModals(nameFormPair);
+    this.setState({
+      modalList: returnData.modalList, 
+      infoRefPair: returnData.infoRefPair
+    })
+  }
+  
+  showInfoModal(modalName) {
+    var ref = this.state.infoRefPair[modalName];
+    ref.current.showModal();
+  }
+
   // createPositionBox
 
   render() {
@@ -73,8 +96,14 @@ export class MultipleChoiceQuestionBox extends Component {
 
     return (
       <div className="createTestInputBox multipleChoiceCreate">
+        <div>
+          {this.state.modalList}
+        </div>
+
         <h3 className="createTestInputBox-heading">Question (Multiple Choice)</h3>  
         {this.generateOptionsDropdown()}
+
+        {CreateInfoButton("multipleChoiceQuestion", this.showInfoModal.bind(this))}
 
         <hr className="createTestInputBox-hr"></hr>
         <input 

@@ -1,5 +1,8 @@
 import React, { Component } from 'react';
 
+import { CreateInfoModals, CreateInfoButton } from 'modal/infoModalUtilities'; 
+import { EntireVideoTimelineInfoForm, ZoomedInTimelineInfoForm } from 'forms/infoForms';
+
 export class VideoBars extends Component {
   constructor(props) {
     super(props);
@@ -22,6 +25,7 @@ export class VideoBars extends Component {
   }
 
   componentDidMount() {
+    this.setInfoModals();
     this.onBarScroll("firstRender");
   }
 
@@ -327,27 +331,48 @@ export class VideoBars extends Component {
     var spacers = document.getElementsByClassName('spacer');
     
     var newStatus;
+    var spacerNewStatus;
     if (this.state.infoVisible) {
       newStatus = "none";
+      spacerNewStatus = "inline-block";
     } else {
       newStatus = "";
+      spacerNewStatus = "none";
     }
     for (var i = 0; i < toToggle.length; i++) {
       toToggle[i].style.display = newStatus;
     }
     for (i = 0; i < spacers.length; i++) {
-      spacers[i].style.display = "inline-block";
+      spacers[i].style.display = spacerNewStatus;
     }
 
     this.setState({infoVisible: !this.state.infoVisible});
   }
 
+  setInfoModals() {
+    var nameFormPair = {
+      "entireBar": EntireVideoTimelineInfoForm,
+      "zoomedBar": ZoomedInTimelineInfoForm
+    }
+    var returnData = CreateInfoModals(nameFormPair);
+    this.setState({
+      modalList: returnData.modalList, 
+      infoRefPair: returnData.infoRefPair
+    })
+  }
+  
+  showInfoModal(modalName) {
+    var ref = this.state.infoRefPair[modalName];
+    ref.current.showModal();
+  }
+
   render() {
     return (
       <div>
+        {this.state.modalList}
         <label>Show Labels</label><input style={{marginLeft: "10px"}} type="checkbox" defaultChecked={this.state.infoVisible} onChange={this.toggleHidableInfo.bind(this)} />
         <div id="videoBarsContainer"> 
-          <h2 className="barLabels hidableInfo" style={{textAlign: "center"}}>Entire Video Timeline</h2>
+          <h2 className="barLabels hidableInfo" style={{textAlign: "center"}}>Entire Video Timeline {CreateInfoButton("entireBar", this.showInfoModal.bind(this))}</h2>
           <h3 className="barLabels hidableInfo" style={{textAlign: "left", marginLeft: "10px", marginBottom: "5px"}}>Emotions</h3>
           {this.renderTimelineBar("entire")}
           <div className="legendContainer hidableInfo">
@@ -362,7 +387,7 @@ export class VideoBars extends Component {
           </div>
           
           <br></br>
-          <h2 className="barLabels hidableInfo" style={{textAlign: "center", marginTop: "40px"}}>Zoomed-in Emotions Timeline</h2>
+          <h2 className="barLabels hidableInfo" style={{textAlign: "center", marginTop: "40px"}}>Zoomed-in Emotions Timeline {CreateInfoButton("zoomedBar", this.showInfoModal.bind(this))}</h2>
           {this.renderTimelineBar("zoomed-in")}
         </div>
       </div>

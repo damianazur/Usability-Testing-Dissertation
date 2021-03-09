@@ -25,6 +25,7 @@ export const Modal = ({
       >
         <div className="modal-area" ref={modalRef}>
           <button
+            type="button"
             ref={buttonRef}
             aria-label="Close Modal"
             aria-labelledby="close-modal"

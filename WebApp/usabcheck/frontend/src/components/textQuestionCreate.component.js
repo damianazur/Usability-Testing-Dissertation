@@ -1,6 +1,9 @@
 import React, { Component } from 'react';
 import DropdownGenerator from "components/dropdownGenerator.component";
 
+import { CreateInfoModals, CreateInfoButton } from 'modal/infoModalUtilities'; 
+import { TextQuestionInfoForm } from 'forms/infoForms';
+
 export class TestQuestionBox extends Component {
   constructor(props) {
     super(props);
@@ -11,6 +14,10 @@ export class TestQuestionBox extends Component {
       type: "task",
       outputData: {}
     };
+  }
+
+  componentDidMount() {
+    this.setInfoModals();
   }
 
   updateOutputData() {
@@ -43,13 +50,36 @@ export class TestQuestionBox extends Component {
     )
   }
 
+  setInfoModals() {
+    var nameFormPair = {
+      "textQuestion": TextQuestionInfoForm
+    }
+    var returnData = CreateInfoModals(nameFormPair);
+    this.setState({
+      modalList: returnData.modalList, 
+      infoRefPair: returnData.infoRefPair
+    })
+  }
+  
+  showInfoModal(modalName) {
+    var ref = this.state.infoRefPair[modalName];
+    ref.current.showModal();
+  }
+
   render() {
     // console.log("Task Create Output", this.state.outputData);
 
     return (
       <div className="createTestInputBox textQuestionCreate">
-        <h3 className="createTestInputBox-heading">Question (Text Answer)</h3>      
+        <div>
+          {this.state.modalList}
+        </div>
+        
+        <h3 className="createTestInputBox-heading">Question (Text Answer)</h3>     
+
         {this.generateOptionsDropdown()}
+
+        {CreateInfoButton("textQuestion", this.showInfoModal.bind(this))}
 
         <hr className="createTestInputBox-hr"></hr>
         <div>

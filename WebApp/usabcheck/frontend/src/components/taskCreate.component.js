@@ -2,6 +2,9 @@ import React, { Component } from 'react';
 import DropdownGenerator from "components/dropdownGenerator.component";
 import DynamicItemList from "components/dynamicList.component";
 
+import { CreateInfoModals, CreateInfoButton } from 'modal/infoModalUtilities'; 
+import { TaskInfoForm } from 'forms/infoForms';
+
 export class TaskCreateBox extends Component {
   constructor(props) {
     super(props);
@@ -11,8 +14,15 @@ export class TaskCreateBox extends Component {
 
     this.state = {
       type: "task",
-      outputData: {}
+      outputData: {},
+
+      modalList: [],
+      infoRefPair: {}
     };
+  }
+
+  componentDidMount() {
+    this.setInfoModals();
   }
 
   updateOutputData() {
@@ -67,11 +77,29 @@ export class TaskCreateBox extends Component {
     )
   }
 
-  render() {
-    // console.log("Task Create Output", this.state.outputData);
+  setInfoModals() {
+    var nameFormPair = {
+      "task": TaskInfoForm
+    }
+    var returnData = CreateInfoModals(nameFormPair);
+    this.setState({
+      modalList: returnData.modalList, 
+      infoRefPair: returnData.infoRefPair
+    })
+  }
+  
+  showInfoModal(modalName) {
+    var ref = this.state.infoRefPair[modalName];
+    ref.current.showModal();
+  }
 
+  render() {
     return (
       <div className="createTestInputBox taskCreate">
+        <div>
+          {this.state.modalList}
+        </div>
+
         <h3 className="createTestInputBox-heading">Task</h3>
         <input className="createTestInputBox-inputField"
             ref={this._taskNameRef}
@@ -82,6 +110,8 @@ export class TaskCreateBox extends Component {
             required/>
         
         {this.generateOptionsDropdown()}
+
+        {CreateInfoButton("task", this.showInfoModal.bind(this))}
 
         <hr className="createTestInputBox-hr"></hr>
         <div>

@@ -6,6 +6,9 @@ import { DeleteTestForm } from 'forms/deleteTestForm';
 import Server from "services/server.service";
 import { createNotification } from 'utilities/utils.js';
 
+import { CreateInfoModals, CreateInfoButton } from 'modal/infoModalUtilities'; 
+import { ReferenceNumInfoForm, StatusInfoForm } from 'forms/infoForms';
+
 export class TestContainer extends Component {
   constructor(props) {
     super(props);
@@ -29,6 +32,7 @@ export class TestContainer extends Component {
     this.updateTaskGrades(test.testId);
     this.updateQuestionAnswers(test.testId);
     this.updateInstanceData(test.testId);
+    this.setInfoModals();
   }
 
   showDeletePopup() {
@@ -166,48 +170,30 @@ export class TestContainer extends Component {
     );
   }
 
-  render() {
-    // console.log("Test Container Props:", this.props);
+  setInfoModals() {
+    var nameFormPair = {
+      "reference": ReferenceNumInfoForm,
+      "status": StatusInfoForm,
+    }
+    var returnData = CreateInfoModals(nameFormPair);
+    this.setState({
+      modalList: returnData.modalList, 
+      infoRefPair: returnData.infoRefPair
+    })
+  }
+  
+  showInfoModal(modalName) {
+    var ref = this.state.infoRefPair[modalName];
+    ref.current.showModal();
+  }
 
+  render() {
     const test = this.props.testItem;
 
     const stats = [];
-
-    // console.log(this.state.taskGradeData["tasks"]);
-
-    // stats.push(
-    //   <div>
-    //     <div className="testStat">
-    //       <span className="testStat-label">No. of Tasks:</span>
-    //       {this.state.taskGradeData["tasks"] ? (
-    //         <span>{this.state.taskGradeData["tasks"].length}</span>
-    //       ) : (
-    //         <span>N/A</span>
-    //       )}
-    //     </div>
-        
-    //     <div className="testStat">
-    //       <span className="testStat-label">No. of Questions:</span>
-    //       {this.state.questionAnswerData["questions"] ? (
-    //         <span>{this.state.questionAnswerData["questions"].length}</span>
-    //       ) : (
-    //         <span>N/A</span>
-    //       )}
-    //     </div>
-        
-    //     <div className="testStat">
-    //       <span className="testStat-label">No. of Participants:</span>
-    //       {this.state.instanceData ? (
-    //         <span>{this.state.instanceData.length}</span>
-    //       ) : (
-    //         <span>N/A</span>
-    //       )}
-    //     </div>
-    //   </div>
-    // )
-
     return (
       <div className="dashboard-testBox">
+        {this.state.modalList}
         <div className="testBox-top">
           <span className="testBox-testName">
             {test.testName}
@@ -254,18 +240,21 @@ export class TestContainer extends Component {
               {test.status}
             </div>
             <div>
-              <span className="testStat-label">Launched:</span>{test.launchedDate}
-            </div>
-            <div>
               <span className="testStat-label">Reference Code:</span>{test.referenceCode}
+              {CreateInfoButton("reference", this.showInfoModal.bind(this))}
             </div>
+
             <div>
-              <span className="testStat-label">Status:</span>{test.testStatus}
+              <span className="testStat-label">Launched:</span>{test.launchedDate}
             </div>
           </span>
           <span className="testBox-bottom-right">
             {this.renderStats()}
           </span>
+          <div>
+            <span className="testStat-label">Status:</span>{test.testStatus}
+            {CreateInfoButton("status", this.showInfoModal.bind(this))}
+          </div>
         </div>
       </div>
     );

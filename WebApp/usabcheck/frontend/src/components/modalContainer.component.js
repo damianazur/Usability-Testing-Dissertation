@@ -16,10 +16,12 @@ export class ModalContainer extends Component {
     this.setState({ isShown: false });
   };
 
-  onClickOutside = (event) => {
-    if (this.modal && this.modal.contains(event.target)) return;
-    this.closeModal();
-  };
+  // onClickOutside = (event) => {
+  //   var className = event.target.getAttribute('class');
+  //   if (this.modal && this.modal.contains(event.target)) return;
+  //   if (className != "modal-cover") return;
+  //   this.closeModal();
+  // };
 
   render() {
     return (

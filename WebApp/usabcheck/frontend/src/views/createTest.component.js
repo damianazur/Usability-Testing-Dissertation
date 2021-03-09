@@ -4,7 +4,10 @@ import TaskCreateBox from "components/taskCreate.component";
 import TextQuestionCreateBox from "components/textQuestionCreate.component";
 import MutlipleChoiceQuestionBox from "components/mutliplechoiceQuestion.component";
 import DropdownGenerator from "components/dropdownGenerator.component";
-import { createNotification } from 'utilities/utils.js';
+import { createNotification } from 'utilities/utils.js';  
+import { CreateInfoModals, CreateInfoButton } from 'modal/infoModalUtilities'; 
+
+import { TestNameInfoForm, PreTestInfoForm, UsabTestInfoForm, TaskInfoForm } from 'forms/infoForms';
 
 import 'react-notifications/lib/notifications.css';
 import "bootstrap.min.css";
@@ -37,11 +40,15 @@ export default class CreateTest extends Component {
         projectName: this.props.location.state.projectName,
         projectId: this.props.location.state.projectId
       },
+
+      modalList: [],
+      infoRefPair: {}
     };
   }
 
   componentDidMount() {
     this.updateProjectList();
+    this.setInfoModals();
   }
 
   updateProjectList() {
@@ -244,29 +251,6 @@ export default class CreateTest extends Component {
     );
   }
 
-  // createNotification(type, message) {
-  //   switch (type) {
-  //     case 'info':
-  //       alert = NotificationManager.info(message, 'Info', 3000);
-  //       break;
-  //     case 'success':
-  //       alert = NotificationManager.success(message, 'Success', 3000);
-  //       break;
-  //     case 'warning':
-  //       alert = NotificationManager.warning(message, 'Warning', 3000);
-  //       break;
-  //     case 'error':
-  //       alert = NotificationManager.error(message, 'Error', 5000, () => {
-  //         console.log("Error callback");
-  //       });
-  //       break;
-  //   }
-
-    // return (
-    //   {alert}
-    // );
-  // };
-
   onProjectSelect(params) {
     params = JSON.parse(params);
     let projectName = params.projectName;
@@ -301,9 +285,26 @@ export default class CreateTest extends Component {
     this.setState({projectDropdown: projectDropdown});
   }
 
+  setInfoModals() {
+    var nameFormPair = {
+      "testName": TestNameInfoForm,
+      "preTest": PreTestInfoForm,
+      "usabTest": UsabTestInfoForm,
+      "task": TaskInfoForm
+    }
+    var returnData = CreateInfoModals(nameFormPair);
+    this.setState({
+      modalList: returnData.modalList, 
+      infoRefPair: returnData.infoRefPair
+    })
+  }
+  
+  showInfoModal(modalName) {
+    var ref = this.state.infoRefPair[modalName];
+    ref.current.showModal();
+  }
+
   render() {  
-    // console.log("RENDER", this.state.testRefs);
-    // console.log("SEQUENCE", this.state.testSequenceList);    
     return (
       <div className="mainPageDiv">
         {/* <div>
@@ -312,8 +313,12 @@ export default class CreateTest extends Component {
           </button>
         </div> */}
 
-        <h1>Create Usability Test</h1>
+        <h1>Create Usability Test {CreateInfoButton("usabTest", this.showInfoModal.bind(this))}</h1>
         <hr></hr>
+
+        <div>
+          {this.state.modalList}
+        </div>
 
         <div className="createTest-content">  
           <form onSubmit={this.onProjectCreate.bind(this)}>
@@ -321,10 +326,11 @@ export default class CreateTest extends Component {
             {this.state.projectDropdown}
             <br></br>
             <label>Test Name</label>
+            {CreateInfoButton("testName", this.showInfoModal.bind(this))}
             <input placeholder="Test Name" autoComplete="off" className="inputField2" type="text" name="testName" required/>
             
             {/* --------- PRE-TEST QUESTIONS --------- */}
-            <h2 style={{marginTop: "50px"}}>Pre-test Questions</h2>
+            <h2 style={{marginTop: "50px"}}>Pre-test Questions {CreateInfoButton("preTest", this.showInfoModal.bind(this))}</h2>
             <div id="preTestInstructionHolder">
               {this.state.pretestSequenceList}
             </div>
@@ -348,7 +354,7 @@ export default class CreateTest extends Component {
             <hr></hr>
 
             {/* --------- USABILITY TEST BODY (TASKS & QUESTIONS) --------- */}
-            <h2  style={{marginTop: "50px"}}>Usability Test</h2>
+            <h2  style={{marginTop: "50px"}}>Usability Test  {CreateInfoButton("usabTest", this.showInfoModal.bind(this))}</h2>
             <div id="testInstructionHolder">
               {this.state.testSequenceList}
             </div>
@@ -378,7 +384,7 @@ export default class CreateTest extends Component {
             </div>
 
             <div>
-              <button className="primaryButton" style={{"backgroundColor": "#00b500"}}>
+              <button className="primaryButton" style={{"backgroundColor": "#00b500", fontWeight: "600"}}>
                 Create Test
               </button>
             </div>

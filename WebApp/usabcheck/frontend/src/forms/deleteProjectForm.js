@@ -26,7 +26,7 @@ export class DeleteProjectForm extends Component {
     return (
       <form onSubmit={this.props.onSubmit}>
         <div className="form-group">
-          <label style={{color: "red"}}>WARNING: This action cannot be undone!</label>
+          <label style={{color: "red"}}>WARNING: This action cannot be undone!<br></br><br></br>The project and all the tests within the project will be deleted!</label>
           <label>Select Project to Delete</label>
           <input type="hidden" name="deleteProjectName" value={this.state.toDeleteProjectName}></input>
           <input type="hidden" name="deleteProjectId" value={this.state.toDeleteProjectId}></input>
