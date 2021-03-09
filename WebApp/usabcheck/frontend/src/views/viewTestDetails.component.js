@@ -50,7 +50,7 @@ export default class ViewTestDetails extends Component {
           if (questionType === "text") {
             itemNameMap[stage].push(
               <div key={key} className="createTestInputBox textQuestionCreate">
-                <h3>Question (Text Answer)</h3>
+                <h3 style={{marginTop: "0px"}}>Question (Text Answer)</h3>
                 <hr className="createTestInputBox-hr"></hr>
                 <label className="label-1">Question:</label>
                 <span className="viewDetails-span">{questionConfigs.questionText}</span>
@@ -70,7 +70,7 @@ export default class ViewTestDetails extends Component {
 
             itemNameMap[stage].push(
               <div key={key} className="createTestInputBox multipleChoiceCreate">
-                <h3>Question (Multiple Choice)</h3>
+                <h3 style={{marginTop: "0px"}}>Question (Multiple Choice)</h3>
                 <hr className="createTestInputBox-hr"></hr>
                 <div>
                   <label className="label-1">Question:</label>
@@ -100,7 +100,7 @@ export default class ViewTestDetails extends Component {
 
           itemNameMap["test"].push(
             <div key={key} className="createTestInputBox taskCreate">
-              <h3>Task</h3>
+              <h3 style={{marginTop: "0px"}}>Task</h3>
               <hr className="createTestInputBox-hr"></hr>
               <div>
                 <label className="label-1">Task Name:</label>
@@ -138,7 +138,7 @@ export default class ViewTestDetails extends Component {
             <span style={{fontWeight: "bold"}}>{data.testStatus}</span>
           </div>
           <hr></hr>
-          <h2>Pre-test</h2>
+          <h2>Pre-test Questions</h2>
         </div>
       );
       key += 1;
@@ -146,7 +146,7 @@ export default class ViewTestDetails extends Component {
       items.push(preTestItems);
       items.push(
         <div key={key}>
-          <hr></hr>
+          <hr style={{marginTop: "80px"}}></hr>
           <h2>Usability Test</h2>
         </div>
       );
@@ -159,7 +159,7 @@ export default class ViewTestDetails extends Component {
   render() {  
     return (
       <div className="mainPageDiv">
-        <h1>View Usability Test Details</h1>
+        <h1>View Usability Test</h1>
         <hr></hr>
         <div className="createTest-content">  
           {this.state.testDetails}

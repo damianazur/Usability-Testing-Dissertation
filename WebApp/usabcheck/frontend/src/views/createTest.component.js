@@ -3,8 +3,8 @@ import Server from "services/server.service";
 import TaskCreateBox from "components/taskCreate.component";
 import TextQuestionCreateBox from "components/textQuestionCreate.component";
 import MutlipleChoiceQuestionBox from "components/mutliplechoiceQuestion.component";
-
-import {NotificationContainer, NotificationManager} from 'react-notifications';
+import DropdownGenerator from "components/dropdownGenerator.component";
+import { createNotification } from 'utilities/utils.js';
 
 import 'react-notifications/lib/notifications.css';
 import "bootstrap.min.css";
@@ -19,6 +19,8 @@ export default class CreateTest extends Component {
       "MutlipleChoiceQuestionBox": MutlipleChoiceQuestionBox
     };
 
+    console.log(this.props.location.state);
+
     this.state = {
       pretestSequenceList: [],
       testSequenceList: [],
@@ -28,7 +30,26 @@ export default class CreateTest extends Component {
 
       pretestRefs: [],
       testRefs: [],
+
+      projects: [],
+      projectDropdown: [],
+      selectedProject: {
+        projectName: this.props.location.state.projectName,
+        projectId: this.props.location.state.projectId
+      },
     };
+  }
+
+  componentDidMount() {
+    this.updateProjectList();
+  }
+
+  updateProjectList() {
+    Server.getProjectList().then(response => {
+      this.setState({projects: response.data}, () => {
+        this.generateProjectDropdown(this.onProjectSelect.bind(this));
+      });
+    });
   }
 
   update() {
@@ -191,7 +212,7 @@ export default class CreateTest extends Component {
 
     let uploadData = {
       testName: testName,
-      projectId: this.props.location.state.projectId,
+      projectId: this.state.selectedProject.projectId,
       sequenceData: testSequenceData
     };
 
@@ -199,8 +220,9 @@ export default class CreateTest extends Component {
     console.log(uploadData);
     Server.createTest(uploadData).then(
       () => {
+        createNotification('success', "Test Created Successfully!");
         this.props.history.push("/dashboard");
-        window.location.reload();
+        // window.location.reload();
       },
       error => {
         const resMessage = (
@@ -212,7 +234,7 @@ export default class CreateTest extends Component {
         
         console.log(error.message);
 
-        this.createNotification("error", error.toString());
+        createNotification("error", error.toString());
 
         this.setState({
           loading: false,
@@ -222,46 +244,82 @@ export default class CreateTest extends Component {
     );
   }
 
-  createNotification(type, message) {
-    switch (type) {
-      case 'info':
-        alert = NotificationManager.info(message, 'Info', 3000);
-        break;
-      case 'success':
-        alert = NotificationManager.success(message, 'Success', 3000);
-        break;
-      case 'warning':
-        alert = NotificationManager.warning(message, 'Warning', 3000);
-        break;
-      case 'error':
-        alert = NotificationManager.error(message, 'Error', 5000, () => {
-          console.log("Error callback");
-        });
-        break;
-    }
+  // createNotification(type, message) {
+  //   switch (type) {
+  //     case 'info':
+  //       alert = NotificationManager.info(message, 'Info', 3000);
+  //       break;
+  //     case 'success':
+  //       alert = NotificationManager.success(message, 'Success', 3000);
+  //       break;
+  //     case 'warning':
+  //       alert = NotificationManager.warning(message, 'Warning', 3000);
+  //       break;
+  //     case 'error':
+  //       alert = NotificationManager.error(message, 'Error', 5000, () => {
+  //         console.log("Error callback");
+  //       });
+  //       break;
+  //   }
 
     // return (
     //   {alert}
     // );
-  };
+  // };
+
+  onProjectSelect(params) {
+    params = JSON.parse(params);
+    let projectName = params.projectName;
+
+    console.log("Selected project: ", params)
+
+    this.setState({selectedProject: {
+      projectName: projectName,
+      projectId: params.projectId
+    }});
+  }
+
+  generateProjectDropdown(onSelectFunction) {
+    let projects = this.state.projects;
+    let menuItems = [];
+
+    for(let i = 0; i < projects.length; i++) {
+      let project = projects[i];
+      let item = {};
+
+      item.name = project.projectName;
+      item.params = {
+        projectName: project.projectName,
+        projectId: project.projectId
+      };
+      item.onSelectFunction = onSelectFunction;
+
+      menuItems.push(item);
+    }
+
+    var projectDropdown = <DropdownGenerator data={menuItems} initalText={this.state.selectedProject.projectName}></DropdownGenerator>;
+    this.setState({projectDropdown: projectDropdown});
+  }
 
   render() {  
     // console.log("RENDER", this.state.testRefs);
     // console.log("SEQUENCE", this.state.testSequenceList);    
     return (
       <div className="mainPageDiv">
-        <div>
+        {/* <div>
           <button className='btn btn-info'
-            onClick={this.createNotification.bind(this, 'success', "Test Created Successfully!")}>Info
+            onClick={createNotification.bind(this, 'success', "Test Created Successfully!")}>Info
           </button>
-          <NotificationContainer/>
-        </div>
+        </div> */}
 
         <h1>Create Usability Test</h1>
         <hr></hr>
 
         <div className="createTest-content">  
           <form onSubmit={this.onProjectCreate.bind(this)}>
+            <label style={{marginRight: "15px"}}>Project</label>
+            {this.state.projectDropdown}
+            <br></br>
             <label>Test Name</label>
             <input placeholder="Test Name" autoComplete="off" className="inputField2" type="text" name="testName" required/>
             

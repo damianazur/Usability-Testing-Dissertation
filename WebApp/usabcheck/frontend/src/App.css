@@ -2,7 +2,7 @@
   --primaryButton-body:rgb(37, 186, 255);
   --primaryButton-hover: rgb(38, 172, 235);
 
-  --button1-body: rgb(153, 206, 255); 
+  --button1-body: rgb(174, 216, 255); 
   --button1-hover: rgb(119, 189, 255);
   --button1-active: rgb(96, 177, 252);
   --button1-active-border: rgb(72, 167, 255);
@@ -15,6 +15,11 @@
   --task-body: rgb(240, 245, 255);
   --text-question-body:  rgb(255, 250, 240);
   --multiple-choice-question-body:  rgb(255, 240, 240);
+}
+
+body {
+  font-size:calc(16px) !important;
+  font-family: Helvetica, sans-serif !important; 
 }
 
 .primaryButton {
@@ -31,22 +36,37 @@
   font-size: 16px;
 }
 
+.button1 {
+  background-color: var(--button1-body);
+}
+
+.button1:hover {
+  background-color: var(--button1-hover);
+}
+
 .secondaryButton {
   padding-left: 20px;
   padding-right: 20px;
   padding-top: 2px;
   padding-bottom: 2px;
-  background-color: var(--primaryButton-body);
-  color: white;
+  color: #1a1a1a;
   margin-top: 5px;
   margin-bottom: 5px;
-  border: 1px solid rgb(255, 255, 255);
-  border-radius: 10px;
-  font-size: 14px;
+  border-radius: 7px;
+  font-size: 16px;
   margin-right: 20px; 
+  font-weight: 600;
+  background-color: var(--button1-body);
+  border: 1px solid rgb(133, 186, 255);
 }
 
-.primaryButton:hover, .secondaryButton:hover {
+
+.secondaryButton:hover {
+  background-color: var(--button1-hover);
+}
+
+.primaryButton:hover {
+  /* filter: brightness(95%); */
   background-color: var(--primaryButton-hover);
 }
 
@@ -114,7 +134,8 @@
 }
 
 .navbar-navDiv li a:hover, .navbar-navDiv a:hover{
-  color: rgb(82, 177, 255);
+  /* color: rgb(82, 177, 255); */
+  filter: brightness(95%);
 }
 
 
@@ -162,10 +183,17 @@ button {
   border-bottom: 1px rgb(233, 233, 233) solid;
   border-radius: 3px;
   background-color: white;
+  font-size: 16px;
+}
+
+.dropdown-menu {
+  padding-bottom: 0px !important;
+  padding-top: 0px !important;
 }
 
 .dropdown-item:hover {
-  background-color: rgb(218, 237, 255);
+  /* background-color: rgb(218, 237, 255); */
+  filter: brightness(95%);
 }
 
 .dropdown-menu {
@@ -180,9 +208,14 @@ button {
   text-align: left;
   padding-left: 10px;
   padding-right: 35px;
+  font-size: 16px;
+  font-weight: 600;
+  border: 1px solid rgb(133, 186, 255);
+  color: #1a1a1a;
 }
 .dropDownButton:hover {
   background-color: var(--button1-hover);
+  /* filter: brightness(95%); */
 }
 .dropDownButton:active{
   background-color: var(--button1-active);
@@ -250,6 +283,7 @@ button {
 
 ._modal-close:hover {
   background: var(--button1-hover);
+  /* filter: brightness(95%); */
 }
 
 .modal-body {
@@ -286,6 +320,7 @@ button {
   background-color: rgb(212, 212, 212);
   padding: 10px;
   overflow: auto;
+  margin-bottom: 20px;
 }
 
 .dashboard-testBox {
@@ -316,7 +351,8 @@ button {
 
 .testStat-label {
   display: inline-block;
-  min-width: 120px;
+  min-width: 180px;
+  /* margin-right: 10px; */
   font-weight: 700;
 }
 
@@ -377,7 +413,7 @@ button {
 }
 
 .viewDetails-span {
-  background-color: rgb(255, 255, 255, 0.8);
+  background-color: rgba(255, 255, 255, 1);
   border: 1px solid rgb(247, 247, 247);
   padding-left: 5px;
   display: inline-block;
@@ -637,7 +673,7 @@ button {
 
 .legendContainer {
   margin-top: 8px;
-  margin-left: 78px;
+  /* margin-left: 78px; */
 }
 
 .legendColorBox {
@@ -677,7 +713,7 @@ button {
 }
 
 .gradingButtons:hover {
-  filter: brightness(90%);
+  filter: brightness(95%);
 }
 
 .taskGradeBox {

@@ -348,13 +348,13 @@ export class VideoBars extends Component {
         <label>Show Labels</label><input style={{marginLeft: "10px"}} type="checkbox" defaultChecked={this.state.infoVisible} onChange={this.toggleHidableInfo.bind(this)} />
         <div id="videoBarsContainer"> 
           <h2 className="barLabels hidableInfo" style={{textAlign: "center"}}>Entire Video Timeline</h2>
-          <h3 className="barLabels hidableInfo" style={{textAlign: "left", marginLeft: "95px", marginBottom: "5px"}}>Emotions</h3>
+          <h3 className="barLabels hidableInfo" style={{textAlign: "left", marginLeft: "10px", marginBottom: "5px"}}>Emotions</h3>
           {this.renderTimelineBar("entire")}
           <div className="legendContainer hidableInfo">
             {this.renderLegend("emotion")}
           </div>
 
-          <h3 className="barLabels hidableInfo" style={{textAlign: "left", marginLeft: "95px", marginBottom: "5px", marginTop: "10px"}}>Tasks</h3>
+          <h3 className="barLabels hidableInfo" style={{textAlign: "left", marginLeft: "10px", marginBottom: "5px", marginTop: "10px"}}>Tasks</h3>
           <span className="spacer" style={{"display": "none", margin: "0px", height: "0px", padding: "0px"}}></span>
           {this.renderTimelineBar("task")}
           <div className="legendContainer hidableInfo">
@@ -362,7 +362,7 @@ export class VideoBars extends Component {
           </div>
           
           <br></br>
-          <h2 className="barLabels hidableInfo" style={{textAlign: "center"}}>Zoomed-in Emotions Timeline</h2>
+          <h2 className="barLabels hidableInfo" style={{textAlign: "center", marginTop: "40px"}}>Zoomed-in Emotions Timeline</h2>
           {this.renderTimelineBar("zoomed-in")}
         </div>
       </div>

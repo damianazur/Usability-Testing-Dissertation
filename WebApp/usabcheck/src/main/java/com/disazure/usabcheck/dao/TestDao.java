@@ -45,6 +45,22 @@ public class TestDao {
 	    return result;
 	}
 	
+	public boolean verifyResearcher(int researcherId, int testId) {
+		String sql = ""
+				+ "SELECT researcherId FROM test "
+				+ "JOIN project using(projectId) "
+				+ "JOIN researcher using(researcherId) "
+				+ "WHERE researcherId = ? AND testId = ?";
+		
+		int resId = jdbcTemplate.queryForObject(sql, Integer.class, researcherId, testId);
+		
+		if (resId == researcherId) {
+			return true;
+		}
+		
+		return false;
+	}
+	
 	public String getByTestId(int researcherId, int testId) throws JsonProcessingException {
 		System.out.println(researcherId + " ## " + testId);
 		String sql = ""
@@ -138,6 +154,25 @@ public class TestDao {
 				+ "WHERE researcherId = ? AND testId = ? AND testName = ?";
 		
         return jdbcTemplate.update(sql, researcherId, testId, testName);
+	}
+	
+	public int changeStatus(int researcherId, int testId, String status) {
+		if (!verifyResearcher(researcherId, testId)) {
+			return -1;
+		}
+		
+		System.out.println("status " + status);
+		if (!status.equals("Open") && !status.equals("Closed")) {
+			return -1;
+		}
+		
+		String sql = ""
+				+ "UPDATE test SET testStatus = ?"
+				+ "WHERE testId = ?";
+		
+		int result = jdbcTemplate.update(sql, status, testId);
+		
+		return result;
 	}
 
 }

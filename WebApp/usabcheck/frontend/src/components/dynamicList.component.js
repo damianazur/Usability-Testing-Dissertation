@@ -79,7 +79,7 @@ export class DynamicList extends Component {
 
         </div>
         <div style={{"width": "10%", display:"inline-block"}}>
-          <button onClick={this.deleteItem.bind(this)} value={key} type="button" style={{"marginLeft": "25px", "backgroundColor":"red", "padding":"5px 10px 5px"}} className="secondaryButton">✖</button>
+          <button onClick={this.deleteItem.bind(this)} value={key} type="button" style={{"marginLeft": "25px", "padding":"5px 10px 5px"}} className="secondaryButton deleteButton2">✖</button>
         </div>
       </div>
     );

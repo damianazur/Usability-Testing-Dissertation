@@ -2,6 +2,7 @@ input {
     border: 1px solid silver;
     font-size: 16px;
     background-color: none;
+    font-size: 16px !important;
 }
 
 input:focus {
@@ -11,7 +12,7 @@ input:focus {
 }
 
 label {
-    font-size: 14px;
+    font-size: 16px;
 }
 
 button {
@@ -27,6 +28,7 @@ button {
     border-radius: 5px;
     margin: 0px auto 0px;
     display : block;
+    font-size: 16px !important;
 }
 
 .inputField2 {
@@ -36,6 +38,7 @@ button {
     width: 200px;
     border-radius: 5px;
     display : block;
+    font-size: 16px !important;
 }
 
 .inputGroup {
@@ -49,11 +52,27 @@ button {
 
 .fullWidth {
     width: 100%;
+    font-size: 18px;
 }
 
 .deleteButton {
-    background-color: red;
-    float: right;
+    background-color: rgb(255, 111, 111); 
+    border: 1px solid rgb(255, 85, 85);
+    /* float: right; */
+}
+
+.deleteButton:hover {
+    background-color: rgb(255, 85, 85); 
+}
+
+.deleteButton2 {
+    background-color: rgb(255, 73, 73);
+    border: 1px solid rgb(253, 39, 39);
+    border-radius: 100%;
+}
+
+.deleteButton2:hover {
+    background-color: rgb(255, 45, 45);
 }
 
 #formHeading {

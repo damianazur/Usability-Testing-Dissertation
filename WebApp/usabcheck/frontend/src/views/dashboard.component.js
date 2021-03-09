@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { Component, createRef } from "react";
 
 import { CreateProjectForm } from 'forms/createProjectForm';
 import { DeleteProjectForm } from 'forms/deleteProjectForm';
@@ -18,13 +18,13 @@ export default class Login extends Component {
     this._deleteProjectModal = React.createRef();
 
     this.state = {
-      projects: undefined,
-      tests: undefined,
+      projects: [],
+      tests: [],
       selectedProject: {
         projectName: "Choose Project",
         projectId: undefined
       },
-      rerenderMe: undefined
+      testContainers: []
     };
   }
 
@@ -36,9 +36,12 @@ export default class Login extends Component {
   }
 
   async componentDidMount() {
+    console.log("DASHBOARD MOUNTED");
     var state = localStorage.getItem('dashboardExitState');
 
     this.updateProjectList();
+
+    console.log(state)
 
     if (state) {
       state = JSON.parse(state);
@@ -66,7 +69,9 @@ export default class Login extends Component {
   updateTestList(projectId) {
     Server.getTestList(projectId).then(response => {
       console.log(response.data);
-      this.setState({tests: response.data});
+      this.setState({tests: response.data}, () => {
+        // this.displayTests();
+      });
     });
   }
   
@@ -84,7 +89,7 @@ export default class Login extends Component {
 
     this.updateTestList(params.projectId);
     this.setState({selectedProject: {
-      projectName: projectName,
+      projectName: params.projectName,
       projectId: params.projectId
     }});
   }
@@ -168,47 +173,67 @@ export default class Login extends Component {
       return(undefined);
     }
 
-    let renderItems = [];
-
+    var renderItems = [];
+    // var key = this.state.containerKey;
     for(let i = 0; i < tests.length; i++) {
       let test = tests[i];
 
       console.log("Test: ", test.testName);
 
+      var key = new Date().getTime() + i;
       renderItems.push(
-        <TestContainer history={this.props.history} parentUpdate={this.update.bind(this)} key={i} onDelete={this.deleteTestSubmit.bind(this)} testItem={test}></TestContainer>
+        <TestContainer 
+          key={key} 
+          history={this.props.history} 
+          parentUpdate={this.update.bind(this)} 
+          onDelete={this.deleteTestSubmit.bind(this)} 
+          testItem={test}>          
+        </TestContainer>
       );
     }
 
     return (
-      <div className="testContainer">
-        {renderItems}
-      </div>
+      renderItems
     )
+  }
+
+  renderCreateTestButton() {
+    return (
+      <button onClick={() => {
+        this.props.history.push({
+          pathname: 'create-test',
+          state: { projectId: this.state.selectedProject.projectId, projectName: this.state.selectedProject.projectName}
+        });
+        window.location.reload();
+        }} type="button" className="secondaryButton button1">Create Usability Test
+      </button>
+    );
   }
 
   render() {  
 
     console.log("RENDER", this.state);
+    console.log(this.state.testContainers)
 
     const projects = this.state.projects;
 
     if (projects) {
       return (
         <div className="mainPageDiv">
-          <h1>Projects</h1>
+          <h1>Dashboard</h1>
           <hr></hr>
           <div className="post-content">  
             <ModalContainer 
               Form={CreateProjectForm} 
               ref={this._createProjectModal} 
-              buttonClassName="secondaryButton" 
-              triggerText={"Create Project"} 
+              buttonClassName="secondaryButton button1" 
+              triggerText={"Create a Project"} 
               onSubmit={this.createProjectSubmit.bind(this)}
             />   
 
             {this.state.projects.length > 0 ? (
               <span>
+                {/* <label style={{marginRight: "15px"}}>Select Project:</label> */}
                 {this.generateProjectDropdown(this.onProjectSelect.bind(this), this.state.selectedProject.projectName)}
 
                 <ModalContainer 
@@ -218,32 +243,39 @@ export default class Login extends Component {
                   triggerText={"Delete a Project"}
                   onSubmit={this.deleteProjectSubmit.bind(this)}
                   generateProjectDropdown={this.generateProjectDropdown.bind(this)}
-                />   
+                />
+
+                {this.state.selectedProject.projectId && this.state.tests.length > 0 ? (
+                  <span>
+                    {this.renderCreateTestButton()}
+                  </span>
+                ) : (
+                  null
+                )}
 
                 <div>
-                 
                     <div>
                       {this.state.selectedProject.projectId && (
                         <h2 style={{width: "100%"}}>Usability Tests</h2>
                       )}
 
-                      {this.state.selectedProject.projectId && (
-                        <button onClick={() => {
-                            this.props.history.push({
-                              pathname: 'create-test',
-                              state: { projectId: this.state.selectedProject.projectId }
-                            });
-                            window.location.reload();
-                          }} type="button" className="secondaryButton">Create Usability Test
-                        </button>
-                      )}
-
                       {this.state.tests && this.state.tests.length > 0 ? (
                         <div>
-                          {this.displayTests()}
+                          <div className="testContainer">
+                            {/* {this.state.testContainers} */}
+                            {this.displayTests()}
+                          </div>
                         </div>
                       ) : (
                         <h3>Please create a usability test for this project</h3>
+                      )}
+
+                      {this.state.selectedProject.projectId && this.state.tests.length == 0 ? (
+                        <span>
+                          {this.renderCreateTestButton()}
+                        </span>
+                      ) : (
+                        null
                       )}
                     </div>
                  

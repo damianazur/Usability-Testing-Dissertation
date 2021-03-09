@@ -143,6 +143,17 @@ class ServerComponent {
           "grade": grade
         })
     }
+
+    changeTestStatus(testId, status) {
+      const token = JSON.parse(localStorage.getItem('user')).accessToken;
+
+      return axios
+        .post(API_URL + "changeTestStatus", {
+          "token": token,
+          "testId": testId,
+          "status": status
+        })
+    }
   }
   
   export default new ServerComponent();

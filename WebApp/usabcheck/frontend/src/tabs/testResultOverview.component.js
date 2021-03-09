@@ -99,7 +99,7 @@ export class TestResultOverviewTab extends Component {
         labels: {
           style: {
             colors: '#000000',
-            fontSize: '15px'
+            fontSize: '16px'
           }
         }
       },
@@ -107,7 +107,7 @@ export class TestResultOverviewTab extends Component {
         labels: {
           style: {
             colors: '#000000',
-            fontSize: '15px'
+            fontSize: '16px'
           }
         }
       }
@@ -201,6 +201,7 @@ export class TestResultOverviewTab extends Component {
           <h3 className="chartHeading">
             Success Rate Across All Tasks
           </h3>
+          <h4 style={{marginBottom: "5px"}}>No. of Tasks Completed by all Participants: {totalCount["Pass"] + totalCount["Fail"] + totalCount["Not Graded"]}</h4>
           <Chart
             options={options}
             series={series}
@@ -237,7 +238,7 @@ export class TestResultOverviewTab extends Component {
         enabled: true,
         textAnchor: 'end',
         style: {
-          fontSize: '15px',
+          fontSize: '16px',
           colors: ["#000000"],
           fontWeight: 'bold',
         },
@@ -246,7 +247,7 @@ export class TestResultOverviewTab extends Component {
         },
       },
       legend: {
-        fontSize: "15px",
+        fontSize: "16px",
         horizontalAlign: 'right',
         width: 200,
       }
@@ -376,35 +377,46 @@ export class TestResultOverviewTab extends Component {
             <h2>Details</h2>
             <hr className="hr2"></hr>
             <h3>No. of Participants: {this.state.instanceData.length}</h3>
+
+            {this.state.taskGradeData["tasks"] ? (
+              <h3>No. of Tasks: {this.state.taskGradeData["tasks"].length}</h3>
+            ) : (
+              null
+            )}
+            {this.state.questionAnswerData["questions"] ? (
+              <h3>No. of Questions: {this.state.questionAnswerData["questions"].length}</h3>
+            ) : (
+              null
+            )}
             <hr></hr>
 
             {this.state.instanceData.length > 0 ? (
               <span>
                 <br></br>
-                <h2>Overall Task Success Rate</h2>
-                <hr className="hr2"></hr>
                 <div className="chartHolder">
+                  <h2>Overall Task Success Rate</h2>
+                  <hr className="hr2"></hr>
                   {this.state.overallChart}
                 </div>
 
                 <br></br>
-                <h2>Individual Task Performance</h2>
-                <hr className="hr2"></hr>
                 <div className="chartHolder">
+                  <h2>Individual Task Performance</h2>
+                  <hr className="hr2"></hr>
                   {this.state.taskChartList}
                 </div>
 
                 <br></br>
-                <h2>Multiple-Choice Question Answers</h2>
-                <hr className="hr2"></hr>
                 <div className="chartHolder">
+                  <h2>Multiple-Choice Question Answers</h2>
+                  <hr className="hr2"></hr>
                   {this.state.answerChartList}
                 </div>
 
                 <br></br>
-                <h2>Text Question Answers</h2>
-                <hr className="hr2"></hr>
                 <div className="chartHolder">
+                  <h2>Text Question Answers</h2>
+                  <hr className="hr2"></hr>
                   {this.state.textAnswerList}
                 </div>
               </span>

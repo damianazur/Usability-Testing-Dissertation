@@ -4,6 +4,7 @@ import ModalContainer from "components/modalContainer.component";
 import DropdownGenerator from "components/dropdownGenerator.component";
 import { DeleteTestForm } from 'forms/deleteTestForm';
 import Server from "services/server.service";
+import { createNotification } from 'utilities/utils.js';
 
 export class TestContainer extends Component {
   constructor(props) {
@@ -12,8 +13,22 @@ export class TestContainer extends Component {
     this._deleteTestModal = React.createRef();
 
     this.state = {
-      selectedOption: "Settings"
+      selectedOption: "Settings",
+      taskGradeData: [],
+      questionAnswerData: [],
+      instanceData: []
     };
+
+    // console.log(this.props.testItem);
+  }
+
+  componentDidMount() {
+    const test = this.props.testItem;
+
+    // console.log("####", test);
+    this.updateTaskGrades(test.testId);
+    this.updateQuestionAnswers(test.testId);
+    this.updateInstanceData(test.testId);
   }
 
   showDeletePopup() {
@@ -23,19 +38,63 @@ export class TestContainer extends Component {
 
   deleteTest(e) {
     e.preventDefault();
-    // console.log("Test delete", e);
-
     let testName = e.target.deleteTestName.value
     let testId = e.target.deleteTestId.value
 
-    // console.log("Project submit!", e, testName, testId);
-
     this._deleteTestModal.current.setState({isShown: false});
     Server.deleteTest(testId, testName).then(response => {
-      console.log(response);
+      // console.log(response);
+      createNotification('success', "Test Deleted Successfully!");
+      this.props.parentUpdate();
+      },
+      error => {
+        const resMessage = (
+          error.response &&
+          error.response.data &&
+          error.response.data.message) || 
+          error.message ||
+          error.toString();
+        
+        console.log(error.message);
+        createNotification("error", error.toString());
+
+        this.setState({
+          loading: false,
+          message: resMessage
+        });
+      }
+    );
+  }
+
+  updateTaskGrades(testId) {
+    Server.getTasksAndGrades(testId).then(response => {
+      this.setState({taskGradeData: response.data});
+    });
+  }
+
+  updateQuestionAnswers(testId) {
+    // console.log(testId);
+    Server.getQuestionAndAnswers(testId).then(response => {
+      // console.log(response.data);
+      this.setState({questionAnswerData: response.data});
+    });
+  }
+
+  updateInstanceData(testId) {
+    Server.getTestInstances(testId).then(response => {
+      this.setState({instanceData: response.data});
+    });
+  }
+
+  changeTestStatus(statusName) {
+    var testId = this.props.testItem.testId;
+
+    Server.changeTestStatus(testId, statusName).then(response => {
+      // console.log(response.data);
       this.props.parentUpdate();
     });
 
+    // console.log(testId, statusName);
   }
 
   generateOptionsDropdown = (test, selectedOption) => {
@@ -48,12 +107,63 @@ export class TestContainer extends Component {
       testId: test.testId
     };
     item.onSelectFunction = this.showDeletePopup.bind(this);
+    menuItems.push(item);
+
+    item = {};
+    var changeToStatus = "";
+    if (this.props.testItem.testStatus == "Open") {
+      item.name = "Close";
+      changeToStatus = "Closed"
+    } else if (this.props.testItem.testStatus == "Closed") {
+      item.name = "Open";
+      changeToStatus = "Open"
+    }
+    item.params = {
+      testName: test.testName,
+      testId: test.testId
+    };
+    item.onSelectFunction = this.changeTestStatus.bind(this, changeToStatus);
 
     menuItems.push(item);
 
     return (
       <DropdownGenerator data={menuItems} initalText={selectedOption}></DropdownGenerator>
     )
+  }
+
+  renderStats() {
+
+    // console.log(this.props.testItem.testId, this.state.taskGradeData["tasks"]);
+    return (
+      <div>
+        <div className="testStat">
+          <span className="testStat-label">No. of Tasks:</span>
+          {this.state.taskGradeData["tasks"] ? (
+            <span>{this.state.taskGradeData["tasks"].length}</span>
+          ) : (
+            null
+          )}
+        </div>
+        
+        <div className="testStat">
+          <span className="testStat-label">No. of Questions:</span>
+          {this.state.questionAnswerData["questions"] ? (
+            <span>{this.state.questionAnswerData["questions"].length}</span>
+          ) : (
+            null
+          )}
+        </div>
+        
+        <div className="testStat">
+          <span className="testStat-label">No. of Participants:</span>
+          {this.state.instanceData ? (
+            <span>{this.state.instanceData.length}</span>
+          ) : (
+            null
+          )}
+        </div>
+      </div>
+    );
   }
 
   render() {
@@ -63,22 +173,38 @@ export class TestContainer extends Component {
 
     const stats = [];
 
-    stats.push(
-      <div key="0">
-        <div className="testStat">
-          <span className="testStat-label">Task Pass:</span>
-          <span>N/A</span>
-        </div>
-        <div className="testStat">
-          <span className="testStat-label">Task Fail:</span>
-          <span>N/A</span>
-        </div>
-        <div className="testStat">
-          <span className="testStat-label">Participants:</span>
-          <span>N/A</span>
-        </div>
-      </div>
-    )
+    // console.log(this.state.taskGradeData["tasks"]);
+
+    // stats.push(
+    //   <div>
+    //     <div className="testStat">
+    //       <span className="testStat-label">No. of Tasks:</span>
+    //       {this.state.taskGradeData["tasks"] ? (
+    //         <span>{this.state.taskGradeData["tasks"].length}</span>
+    //       ) : (
+    //         <span>N/A</span>
+    //       )}
+    //     </div>
+        
+    //     <div className="testStat">
+    //       <span className="testStat-label">No. of Questions:</span>
+    //       {this.state.questionAnswerData["questions"] ? (
+    //         <span>{this.state.questionAnswerData["questions"].length}</span>
+    //       ) : (
+    //         <span>N/A</span>
+    //       )}
+    //     </div>
+        
+    //     <div className="testStat">
+    //       <span className="testStat-label">No. of Participants:</span>
+    //       {this.state.instanceData ? (
+    //         <span>{this.state.instanceData.length}</span>
+    //       ) : (
+    //         <span>N/A</span>
+    //       )}
+    //     </div>
+    //   </div>
+    // )
 
     return (
       <div className="dashboard-testBox">
@@ -94,7 +220,7 @@ export class TestContainer extends Component {
                     state: { testId: test.testId }
                   });
                   window.location.reload();
-                }} type="button" className="secondaryButton">View Test Details
+                }} type="button" className="secondaryButton button1">View Test Details
               </button>
               
               <button onClick={() => {
@@ -103,7 +229,7 @@ export class TestContainer extends Component {
                     state: { testId: test.testId, testName: test.testName }
                   });
                   window.location.reload();
-                }} type="button" className="secondaryButton">View Test Results
+                }} type="button" className="secondaryButton button1">View Test Results
               </button>
 
               <span style={{marginTop: "7px"}}>
@@ -130,9 +256,15 @@ export class TestContainer extends Component {
             <div>
               <span className="testStat-label">Launched:</span>{test.launchedDate}
             </div>
+            <div>
+              <span className="testStat-label">Reference Code:</span>{test.referenceCode}
+            </div>
+            <div>
+              <span className="testStat-label">Status:</span>{test.testStatus}
+            </div>
           </span>
           <span className="testBox-bottom-right">
-            {stats}
+            {this.renderStats()}
           </span>
         </div>
       </div>

@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import { Switch, Route, Link, BrowserRouter as Router} from "react-router-dom";
+import {NotificationContainer, NotificationManager} from 'react-notifications';
 
 import "./App.css";
 
@@ -43,7 +44,20 @@ class App extends Component {
     return (
       <Router>
       <div>
+        <NotificationContainer/>
         <nav className="main-navbar">
+          <div className="navbar-navDiv">
+            <Link style={{paddingTop: "7px", paddingBottom: "5px",  height: "100%"}} to={"/"} className="navDiv-link">
+              <img 
+                src={`${process.env.PUBLIC_URL}/Logo.png`} 
+                alt="Logo" 
+                style={{
+                  width: "40px"
+                }}
+              />
+            </Link>
+          </div>
+
           <div className="navbar-navDiv">
             <Link to={"/"} className="navDiv-link">
               UsabCheck

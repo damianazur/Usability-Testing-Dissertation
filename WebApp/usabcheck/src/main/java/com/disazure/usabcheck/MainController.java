@@ -334,4 +334,17 @@ public class MainController {
 		return new ResponseEntity<String>(Integer.toString(result), HttpStatus.OK);
 	}
 	
+	@RequestMapping(value = "/changeTestStatus", method = RequestMethod.POST)
+	public ResponseEntity<?> changeTestStatus(@RequestBody Map<String, String> json) {
+		String token = json.get("token");
+		int testId = Integer.parseInt(json.get("testId"));
+		String status = json.get("status");
+		String username = jwtUtils.getUserNameFromJwtToken(token);
+		int researcherId = resDao.getIdFromUsername(username);
+		
+		int result = testDao.changeStatus(researcherId, testId, status);
+		
+		return new ResponseEntity<String>(Integer.toString(result), HttpStatus.OK);
+	}
+	
 }

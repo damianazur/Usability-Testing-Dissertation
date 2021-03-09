@@ -157,6 +157,19 @@ export default class Register extends Component {
                   role="alert"
                 >
                   {this.state.message}
+
+                  {this.state.successful == true ? (
+                    <button onClick={() => {
+                      this.props.history.push({
+                        pathname: 'login'
+                      });
+                      window.location.reload();
+                      }} type="button" className="primaryButton">Login
+                    </button>
+                  ) : (
+                    null
+                  )}
+
                 </div>
               </div>
             )}
