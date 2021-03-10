@@ -136,10 +136,10 @@ public class TestDao {
 		}
 		
 		String sql = ""
-				+ "INSERT INTO test (testName, projectId, launchedDate, testStatus, referenceCode) "
-				+ "VALUES (?, ?, ?, ?, ?)";
+				+ "INSERT INTO test (testName, projectId, launchedDate, testStatus, referenceCode, scenario) "
+				+ "VALUES (?, ?, ?, ?, ?, ?)";
 		
-        return jdbcTemplate.update(sql, test.getTestName(), test.getProjectId(), test.getLaunchedDate(), test.getStatus(), this.generateReferenceCode());
+        return jdbcTemplate.update(sql, test.getTestName(), test.getProjectId(), test.getLaunchedDate(), test.getStatus(), this.generateReferenceCode(), test.getScenario());
 		
 	}
 	

@@ -151,9 +151,10 @@ public class MainController {
 		
 		// Create Usability Test
 		String testName = data.get("testName").getAsString();
+		String scenario = data.get("scenario").getAsString();
 		int projectId = data.get("projectId").getAsInt();
 		java.sql.Date currentDate = new java.sql.Date(Calendar.getInstance().getTime().getTime());
-		UsabilityTest newTest = new UsabilityTest(testName, projectId, currentDate.toString(), "Open");
+		UsabilityTest newTest = new UsabilityTest(testName, projectId, currentDate.toString(), "Open", scenario);
 		int result = testDao.createTest(researcherId, newTest);
 		
 		

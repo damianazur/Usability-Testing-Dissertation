@@ -7,12 +7,14 @@ public class UsabilityTest {
 	private String launchedDate;
 	private String status;
 	private String referenceCode;
+	private String scenario;
 	
-	public UsabilityTest(String testName, int projectId, String launchedDate, String status) {
+	public UsabilityTest(String testName, int projectId, String launchedDate, String status, String scenario) {
 		this.testName = testName;
 		this.projectId = projectId;
 		this.launchedDate = launchedDate;
 		this.status = status;
+		this.scenario = scenario;
 	}
 
 	public int getTestId() {
@@ -61,6 +63,14 @@ public class UsabilityTest {
 
 	public void setReferenceCode(String referenceCode) {
 		this.referenceCode = referenceCode;
+	}
+
+	public String getScenario() {
+		return scenario;
+	}
+
+	public void setScenario(String scenario) {
+		this.scenario = scenario;
 	}
 	
 	

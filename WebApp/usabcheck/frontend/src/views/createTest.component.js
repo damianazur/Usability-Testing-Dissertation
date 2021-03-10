@@ -4,10 +4,10 @@ import TaskCreateBox from "components/taskCreate.component";
 import TextQuestionCreateBox from "components/textQuestionCreate.component";
 import MutlipleChoiceQuestionBox from "components/mutliplechoiceQuestion.component";
 import DropdownGenerator from "components/dropdownGenerator.component";
-import { createNotification } from 'utilities/utils.js';  
+import { CreateNotification, HandleServerError } from 'utilities/utils.js';  
 import { CreateInfoModals, CreateInfoButton } from 'modal/infoModalUtilities'; 
 
-import { TestNameInfoForm, PreTestInfoForm, UsabTestInfoForm, TaskInfoForm } from 'forms/infoForms';
+import { TestNameInfoForm, PreTestInfoForm, UsabTestInfoForm, TaskInfoForm, ScenarioInfoForm } from 'forms/infoForms';
 
 import 'react-notifications/lib/notifications.css';
 import "bootstrap.min.css";
@@ -178,11 +178,12 @@ export default class CreateTest extends Component {
     </div>
   )
 
-  onProjectCreate(e) {
+  onTestCreate(e) {
     e.preventDefault();
     console.log("CREATE TEST ", e.target.testName.value);
 
     let testName = e.target.testName.value;
+    let scenario = e.target.scenario.value;
     let testSequenceData = [];
 
     let stages = [
@@ -219,6 +220,7 @@ export default class CreateTest extends Component {
 
     let uploadData = {
       testName: testName,
+      scenario: scenario,
       projectId: this.state.selectedProject.projectId,
       sequenceData: testSequenceData
     };
@@ -227,26 +229,12 @@ export default class CreateTest extends Component {
     console.log(uploadData);
     Server.createTest(uploadData).then(
       () => {
-        createNotification('success', "Test Created Successfully!");
+        CreateNotification('success', "Test Created Successfully!");
         this.props.history.push("/dashboard");
         // window.location.reload();
       },
       error => {
-        const resMessage = (
-          error.response &&
-          error.response.data &&
-          error.response.data.message) || 
-          error.message ||
-          error.toString();
-        
-        console.log(error.message);
-
-        createNotification("error", error.toString());
-
-        this.setState({
-          loading: false,
-          message: resMessage
-        });
+        HandleServerError(error);
       }
     );
   }
@@ -290,7 +278,8 @@ export default class CreateTest extends Component {
       "testName": TestNameInfoForm,
       "preTest": PreTestInfoForm,
       "usabTest": UsabTestInfoForm,
-      "task": TaskInfoForm
+      "task": TaskInfoForm,
+      "scenario": ScenarioInfoForm
     }
     var returnData = CreateInfoModals(nameFormPair);
     this.setState({
@@ -321,7 +310,7 @@ export default class CreateTest extends Component {
         </div>
 
         <div className="createTest-content">  
-          <form onSubmit={this.onProjectCreate.bind(this)}>
+          <form onSubmit={this.onTestCreate.bind(this)}>
             <label style={{marginRight: "15px"}}>Project</label>
             {this.state.projectDropdown}
             <br></br>
@@ -353,6 +342,11 @@ export default class CreateTest extends Component {
             
             <hr></hr>
 
+            {/* SCENARIO */}
+            <h2  style={{marginTop: "50px"}}>Scenario  {CreateInfoButton("scenario", this.showInfoModal.bind(this))}</h2>
+            <textarea id="scenario" rows="3" cols="60" type="text" name="scenario"></textarea>
+            
+            <hr></hr>
             {/* --------- USABILITY TEST BODY (TASKS & QUESTIONS) --------- */}
             <h2  style={{marginTop: "50px"}}>Usability Test  {CreateInfoButton("usabTest", this.showInfoModal.bind(this))}</h2>
             <div id="testInstructionHolder">

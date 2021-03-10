@@ -6,7 +6,6 @@ export class TabGenerator extends Component {
 
     this.state = {
       tabButtons: [],
-      tabIndex: "1",
       createdComponentList: []
     };
   }
@@ -22,7 +21,7 @@ export class TabGenerator extends Component {
     }
 
     console.log(components);
-    this.renderTabButtons("1");
+    this.renderTabButtons("0");
     this.createTabContent(components);
   }
 
@@ -46,7 +45,7 @@ export class TabGenerator extends Component {
     this.setState({
       createdComponentList: createdComponentList
     }, () => {
-      this.renderTab(1);
+      this.renderTab(0);
     });
   }
 
@@ -71,6 +70,7 @@ export class TabGenerator extends Component {
   }
 
   tabSelect(tabIndex) {
+    console.log(tabIndex)
     this.renderTabButtons(tabIndex);
     this.renderTab(tabIndex)
   }
@@ -79,11 +79,13 @@ export class TabGenerator extends Component {
     var createdComponentList = this.state.createdComponentList;
 
     for (var i = 0; i < createdComponentList.length; i++) {
-      createdComponentList[i].ref.current.setState({isShown: false});
+      createdComponentList[i].ref.current.disable();
+      // createdComponentList[i].ref.current.setState({isShown: false});
     }
 
     if (createdComponentList[tabIndex].ref.current != null) {
-      createdComponentList[tabIndex].ref.current.setState({isShown: true});
+      createdComponentList[tabIndex].ref.current.enable();
+      // createdComponentList[tabIndex].ref.current.setState({isShown: true});
     }
   }
 

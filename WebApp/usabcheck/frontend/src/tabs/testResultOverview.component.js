@@ -8,7 +8,8 @@ export class TestResultOverviewTab extends Component {
     super(props);
 
     this.state = {
-      isShown: true,
+      displayStatus: "none",
+
       taskGradeData: {},
       questionAnswerData: {},
       instanceData: [],
@@ -21,11 +22,28 @@ export class TestResultOverviewTab extends Component {
   }
 
   async componentDidMount() {
-    // console.log("Props", this.props);
+    console.log("Props", this.props);
     this.updateInstanceData(this.props.testId);
     this.updateTaskGrades(this.props.testId);
     this.updateQuestionAnswers(this.props.testId);
   }
+
+  componentDidUpdate() {
+    console.log("Updated");
+  }
+
+  disable() {
+    this.setState({displayStatus: "none"});
+  }
+
+  enable() {
+    this.setState({displayStatus: ""}, () => {
+      this.updateInstanceData(this.props.testId);
+      this.updateTaskGrades(this.props.testId);
+      this.updateQuestionAnswers(this.props.testId);
+    });
+  }
+
 
   updateTaskGrades(testId) {
     Server.getTasksAndGrades(testId).then(response => {
@@ -173,9 +191,9 @@ export class TestResultOverviewTab extends Component {
         var series = [{
           data: [gradeCount["Pass"], gradeCount["Fail"], gradeCount["Not Graded"]]
         }];
-        
+        var key = new Date().getTime() + i.toString();
         taskChartList.push(
-          <div key={i} style={{display: "inline-block", "marginRight": "30px"}}>
+          <div key={key} style={{display: "inline-block", "marginRight": "30px"}}>
             <h3 className="chartHeading">
             [{gradeCount["Task"]["sequenceNumber"] + 1}] {gradeCount["Task"]["taskName"]}
             </h3>
@@ -195,9 +213,10 @@ export class TestResultOverviewTab extends Component {
       var series = [{
         data: [totalCount["Pass"], totalCount["Fail"], totalCount["Not Graded"]]
       }];
-
+      
+      var key = new Date().getTime() + "0";
       taskChartList.push(
-        <div key={0} style={{display: "inline-block", "marginRight": "30px"}}>
+        <div key={key} style={{display: "inline-block", "marginRight": "30px"}}>
           <h3 className="chartHeading">
             Success Rate Across All Tasks
           </h3>
@@ -271,8 +290,6 @@ export class TestResultOverviewTab extends Component {
         );
       }
     }
-
-    // console.log(answerList);
 
     return(
       <div>
@@ -372,64 +389,61 @@ export class TestResultOverviewTab extends Component {
   render() {
     return (
       <React.Fragment>
-        {this.state.isShown ? (
-          <div>
-            <h2>Details</h2>
-            <hr className="hr2"></hr>
-            <h3>No. of Participants: {this.state.instanceData.length}</h3>
 
-            {this.state.taskGradeData["tasks"] ? (
-              <h3>No. of Tasks: {this.state.taskGradeData["tasks"].length}</h3>
-            ) : (
-              null
-            )}
-            {this.state.questionAnswerData["questions"] ? (
-              <h3>No. of Questions: {this.state.questionAnswerData["questions"].length}</h3>
-            ) : (
-              null
-            )}
-            <hr></hr>
+        <div style={{display: this.state.displayStatus}}>
+          <h2>Details</h2>
+          <hr className="hr2"></hr>
+          <h3>No. of Participants: {this.state.instanceData.length}</h3>
 
-            {this.state.instanceData.length > 0 ? (
-              <span>
-                <br></br>
-                <div className="chartHolder">
-                  <h2>Overall Task Success Rate</h2>
-                  <hr className="hr2"></hr>
-                  {this.state.overallChart}
-                </div>
+          {this.state.taskGradeData["tasks"] ? (
+            <h3>No. of Tasks: {this.state.taskGradeData["tasks"].length}</h3>
+          ) : (
+            null
+          )}
+          {this.state.questionAnswerData["questions"] ? (
+            <h3>No. of Questions: {this.state.questionAnswerData["questions"].length}</h3>
+          ) : (
+            null
+          )}
+          <hr></hr>
 
-                <br></br>
-                <div className="chartHolder">
-                  <h2>Individual Task Performance</h2>
-                  <hr className="hr2"></hr>
-                  {this.state.taskChartList}
-                </div>
+          {this.state.instanceData.length > 0 ? (
+            <span>
+              <br></br>
+              <div className="chartHolder">
+                <h2>Overall Task Success Rate</h2>
+                <hr className="hr2"></hr>
+                {this.state.overallChart}
+              </div>
 
-                <br></br>
-                <div className="chartHolder">
-                  <h2>Multiple-Choice Question Answers</h2>
-                  <hr className="hr2"></hr>
-                  {this.state.answerChartList}
-                </div>
+              <br></br>
+              <div className="chartHolder">
+                <h2>Individual Task Performance</h2>
+                <hr className="hr2"></hr>
+                {this.state.taskChartList}
+              </div>
 
-                <br></br>
-                <div className="chartHolder">
-                  <h2>Text Question Answers</h2>
-                  <hr className="hr2"></hr>
-                  {this.state.textAnswerList}
-                </div>
-              </span>
-            ) : ( 
-              <span>
-                <h3>There is no data to display as no participants have taken the test.</h3>
-                <hr></hr>
-              </span>
-            )}
-          </div>  
-        ) : ( 
-          null
-        )}
+              <br></br>
+              <div className="chartHolder">
+                <h2>Multiple-Choice Question Answers</h2>
+                <hr className="hr2"></hr>
+                {this.state.answerChartList}
+              </div>
+
+              <br></br>
+              <div className="chartHolder">
+                <h2>Text Question Answers</h2>
+                <hr className="hr2"></hr>
+                {this.state.textAnswerList}
+              </div>
+            </span>
+          ) : ( 
+            <span>
+              <h3>There is no data to display as no participants have taken the test.</h3>
+              <hr></hr>
+            </span>
+          )}
+        </div>  
       </React.Fragment>
     )
   }

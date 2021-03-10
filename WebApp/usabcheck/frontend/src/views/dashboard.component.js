@@ -7,6 +7,8 @@ import ModalContainer from "components/modalContainer.component";
 import TestContainer from "components/testContainer.component";
 import DropdownGenerator from "components/dropdownGenerator.component";
 
+import { CreateNotification, HandleServerError } from 'utilities/utils.js';  
+
 import "bootstrap.min.css";
 
 export default class Login extends Component {
@@ -29,19 +31,16 @@ export default class Login extends Component {
   }
 
   update() {
-    console.log("Dashboard rerender update");
     if (this.state.selectedProject.projectId !== undefined) {
       this.updateTestList(this.state.selectedProject.projectId);
     }
   }
 
   async componentDidMount() {
-    console.log("DASHBOARD MOUNTED");
+    this._isMounted = true;
     var state = localStorage.getItem('dashboardExitState');
 
     this.updateProjectList();
-
-    console.log(state)
 
     if (state) {
       state = JSON.parse(state);
@@ -50,13 +49,13 @@ export default class Login extends Component {
   }
 
   postStateRestore() {
-    console.log(this.state.selectedProject);
     if (this.state.selectedProject && this.state.selectedProject.projectId) {
       this.updateTestList(this.state.selectedProject.projectId)
     }
   }
 
   async componentWillUnmount() {
+    this._isMounted = false;
     localStorage.setItem('dashboardExitState', JSON.stringify(this.state));
   }
 
@@ -68,10 +67,7 @@ export default class Login extends Component {
 
   updateTestList(projectId) {
     Server.getTestList(projectId).then(response => {
-      console.log(response.data);
-      this.setState({tests: response.data}, () => {
-        // this.displayTests();
-      });
+      this.setState({tests: response.data});
     });
   }
   
@@ -83,9 +79,6 @@ export default class Login extends Component {
 
   onProjectSelect(params) {
     params = JSON.parse(params);
-    let projectName = params.projectName;
-
-    console.log("Selected project: ", params)
 
     this.updateTestList(params.projectId);
     this.setState({selectedProject: {
@@ -112,8 +105,9 @@ export default class Login extends Component {
       menuItems.push(item);
     }
 
+    var key = new Date().getTime();
     return (
-      <DropdownGenerator data={menuItems} initalText={selectedProjectState}></DropdownGenerator>
+      <DropdownGenerator key={key} data={menuItems} initalText={selectedProjectState}></DropdownGenerator>
     )
   }
 
@@ -121,12 +115,13 @@ export default class Login extends Component {
     e.preventDefault();
     let projectName = e.target.projectName.value
 
-    console.log("Project submit!", e, projectName);
-
     this._createProjectModal.current.setState({isShown: false});
     Server.createProject(projectName).then(response => {
-      console.log(response);
+      CreateNotification('success', "Project Created Successfully!");
       this.updateProjectList();
+    },
+    error => {
+      HandleServerError(error);
     });
   }
 
@@ -138,43 +133,34 @@ export default class Login extends Component {
       return;
     }
 
-    console.log("Project delete!", projectId);
-
     this._deleteProjectModal.current.setState({isShown: false});
     Server.deleteProject(projectId).then(response => {
-      console.log(response);
+      CreateNotification('success', "Project Deleted Successfully!");
       this.updateProjectList();
+
+      if (this.state.selectedProject && this.state.selectedProject.projectId == projectId) {
+        this.setState({selectedProject: {
+          projectName: "Choose Project",
+          projectId: undefined
+        }});
+      }
+    },
+    error => {
+      HandleServerError(error);
     });
   }
 
-  deleteTestSubmit(e) {
-    e.preventDefault();
-    let testId = e.target.testId.value
-
-    if (testId === undefined || testId === null || testId === "") {
-      return;
-    }
-
-    console.log("Test delete!", testId);
-
-    // this._deleteProjectModal.current.setState({isShown: false});
-    // Server.deleteProject(projectId).then(response => {
-    //   console.log(response);
-    //   this.updateProjectList();
-    // });
-  }
-
-  displayTests() {
+  displayTests() {  
     console.log(this.state.selectedProject);
-    // console.log(this.state.tests);
     let tests = this.state.tests;
 
-    if (!tests) {
+    if (!tests || this._isMounted == false) {
       return(undefined);
     }
 
+    console.log(this._isMounted)
+
     var renderItems = [];
-    // var key = this.state.containerKey;
     for(let i = 0; i < tests.length; i++) {
       let test = tests[i];
 
@@ -186,7 +172,7 @@ export default class Login extends Component {
           key={key} 
           history={this.props.history} 
           parentUpdate={this.update.bind(this)} 
-          onDelete={this.deleteTestSubmit.bind(this)} 
+          onDelete={null} 
           testItem={test}>          
         </TestContainer>
       );
@@ -233,7 +219,6 @@ export default class Login extends Component {
 
             {this.state.projects.length > 0 ? (
               <span>
-                {/* <label style={{marginRight: "15px"}}>Select Project:</label> */}
                 {this.generateProjectDropdown(this.onProjectSelect.bind(this), this.state.selectedProject.projectName)}
 
                 <ModalContainer 

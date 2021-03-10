@@ -1,7 +1,5 @@
 import React from 'react';
 const ModalButton = ({ triggerText, buttonRef, showModal, buttonClassName }) => {
-  console.log("buttonStyle", buttonClassName)
-
   return (
     <button
       className={buttonClassName}

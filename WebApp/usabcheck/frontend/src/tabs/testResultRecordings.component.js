@@ -12,7 +12,7 @@ export class TestResultOverviewTab extends Component {
     this._videoBars = React.createRef();
 
     this.state = {
-      isShown: true,
+      displayStatus: "none",
 
       videoEmbed: [],
       player: {},
@@ -20,10 +20,10 @@ export class TestResultOverviewTab extends Component {
       testDetails: [],
       testInstanceDropdown: [],
       videoTimeStamps: [],
-      currentVideoId: "512700005", //"510894964",
+      currentVideoId: null,//"512700005", //"510894964",
       videoFullScreen: false,
       videoDuration: 0,
-      selectedTestInstaceId: 20,
+      selectedTestInstaceId: null,
 
       taskGradeData: [],
       taskGradeBoxes: [],
@@ -34,16 +34,28 @@ export class TestResultOverviewTab extends Component {
   componentDidMount() {
     var testId = this.props.testId;
     this.getTestInstances(testId);
-    this.getVideoTimeStamps(20);
+    // this.getVideoTimeStamps(20);
     this.getTestDetails(testId);
-    this.setVideoEmbed();
-    this.getTaskGradesByInstanceId(this.state.selectedTestInstaceId);
+    // this.setVideoEmbed();
+    // this.getTaskGradesByInstanceId(this.state.selectedTestInstaceId);
 
     window.addEventListener('resize', this.onVideoResize.bind(this));
   }
 
   componentDidUpdate() {
     
+  }
+
+  disable() {
+    this.setState({displayStatus: "none"});
+  }
+
+  enable() {
+    this.setState({displayStatus: ""}, () => {
+      if (this._videoBars.current) {
+        this._videoBars.current.onBarScroll();
+      }
+    });
   }
 
   // Get Data from Server
@@ -94,22 +106,29 @@ export class TestResultOverviewTab extends Component {
     // Get video ID
     var paramsJson = JSON.parse(params)
     var testInstanceObj = paramsJson["testInstance"]
+    var instanceId = testInstanceObj["testInstanceId"];
     var videoId = testInstanceObj["videoLocation"]
     videoId = videoId.replace('/videos/', '');
 
-    // Set videoID and get data
-    this.setState({currentVideoId: videoId})
-    this.getVideoTimeStamps(testInstanceObj["testInstanceId"]);
+    console.log(videoId, instanceId)
 
-    // Initialize player
-    var player = new Vimeo("videoEmbed");
-    this.state.player.getDuration().then(function(duration) {
-      this.setState({
-        player: player,
-        videoDuration: duration,
-        selectedTestInstaceId: paramsJson["testInstanceId"]
-      });
-    }.bind(this));
+    // Set videoID and get data
+    this.setState({currentVideoId: videoId, selectedTestInstaceId: instanceId}, () => {
+      this.setVideoEmbed();
+      this.getVideoTimeStamps(instanceId);
+      this.getTaskGradesByInstanceId(instanceId);
+
+      // this.setVideoPlayer();
+      // // Initialize player
+      // var player = new Vimeo("videoEmbed");
+      // this.state.player.getDuration().then(function(duration) {
+      //   this.setState({
+      //     player: player,
+      //     videoDuration: duration,
+      //     selectedTestInstaceId: paramsJson["testInstanceId"]
+      //   });
+      // }.bind(this));
+    });
   }
 
   // Dropdown for selecting test instance
@@ -121,7 +140,7 @@ export class TestResultOverviewTab extends Component {
       let instance = instances[i];
       let item = {};
 
-      item.name = "Test Instance " + i.toString();
+      item.name = "Test Instance " + (i + 1).toString();
       item.params = {
         testInstance: instance
       };
@@ -135,7 +154,7 @@ export class TestResultOverviewTab extends Component {
   }
 
   onVideoResize() {
-    if (this.state.videoFullScreen === true) {
+    if (this.state.videoFullScreen === true && this.state.displayStatus != "none") {
       // Get the elements
       var videoContainer = document.getElementById('videoContainer');
       var contentBody = document.getElementById('recordingResultMainDiv-contentBody');
@@ -208,6 +227,7 @@ export class TestResultOverviewTab extends Component {
   } 
 
   setVideoPlayer(iframe) {  
+    console.log("Setting video player");
     var player = new Vimeo("videoEmbed");
 
     var debounce = 2;
@@ -249,6 +269,7 @@ export class TestResultOverviewTab extends Component {
   }
 
   setVideoEmbed() {
+    console.log("Setting video embed");
     var src = "https://player.vimeo.com/video/" + this.state.currentVideoId + "?portrait=0&byline=0&title=0";
 
     var iframe =  
@@ -324,7 +345,7 @@ export class TestResultOverviewTab extends Component {
   render() {
     return (
       <React.Fragment>
-      {this.state.isShown ? (
+      <div style={{display: this.state.displayStatus}}>
         <div id="recordingResultMainDiv">
           <div>
             <div id="blackBackground"  style={{position:"absolute", top:"0", left:"0", width:"100%", height:"100%", display: "none"}}>
@@ -334,33 +355,31 @@ export class TestResultOverviewTab extends Component {
               {this.state.testInstanceDropdown}
             </div>
             
-            {this.state.currentVideoId != null ? (
-              <div>
-                <div id="videoContainer" style={{}}>
-                  {this.state.videoEmbed}
+            <div>
+              <div id="videoContainer" style={{}}>
+                {this.state.videoEmbed}
+              </div>
+            </div>
+          </div>
+          
+          {this.state.currentVideoId != null ? (
+            <div id="recordingResultMainDiv-contentBody">
+              <div className="dividerContainer">
+                {this.renderVideoBars()}
+              </div>
+
+              <div className="dividerContainer">
+                <div id="taskGradingContainer">
+                  <h2 style={{textAlign: "center"}}>Task Grading</h2>
+                  {this.state.taskGradeBoxes}
                 </div>
               </div>
-            ) : (
-              null
-            )}
-          </div>
-
-          <div id="recordingResultMainDiv-contentBody">
-            <div className="dividerContainer">
-              {this.renderVideoBars()}
             </div>
-
-            <div className="dividerContainer">
-              <div id="taskGradingContainer">
-                <h2 style={{textAlign: "center"}}>Task Grading</h2>
-                {this.state.taskGradeBoxes}
-              </div>
-            </div>
-          </div>
+          ) : (
+            null
+          )}
         </div>
-      ) : ( 
-        null
-      )}
+      </div>
     </React.Fragment>
     )
   }

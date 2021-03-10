@@ -4,7 +4,7 @@ import ModalContainer from "components/modalContainer.component";
 import DropdownGenerator from "components/dropdownGenerator.component";
 import { DeleteTestForm } from 'forms/deleteTestForm';
 import Server from "services/server.service";
-import { createNotification } from 'utilities/utils.js';
+import { CreateNotification, HandleServerError } from 'utilities/utils.js';
 
 import { CreateInfoModals, CreateInfoButton } from 'modal/infoModalUtilities'; 
 import { ReferenceNumInfoForm, StatusInfoForm } from 'forms/infoForms';
@@ -21,22 +21,24 @@ export class TestContainer extends Component {
       questionAnswerData: [],
       instanceData: []
     };
-
-    // console.log(this.props.testItem);
   }
 
   componentDidMount() {
     const test = this.props.testItem;
 
-    // console.log("####", test);
     this.updateTaskGrades(test.testId);
     this.updateQuestionAnswers(test.testId);
     this.updateInstanceData(test.testId);
     this.setInfoModals();
   }
 
+  componentWillUnmount() {
+    this.setState = (state, callback)=>{
+        return;
+    };
+}
+
   showDeletePopup() {
-    // console.log("Delete Test Option Selected");
     this._deleteTestModal.current.setState({isShown: true});
   }
 
@@ -47,25 +49,11 @@ export class TestContainer extends Component {
 
     this._deleteTestModal.current.setState({isShown: false});
     Server.deleteTest(testId, testName).then(response => {
-      // console.log(response);
-      createNotification('success', "Test Deleted Successfully!");
+      CreateNotification('success', "Test Deleted Successfully!");
       this.props.parentUpdate();
       },
       error => {
-        const resMessage = (
-          error.response &&
-          error.response.data &&
-          error.response.data.message) || 
-          error.message ||
-          error.toString();
-        
-        console.log(error.message);
-        createNotification("error", error.toString());
-
-        this.setState({
-          loading: false,
-          message: resMessage
-        });
+        HandleServerError(error);
       }
     );
   }
@@ -77,9 +65,7 @@ export class TestContainer extends Component {
   }
 
   updateQuestionAnswers(testId) {
-    // console.log(testId);
     Server.getQuestionAndAnswers(testId).then(response => {
-      // console.log(response.data);
       this.setState({questionAnswerData: response.data});
     });
   }
@@ -94,11 +80,17 @@ export class TestContainer extends Component {
     var testId = this.props.testItem.testId;
 
     Server.changeTestStatus(testId, statusName).then(response => {
-      // console.log(response.data);
+      console.log(response.data);
+      if (response.data == 1) {
+        CreateNotification('success', "Status Changed Successfully!");
+      } else {
+        CreateNotification("error", "Changing Status Failed!");
+      }
       this.props.parentUpdate();
+    },
+    error => {
+      HandleServerError(error);
     });
-
-    // console.log(testId, statusName);
   }
 
   generateOptionsDropdown = (test, selectedOption) => {
@@ -117,7 +109,7 @@ export class TestContainer extends Component {
     var changeToStatus = "";
     if (this.props.testItem.testStatus == "Open") {
       item.name = "Close";
-      changeToStatus = "Closed"
+      changeToStatus = "Closed" 
     } else if (this.props.testItem.testStatus == "Closed") {
       item.name = "Open";
       changeToStatus = "Open"
@@ -136,8 +128,6 @@ export class TestContainer extends Component {
   }
 
   renderStats() {
-
-    // console.log(this.props.testItem.testId, this.state.taskGradeData["tasks"]);
     return (
       <div>
         <div className="testStat">
@@ -190,7 +180,6 @@ export class TestContainer extends Component {
   render() {
     const test = this.props.testItem;
 
-    const stats = [];
     return (
       <div className="dashboard-testBox">
         {this.state.modalList}
