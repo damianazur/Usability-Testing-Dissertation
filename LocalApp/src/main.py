@@ -525,21 +525,36 @@ class RecordingWindow(QWidget):
 
         self.videoFileName = "UsabTest-" + datetime.today().strftime('%Y-%m-%d-%H-%M-%S') +".avi"
         
-        self.screenRecorder = ScreenRecorder(self.videoFileName)
-        screenRecThread = threading.Thread(target=self.startRecorder, args=(self.screenRecorder,))
+        # self.screenRecorder = ScreenRecorder(self.videoFileName)
+        # screenRecThread = threading.Thread(target=self.startRecorder, args=(self.screenRecorder,)) 
+        screenRecThread = threading.Thread(target=self.startRecorder, args=(self,)) 
         screenRecThread.start()
+        
+        while not hasattr(self, "screenRecorder"):
+            time.sleep(0.1)
 
-        self.fer = FacialExpressionRecog("Model 1", self.screenRecorder)
-        ferThread = threading.Thread(target=self.startFER, args=(self.fer,))
+        # self.fer = FacialExpressionRecog("Model 1", self.screenRecorder)
+        # ferThread = threading.Thread(target=self.startFER, args=(self.fer,))
+        # ferThread.start()
+
+        ferThread = threading.Thread(target=self.startFER, args=(self,))
         ferThread.start()
         
 
-    def startRecorder(self, screenRecorder):
-        screenRecorder.begin()
+    # def startRecorder(self, screenRecorder):
+    #     screenRecorder.begin()
+
+    # def startFER(self, fer):
+    #     fer.begin()
+
+    def startRecorder(self, parent):
+        parent.screenRecorder = ScreenRecorder(parent.videoFileName)
+        parent.screenRecorder.begin()
 
 
-    def startFER(self, fer):
-        fer.begin()
+    def startFER(self, parent):
+        parent.fer = FacialExpressionRecog("Model 1", parent.screenRecorder)
+        parent.fer.begin()
 
 
     def renderBorder(self):
@@ -703,11 +718,87 @@ class UploadDataWindow(QWidget):
         self.parent.uploadData()
 
 
+class LoadingWindow(QWidget):
+    def __init__(self, parent):
+        QWidget.__init__(self, None, Qt.WindowStaysOnTopHint)
+        self.parent = parent
+
+        self.status = "Loading..."
+
+        # Window configurations
+        self.setGeometry(400, 350, 300, 250)
+        self.setWindowTitle("UsabCheck")
+        self.setStyleSheet("font-size: 22px;")
+
+        self.displayStatusLayout = QGroupBox("Loading")
+        
+        # Layout
+        self.mainLayout = QVBoxLayout()
+        self.mainLayout.setContentsMargins(20, 20, 20, 20)
+        self.displayStatus()
+        self.setLayout(self.mainLayout)
+
+
+    # Display the data so that the user can verify that the test is correct
+    def displayStatus(self):
+        # Remove the widget if it already exists (if the user submits another code the data is reloaded)
+        self.mainLayout.removeWidget(self.displayStatusLayout)
+        self.displayStatusLayout = QGroupBox("")
+        self.displayStatusLayout.setMinimumWidth(400)
+        layout = QFormLayout()
+        layout.setSpacing(10)
+        layout.addRow(QLabel("Loading Status: "), QLabel(str(self.status)))
+        self.displayStatusLayout.setLayout(layout)
+        
+        self.mainLayout.addWidget(self.displayStatusLayout)
+
+    def setStatus(self, text):
+        self.status = text
+        self.displayStatus()
+        if text == "Finished!":
+            self.parent.loadNextSequenceItem()
+            self.close()
+
+    def busyFunc(self):
+        self.thread = Thread(self)
+        self.thread.signal.connect(self.setStatus)
+        self.thread.start() 
+
+
+class Thread(QThread):
+    signal = pyqtSignal(str)
+
+    def __init__(self, parent=None):
+        QThread.__init__(self, parent)
+        self.parent = parent
+
+    def run(self):
+        parent = self.parent.parent
+        while True:
+            screenRecCreated = hasattr(parent, 'recordingWindow')
+            self.signal.emit("Loading Screen Recorder..")
+            if screenRecCreated:
+                self.signal.emit("Loading Camera")
+                ferCreated = hasattr(parent.recordingWindow, 'fer')
+
+                if ferCreated:
+                    self.signal.emit("Configuring Camera")
+                    ferStarted = parent.recordingWindow.fer.started
+                    if ferStarted:
+                        self.signal.emit("Finished!")
+                        parent.finishedLoading = True
+                        break
+
+            time.sleep(0.1)
+
+
 class MainProgram():
     def __init__(self):
         app = QApplication([])
         app.setStyle('Fusion')
         
+        self.began = False
+        self.finishedLoading = False
         self.answers = []
         self.sequenceTimeStamp = []
         self.previousTaskPos = None
@@ -717,8 +808,6 @@ class MainProgram():
         self.mainWindow = InitialWindow(self)
         self.mainWindow.show()
 
-        # self.data = self.getDebugData()
-        # self.loadNextSequenceItem()
 
         app.exec_()
 
@@ -730,6 +819,8 @@ class MainProgram():
             print(timeStamp)
         self.recordingWindow.close()
         self.window.close()
+
+        print(self.sequenceTimeStamp)
 
 
     def testFinishedSuccessfully(self):
@@ -767,8 +858,6 @@ class MainProgram():
         print(saveVideoLinkRequest)
 
 
-
-
     def packageData(self):
         # print(self.ferCameraData)
         # print(self.answers)
@@ -793,6 +882,9 @@ class MainProgram():
             "label": str(self.sequenceIndex),
             "endTime": "N/A"
         }
+        sequenceSize = len(self.sequenceTimeStamp)
+        if sequenceSize > 0:
+            self.sequenceTimeStamp[sequenceSize - 1]["endTime"] = self.recordingWindow.screenRecorder.currentTime
         self.sequenceTimeStamp.append(sequenceTimeStamp)
 
 
@@ -812,6 +904,9 @@ class MainProgram():
             self.loadNextSequenceItem()
         else:
             print("TEST FINISHED!")
+            sequenceSize = len(self.sequenceTimeStamp)
+            if sequenceSize > 0:
+                self.sequenceTimeStamp[sequenceSize - 1]["endTime"] = self.recordingWindow.screenRecorder.currentTime
             self.testFinishedSuccessfully()
 
     
@@ -868,14 +963,19 @@ class MainProgram():
     
 
     def begin(self, data):
-        print("Begin...")
-        self.recordingWindow = RecordingWindow(self)
-        self.recordingWindow.show()
+        if (self.began == False):
+            self.data = data
+            self.began = True
+            print("Begin...")
 
-        self.mainWindow.close()
-        self.data = data
-        self.loadNextSequenceItem()
+            self.loadingWindow = LoadingWindow(self)
+            self.loadingWindow.show()
+            self.loadingWindow.busyFunc()
 
+            self.mainWindow.close()
+
+            self.recordingWindow = RecordingWindow(self)
+            self.recordingWindow.show()
 
 
 if __name__ == '__main__':

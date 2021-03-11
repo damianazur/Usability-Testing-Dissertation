@@ -30,6 +30,7 @@ class FacialExpressionRecog():
     self.faceDetector = cv2.CascadeClassifier(r'./models/haarcascade_frontalface_default.xml')
     self.screenRecorder = screenRecorder
     self.cap = cv2.VideoCapture(0)
+    self.started = False
     # self.begin()
 
 
@@ -40,6 +41,7 @@ class FacialExpressionRecog():
     previousLabel = None
     minEmotionTime = 0.5
 
+    camImageDim = None
     while self.running:
         # Get frame from camera
         ret, frame = self.cap.read()
@@ -96,8 +98,17 @@ class FacialExpressionRecog():
                     fontFace=cv2.FONT_HERSHEY_COMPLEX , fontScale=2, color=[255, 0, 0], lineType=cv2.LINE_AA, thickness=3)
             else:
                 cv2.putText(frame,'No Face Detected',(20,60),cv2.FONT_HERSHEY_SIMPLEX,2,(0,255,0),2)
-        
-        cv2.imshow('Facial Expression Detector', frame)
+
+        if (self.started == False):
+          print("FER START", self.screenRecorder.currentTime)
+          self.started = True
+          camImageDim = gray.shape
+          print((int(camImageDim[1]/2), int(camImageDim[0]/2)))
+
+        width = int(camImageDim[1]/3)
+        height = int(camImageDim[0]/3)
+        resizedFrame = cv2.resize(frame, (width, height), interpolation=cv2.INTER_AREA)
+        cv2.imshow('Facial Expression Detector', resizedFrame)
 
         # If the q letter is pressed then exit the program
         if cv2.waitKey(1) & 0xFF == ord('q'):
