@@ -11,7 +11,7 @@
 	<groupId>com.disazure</groupId>
 	<artifactId>usabcheck</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<packaging>war</packaging>
+	<packaging>jar</packaging>
 	<name>usabcheck</name>
 	<description>Final Year Project Usability Testing</description>
 

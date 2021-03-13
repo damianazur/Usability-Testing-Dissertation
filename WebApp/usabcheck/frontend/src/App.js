@@ -80,6 +80,9 @@ class App extends Component {
                 <a href="/login" className="navDiv-link" onClick={this.logOut}>
                   LogOut
                 </a>
+                {/* <Link to={"/login"} className="navDiv-link">
+                  Logout
+                </Link> */}
               </li>
               <li className="nav-right">
                 <Link to={"/dashboard"} className="navDiv-link">
