@@ -14,7 +14,6 @@ public class WebApplicationConfig implements WebMvcConfigurer {
 
     @Override
     public void addViewControllers(ViewControllerRegistry registry) {
-    	System.out.println("~~~~~~~~~~~~~~~~~~REEEEEEEEEEEEEEEEEEEEEE");
         registry.addViewController("/notFound").setViewName("forward:/index.html");
     }
 

@@ -33,7 +33,7 @@ public class AnswerDao {
 	public String getByTestId(int researcherId, int testId) throws JsonProcessingException {
 		String sql = ""
 				+ "SELECT answerId, answerJSON, questionId, testInstanceId FROM answer "
-				+ "LEFT JOIN testInstance using(testInstanceId) "
+				+ "LEFT JOIN testinstance using(testInstanceId) "
 				+ "LEFT JOIN test using(testId) "
 				+ "LEFT JOIN project using(projectId) "
 				+ "LEFT JOIN researcher using(researcherId) "

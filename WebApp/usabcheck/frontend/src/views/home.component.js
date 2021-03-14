@@ -23,7 +23,7 @@ export default class Home extends Component {
 
         <div id="headingDiv">
           <h1 id="mainText">UsabCheck</h1>
-          <h1 id="otherText">Test the usability of software with emotion recognition technology</h1>
+          <h1 id="otherText">Test the usability of software with emotion recognition technology.</h1>
         </div>
       </div>
     );

@@ -14,6 +14,8 @@ import CreateTest from "views/createTest.component";
 import ViewTestDetails from "views/viewTestDetails.component";
 import ViewTestResults from "views/viewTestResults.component";
 
+// package-json
+// proxy": "http://localhost:8090",
 class App extends Component {
   constructor(props) {
     super(props);

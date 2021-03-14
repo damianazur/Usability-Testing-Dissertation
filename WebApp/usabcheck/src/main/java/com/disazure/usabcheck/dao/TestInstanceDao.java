@@ -61,7 +61,7 @@ public class TestInstanceDao {
 	
 	public int create(UsabilityTestInstance testInstance) {
 		String sql = ""
-				+ "INSERT INTO testInstance (testId, studyDate, instanceReference) "
+				+ "INSERT INTO testinstance (testId, studyDate, instanceReference) "
 				+ "VALUES (?, ?, ?)";
 		
 		GeneratedKeyHolder holder = new GeneratedKeyHolder();
@@ -85,7 +85,7 @@ public class TestInstanceDao {
 	
 	public String getReferenceCodeById(int testInstanceId) throws JsonProcessingException {
 		String sql = ""
-				+ "SELECT instanceReference FROM testInstance "
+				+ "SELECT instanceReference FROM testinstance "
 				+ "WHERE testInstanceId = ?";
 
 		System.out.println(testInstanceId);

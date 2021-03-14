@@ -33,7 +33,7 @@ public class TimeStampDao {
 	public String getByInstanceId(int researcherId, int instanceId) throws JsonProcessingException {
 		String sql = ""
 				+ "SELECT timeStampId, testInstanceId, type, label, startTime, endTime FROM videotimestamp "
-				+ "LEFT JOIN testInstance using(testInstanceId) "
+				+ "LEFT JOIN testinstance using(testInstanceId) "
 				+ "LEFT JOIN test using(testId) "
 				+ "LEFT JOIN project using(projectId) "
 				+ "LEFT JOIN researcher using(researcherId) "

@@ -737,6 +737,7 @@ button {
 
 /* -------------------------------------- react-notification CSS -------------------------------------- */
 .notification-container {
+  pointer-events: none;
   box-sizing: border-box;
   position: fixed;
   z-index: 999999;

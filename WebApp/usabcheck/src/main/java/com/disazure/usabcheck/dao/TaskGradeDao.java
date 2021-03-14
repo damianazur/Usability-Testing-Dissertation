@@ -32,7 +32,7 @@ public class TaskGradeDao {
 	
 	public String getByTestId(int researcherId, int testId) throws JsonProcessingException {
 		String sql = ""
-				+ "SELECT taskGradeId, testGradeId, taskId, grade FROM taskGrade "
+				+ "SELECT taskGradeId, testGradeId, taskId, grade FROM taskgrade "
 				+ "LEFT JOIN task using(taskId) "
 				+ "LEFT JOIN test using(testId) "
 				+ "LEFT JOIN project using(projectId) "
@@ -49,7 +49,7 @@ public class TaskGradeDao {
 	
 	public String getByTestInstanceId(int researcherId, int testInstanceId) throws JsonProcessingException {
 		String sql = ""
-				+ "SELECT taskGradeId, testGradeId, taskId, taskName, stepsJSON, sequenceNumber, grade FROM taskGrade "
+				+ "SELECT taskGradeId, testGradeId, taskId, taskName, stepsJSON, sequenceNumber, grade FROM taskgrade "
 				+ "LEFT JOIN task using(taskId) "
 				+ "LEFT JOIN test using(testId) "
 				+ "LEFT JOIN project using(projectId) "
@@ -68,7 +68,7 @@ public class TaskGradeDao {
 	
 	public int create(int testGradeId, JsonArray taskList) {
 		String sql = ""
-				+ "INSERT INTO taskGrade (testGradeId, taskId, grade) "
+				+ "INSERT INTO taskgrade (testGradeId, taskId, grade) "
 				+ "VALUES (?, ?, ?)";
 		
 		for (JsonElement elem : taskList) {
@@ -107,7 +107,7 @@ public class TaskGradeDao {
 		}
 		
 		String sql = ""
-				+ "UPDATE taskGrade "
+				+ "UPDATE taskgrade "
 				+ "SET grade = ? "
 				+ "WHERE taskGradeId = ?";
 		
