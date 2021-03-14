@@ -22,7 +22,7 @@ export default class CreateTest extends Component {
       "MutlipleChoiceQuestionBox": MutlipleChoiceQuestionBox
     };
 
-    console.log(this.props.location.state);
+    // console.log(this.props.location.state);
 
     this.state = {
       pretestSequenceList: [],
@@ -60,7 +60,7 @@ export default class CreateTest extends Component {
   }
 
   update() {
-    console.log("CreateTest rerender update");
+    // console.log("CreateTest rerender update");
     this.setState();
   }
 
@@ -68,7 +68,7 @@ export default class CreateTest extends Component {
     let sequenceList = this.state[sequenceListName];
     let refList = this.state[refListName];
 
-    console.log(typeof sequenceKey, typeof sequenceList[0].key, typeof refList[0].key);
+    // console.log(typeof sequenceKey, typeof sequenceList[0].key, typeof refList[0].key);
 
     sequenceList = sequenceList.filter((item) => parseInt(item.key) !== sequenceKey);
     refList = refList.filter((item) => item.key !== sequenceKey);
@@ -180,7 +180,7 @@ export default class CreateTest extends Component {
 
   onTestCreate(e) {
     e.preventDefault();
-    console.log("CREATE TEST ", e.target.testName.value);
+    // console.log("CREATE TEST ", e.target.testName.value);
 
     let testName = e.target.testName.value;
     let scenario = e.target.scenario.value;
@@ -226,7 +226,7 @@ export default class CreateTest extends Component {
     };
 
 
-    console.log(uploadData);
+    // console.log(uploadData);
     Server.createTest(uploadData).then(
       () => {
         CreateNotification('success', "Test Created Successfully!");
@@ -243,7 +243,7 @@ export default class CreateTest extends Component {
     params = JSON.parse(params);
     let projectName = params.projectName;
 
-    console.log("Selected project: ", params)
+    // console.log("Selected project: ", params)
 
     this.setState({selectedProject: {
       projectName: projectName,

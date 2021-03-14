@@ -61,7 +61,7 @@ export class TestResultOverviewTab extends Component {
   // Get Data from Server
   getTestInstances(testId) {
     Server.getTestInstances(testId).then(response => {
-      console.log(response.data);
+      // console.log(response.data);
       this.setState({
         testInstances: response.data}, () => {
           this.generateInstanceDropdown();
@@ -72,7 +72,7 @@ export class TestResultOverviewTab extends Component {
   // Get Data from Server
   getTestDetails(testId) {
     Server.getTestsWithDetails(testId).then(response => {
-      console.log(response.data);
+      // console.log(response.data);
       this.setState({
         testDetails: response.data
       });
@@ -91,7 +91,7 @@ export class TestResultOverviewTab extends Component {
   // Get Data from Server
   getTaskGradesByInstanceId(testInstanceId) {
     Server.getTaskGradesByInstanceId(testInstanceId).then(response => {
-      console.log(response.data);
+      // console.log(response.data);
       this.setState({
         taskGradeData: response.data}, () => {
           this.generateTaskGrading()
@@ -101,7 +101,7 @@ export class TestResultOverviewTab extends Component {
 
   // Instance of a test selected from dropdown
   onInstanceSelect(params) {
-    console.log(params)
+    // console.log(params)
 
     // Get video ID
     var paramsJson = JSON.parse(params)
@@ -110,7 +110,7 @@ export class TestResultOverviewTab extends Component {
     var videoId = testInstanceObj["videoLocation"]
     videoId = videoId.replace('/videos/', '');
 
-    console.log(videoId, instanceId)
+    // console.log(videoId, instanceId)
 
     // Set videoID and get data
     this.setState({currentVideoId: videoId, selectedTestInstaceId: instanceId}, () => {
@@ -184,7 +184,7 @@ export class TestResultOverviewTab extends Component {
       // is less than the screen size
       var marginLeft = ((100 - setWidthPercent) / 2) + "%";
       if (parseInt(setWidthPercent) !== 100) {
-        console.log(((setWidthPercent - 100) / 2) + "%");
+        // console.log(((setWidthPercent - 100) / 2) + "%");
         videoContainer.style.marginLeft = marginLeft
       }
       
@@ -227,7 +227,7 @@ export class TestResultOverviewTab extends Component {
   } 
 
   setVideoPlayer(iframe) {  
-    console.log("Setting video player");
+    // console.log("Setting video player");
     var player = new Vimeo("videoEmbed");
 
     var debounce = 2;
@@ -254,7 +254,7 @@ export class TestResultOverviewTab extends Component {
           this.onVideoResize();
 
         }.bind(this)).catch(function(error) {
-          console.log(error);
+          // console.log(error);
         });
       }
     }.bind(this));
@@ -269,7 +269,7 @@ export class TestResultOverviewTab extends Component {
   }
 
   setVideoEmbed() {
-    console.log("Setting video embed");
+    // console.log("Setting video embed");
     var src = "https://player.vimeo.com/video/" + this.state.currentVideoId + "?portrait=0&byline=0&title=0";
 
     var iframe =  

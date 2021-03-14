@@ -20,13 +20,13 @@ export class TabGenerator extends Component {
       components.push(tabComponent);
     }
 
-    console.log(components);
+    // console.log(components);
     this.renderTabButtons("0");
     this.createTabContent(components);
   }
 
   createTabContent(components) {
-    console.log("CREATING TABS");
+    // console.log("CREATING TABS");
     var createdComponentList = []
 
     for (let i = 0; i < components.length; i++) {
@@ -70,7 +70,7 @@ export class TabGenerator extends Component {
   }
 
   tabSelect(tabIndex) {
-    console.log(tabIndex)
+    // console.log(tabIndex)
     this.renderTabButtons(tabIndex);
     this.renderTab(tabIndex)
   }

@@ -145,7 +145,7 @@ export class VideoBars extends Component {
 
     // if video has not yet rendered and the player for the video was not yet created
     if (frameContainer && this.state.player && this.state.videoDuration !== 0) {} else {
-      console.log("NULL CONDITION");
+      // console.log("NULL CONDITION");
       return null;
     }
 

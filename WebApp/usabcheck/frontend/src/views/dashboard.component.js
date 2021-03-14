@@ -151,20 +151,20 @@ export default class Login extends Component {
   }
 
   displayTests() {  
-    console.log(this.state.selectedProject);
+    // console.log(this.state.selectedProject);
     let tests = this.state.tests;
 
     if (!tests || this._isMounted == false) {
       return(undefined);
     }
 
-    console.log(this._isMounted)
+    // console.log(this._isMounted)
 
     var renderItems = [];
     for(let i = 0; i < tests.length; i++) {
       let test = tests[i];
 
-      console.log("Test: ", test.testName);
+      // console.log("Test: ", test.testName);
 
       var key = new Date().getTime() + i;
       renderItems.push(
@@ -198,8 +198,8 @@ export default class Login extends Component {
 
   render() {  
 
-    console.log("RENDER", this.state);
-    console.log(this.state.testContainers)
+    // console.log("RENDER#", this.state);
+    // console.log(this.state.testContainers)
 
     const projects = this.state.projects;
 

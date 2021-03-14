@@ -16,10 +16,10 @@ export class TaskGrading extends Component {
   }
 
   setGrade(taskGradeId, grade) {
-    console.log(taskGradeId, grade);
+    // console.log(taskGradeId, grade);
 
     Server.updateTaskGrade(taskGradeId, grade).then(response => {
-      console.log(response.data);
+      // console.log(response.data);
       this.setState({
         taskGradeData: response.data}, () => {
           if (response.data == 1) {

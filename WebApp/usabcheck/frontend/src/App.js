@@ -15,7 +15,8 @@ import ViewTestDetails from "views/viewTestDetails.component";
 import ViewTestResults from "views/viewTestResults.component";
 
 // package-json
-// proxy": "http://localhost:8090",
+// "proxy": "http://localhost:8090",
+// "proxy": "https://usabcheck.herokuapp.com:8080",
 class App extends Component {
   constructor(props) {
     super(props);
@@ -38,6 +39,7 @@ class App extends Component {
 
   logOut() {
     AuthService.logout();
+    localStorage.clear();
   }
 
   render() {

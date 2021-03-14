@@ -22,14 +22,14 @@ export class TestResultOverviewTab extends Component {
   }
 
   async componentDidMount() {
-    console.log("Props", this.props);
+    // console.log("Props", this.props);
     this.updateInstanceData(this.props.testId);
     this.updateTaskGrades(this.props.testId);
     this.updateQuestionAnswers(this.props.testId);
   }
 
   componentDidUpdate() {
-    console.log("Updated");
+    // console.log("Updated");
   }
 
   disable() {

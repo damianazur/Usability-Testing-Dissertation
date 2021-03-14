@@ -14,7 +14,7 @@ export class DeleteProjectForm extends Component {
     params = JSON.parse(params);
     let projectName = params.projectName;
 
-    console.log("Selected delete project: ", params)
+    // console.log("Selected delete project: ", params)
 
     this.setState({
       toDeleteProjectName: projectName,

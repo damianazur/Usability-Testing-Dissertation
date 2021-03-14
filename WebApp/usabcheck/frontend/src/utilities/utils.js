@@ -13,7 +13,7 @@ export function CreateNotification(type, message) {
       break;
     case 'error':
       alert = NotificationManager.error(message, 'Error', 5000, () => {
-        console.log("Error callback");
+        // console.log("Error callback");
       });
       break;
   }
@@ -27,7 +27,7 @@ export function HandleServerError(error) {
     error.message ||
     error.toString();
   
-  console.log(error.message);
+  // console.log(error.message);
 
   CreateNotification("error", error.toString());
 }

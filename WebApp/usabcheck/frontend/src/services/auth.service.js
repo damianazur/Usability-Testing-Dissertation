@@ -31,7 +31,7 @@ class AuthService {
     }
 
     getUsernameFromBackend(token) {
-      console.log("Token to be sent: ", token);
+      // console.log("Token to be sent: ", token);
       return axios.post(API_URL + "getMyUsername", {
         token
       });

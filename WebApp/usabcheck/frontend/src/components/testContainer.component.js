@@ -80,7 +80,7 @@ export class TestContainer extends Component {
     var testId = this.props.testItem.testId;
 
     Server.changeTestStatus(testId, statusName).then(response => {
-      console.log(response.data);
+      // console.log(response.data);
       if (response.data == 1) {
         CreateNotification('success', "Status Changed Successfully!");
       } else {

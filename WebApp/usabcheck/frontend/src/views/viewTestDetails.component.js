@@ -17,7 +17,7 @@ export default class ViewTestDetails extends Component {
   }
 
   update() {
-    console.log("CreateTest rerender update");
+    // console.log("CreateTest rerender update");
     this.setState();
   }
 
@@ -25,9 +25,9 @@ export default class ViewTestDetails extends Component {
     let testId = this.props.location.state.testId;
 
     Server.getTestsWithDetails(testId).then(response => {
-      console.log("Data Obectained")
+      // console.log("Data Obectained")
       let data = response.data;
-      console.log(data);
+      // console.log(data);
 
       let sequenceData = data.sequenceData.sort((a, b) => (a.sequenceNumber > b.sequenceNumber) ? 1 : -1)
       
@@ -46,7 +46,7 @@ export default class ViewTestDetails extends Component {
           let questionConfigs = JSON.parse(seqItem.questionConfigsJSON);
           let questionType = questionConfigs.questionType;
           
-          console.log(questionType);
+          // console.log(questionType);
           if (questionType === "text") {
             itemNameMap[stage].push(
               <div key={key} className="createTestInputBox textQuestionCreate">
@@ -84,7 +84,7 @@ export default class ViewTestDetails extends Component {
             );
             key += 1;
           }
-          console.log(questionConfigs);
+          // console.log(questionConfigs);
         }
         if (seqItem.taskId) {
           let taskSteps = JSON.parse(seqItem.stepsJSON);
@@ -96,7 +96,7 @@ export default class ViewTestDetails extends Component {
             );
           }
 
-          console.log(seqItem);
+          // console.log(seqItem);
 
           itemNameMap["test"].push(
             <div key={key} className="createTestInputBox taskCreate">
@@ -117,7 +117,7 @@ export default class ViewTestDetails extends Component {
 
       }
 
-      console.log(sequenceData);
+      // console.log(sequenceData);
 
       let items = [];
       items.push(
