@@ -10,6 +10,7 @@ export class TestResultOverviewTab extends Component {
     super(props);
 
     this._videoBars = React.createRef();
+    this._isMounted = false;
 
     this.state = {
       displayStatus: "none",
@@ -32,6 +33,7 @@ export class TestResultOverviewTab extends Component {
   }
 
   componentDidMount() {
+    this._isMounted = true;
     var testId = this.props.testId;
     this.getTestInstances(testId);
     // this.getVideoTimeStamps(20);
@@ -43,7 +45,11 @@ export class TestResultOverviewTab extends Component {
   }
 
   componentDidUpdate() {
-    
+
+  }
+
+  async componentWillUnmount() {
+    this._isMounted = false;
   }
 
   disable() {
@@ -107,7 +113,13 @@ export class TestResultOverviewTab extends Component {
     var paramsJson = JSON.parse(params)
     var testInstanceObj = paramsJson["testInstance"]
     var instanceId = testInstanceObj["testInstanceId"];
-    var videoId = testInstanceObj["videoLocation"]
+    var videoId = testInstanceObj["videoLocation"];
+    if (videoId == null) {
+      this.setState({currentVideoId: null, selectedTestInstaceId: instanceId}, () => {
+        this.setVideoEmbed();
+      });
+      return;
+    }
     videoId = videoId.replace('/videos/', '');
 
     // console.log(videoId, instanceId)
@@ -117,17 +129,6 @@ export class TestResultOverviewTab extends Component {
       this.setVideoEmbed();
       this.getVideoTimeStamps(instanceId);
       this.getTaskGradesByInstanceId(instanceId);
-
-      // this.setVideoPlayer();
-      // // Initialize player
-      // var player = new Vimeo("videoEmbed");
-      // this.state.player.getDuration().then(function(duration) {
-      //   this.setState({
-      //     player: player,
-      //     videoDuration: duration,
-      //     selectedTestInstaceId: paramsJson["testInstanceId"]
-      //   });
-      // }.bind(this));
     });
   }
 
@@ -140,7 +141,12 @@ export class TestResultOverviewTab extends Component {
       let instance = instances[i];
       let item = {};
 
-      item.name = "Test Instance " + (i + 1).toString();
+      var participantName = instance.participantName;
+      if (participantName == null) {
+        participantName = "";
+      }
+
+      item.name = "(" + (i + 1).toString() + ") " + participantName;
       item.params = {
         testInstance: instance
       };
@@ -154,75 +160,83 @@ export class TestResultOverviewTab extends Component {
   }
 
   onVideoResize() {
-    if (this.state.videoFullScreen === true && this.state.displayStatus != "none") {
-      // Get the elements
-      var videoContainer = document.getElementById('videoContainer');
-      var contentBody = document.getElementById('recordingResultMainDiv-contentBody');
-      var blackBackground = document.getElementById('blackBackground');
-      
-      // Get variables used in calculations
-      var videoRatio = 1.777
-      var screenHeight = window.innerHeight;
-      var screenWidth = window.innerWidth;
-      var heightAtFullWidth = screenWidth/videoRatio
+    if (this._isMounted == true) {
+      if (this.state.videoFullScreen === true && this.state.displayStatus != "none") {
+        // Get the elements
+        var videoContainer = document.getElementById('videoContainer');
+        var contentBody = document.getElementById('recordingResultMainDiv-contentBody');
+        var blackBackground = document.getElementById('blackBackground');
+        
+        // Get variables used in calculations
+        var videoRatio = 1.777
+        var screenHeight = window.innerHeight;
+        var screenWidth = window.innerWidth;
+        var heightAtFullWidth = screenWidth/videoRatio
 
-      // Get the width of the video so that it fills either the width or height of the screen
-      // but does not exceed either
-      var setWidthPercent = 100;
-      if (heightAtFullWidth > screenHeight) {
-        var desiredWidth = (videoRatio * screenHeight);
-        setWidthPercent = (desiredWidth / screenWidth * 100)
+        // Get the width of the video so that it fills either the width or height of the screen
+        // but does not exceed either
+        var setWidthPercent = 100;
+        if (heightAtFullWidth > screenHeight) {
+          var desiredWidth = (videoRatio * screenHeight);
+          setWidthPercent = (desiredWidth / screenWidth * 100)
+        }
+
+        // The video goes to the top left corner
+        videoContainer.style.position = "absolute";
+        videoContainer.style.top = "0";
+        videoContainer.style.left = "0";
+        videoContainer.style.width = setWidthPercent + "%";
+
+        // A margin is calculated to center the video if the width of the video
+        // is less than the screen size
+        var marginLeft = ((100 - setWidthPercent) / 2) + "%";
+        if (parseInt(setWidthPercent) !== 100) {
+          // console.log(((setWidthPercent - 100) / 2) + "%");
+          videoContainer.style.marginLeft = marginLeft
+        }
+        
+        var videoEmbed = document.getElementById('videoEmbed');
+        var videHeightPx = videoEmbed.clientHeight;
+
+        // The content below the video is set to absolute position and positioned inline with the video
+        contentBody.style.position = "absolute";
+        contentBody.style.top = videHeightPx + "px";
+        contentBody.style.left = "0";
+        contentBody.style.paddingLeft = marginLeft;
+
+        // The emotion/task bars are resized and adjusted
+        // The on bar scroll function achieves this
+        this._videoBars.current.onBarScroll();
+
+        // Set the black 
+        blackBackground.style.display = "";
+        blackBackground.style.height = videHeightPx +  "px";
+
+      } else if (this.state.videoFullScreen === false && this.state.displayStatus != "none") {
+        // When exiting fullscreen clear the CSS
+        var clearStyleList = ["videoContainer", "recordingResultMainDiv-contentBody"];
+
+        clearStyleList.forEach(function(elementName) {
+          var element = document.getElementById(elementName);
+          if (element) {
+            element.style.position = "";
+            element.style.top = "";
+            element.style.left = "";
+            element.style.marginLeft = "";
+            element.style.width = "";
+          }
+        });
+
+        blackBackground = document.getElementById('blackBackground');
+        if (blackBackground) {
+          blackBackground.style.display = "none";
+        }
+
+        // Update the video bars
+        if (this._videoBars.current) {
+          this._videoBars.current.onBarScroll();
+        }
       }
-
-      // The video goes to the top left corner
-      videoContainer.style.position = "absolute";
-      videoContainer.style.top = "0";
-      videoContainer.style.left = "0";
-      videoContainer.style.width = setWidthPercent + "%";
-
-      // A margin is calculated to center the video if the width of the video
-      // is less than the screen size
-      var marginLeft = ((100 - setWidthPercent) / 2) + "%";
-      if (parseInt(setWidthPercent) !== 100) {
-        // console.log(((setWidthPercent - 100) / 2) + "%");
-        videoContainer.style.marginLeft = marginLeft
-      }
-      
-      var videoEmbed = document.getElementById('videoEmbed');
-      var videHeightPx = videoEmbed.clientHeight;
-
-      // The content below the video is set to absolute position and positioned inline with the video
-      contentBody.style.position = "absolute";
-      contentBody.style.top = videHeightPx + "px";
-      contentBody.style.left = "0";
-      contentBody.style.paddingLeft = marginLeft;
-
-      // The emotion/task bars are resized and adjusted
-      // The on bar scroll function achieves this
-      this._videoBars.current.onBarScroll();
-
-      // Set the black 
-      blackBackground.style.display = "";
-      blackBackground.style.height = videHeightPx +  "px";
-
-    } else if (this.state.videoFullScreen === false) {
-      // When exiting fullscreen clear the CSS
-      var clearStyleList = ["videoContainer", "recordingResultMainDiv-contentBody"];
-
-      clearStyleList.forEach(function(elementName) {
-        var element = document.getElementById(elementName);
-        element.style.position = "";
-        element.style.top = "";
-        element.style.left = "";
-        element.style.marginLeft = "";
-        element.style.width = "";
-      });
-
-      blackBackground = document.getElementById('blackBackground');
-      blackBackground.style.display = "none";
-
-      // Update the video bars
-      this._videoBars.current.onBarScroll();
     }
   } 
 
@@ -270,6 +284,17 @@ export class TestResultOverviewTab extends Component {
 
   setVideoEmbed() {
     // console.log("Setting video embed");
+    if (!this.state.currentVideoId) {
+      var videoLoadingStatus = (
+      <div>
+        <h2>The video for this test instance is not yet available..</h2>
+      </div>
+      );
+
+      this.setState({videoEmbed: videoLoadingStatus});
+      return;
+    }
+
     var src = "https://player.vimeo.com/video/" + this.state.currentVideoId + "?portrait=0&byline=0&title=0";
 
     var iframe =  

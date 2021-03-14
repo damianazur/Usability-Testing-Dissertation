@@ -100,6 +100,7 @@ public class UsabilityTestService {
 	public String createUsabilityTestInstance(Map<String, String> json) throws JsonProcessingException {
 		JsonParser jsonParser = new JsonParser();
 		
+		String participantName = json.get("participantName");
 		String referenceCode = json.get("referenceCode");
 		String ferCameraDataStr = json.get("ferCameraData");
 		String sequenceTimeStampStr = json.get("sequenceTimeStamp");
@@ -112,6 +113,7 @@ public class UsabilityTestService {
 		int testId = testDao.getIdByReferenceCode(referenceCode);
 		java.sql.Date currentDate = new java.sql.Date(Calendar.getInstance().getTime().getTime());
 		UsabilityTestInstance newUsabTestInst = new UsabilityTestInstance(testId, currentDate.toString());
+		newUsabTestInst.setParticipantName(participantName);
 		
 		String tasksStr = taskDao.getByTestIdNoSecurity(testId);
 		JsonArray tasks = jsonParser.parse(tasksStr).getAsJsonArray();

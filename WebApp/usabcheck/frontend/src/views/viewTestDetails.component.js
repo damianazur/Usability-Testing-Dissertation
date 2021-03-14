@@ -138,6 +138,11 @@ export default class ViewTestDetails extends Component {
             <span style={{fontWeight: "bold"}}>{data.testStatus}</span>
           </div>
           <hr></hr>
+
+          <h2>Scenario/Information</h2>
+          <p style={{width: "90%", backgroundColor: "#f3f3f3", padding: "10px"}}>{data.scenario}</p>
+
+          <hr></hr>
           <h2>Pre-test Questions</h2>
         </div>
       );

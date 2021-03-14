@@ -23,6 +23,20 @@ class VideoUploader:
     return uri
 
 
+  def checkUploadState(self, uri):
+    response = self.client.get(uri + '?fields=transcode.status').json()
+    if response['transcode']['status'] == 'complete':
+        print('Your video finished transcoding.')
+        return('Your video finished transcoding.')
+
+    elif response['transcode']['status'] == 'in_progress':
+        print('Your video is still transcoding.')
+        return('Your video is still transcoding.')
+
+    else:
+        print('Your video encountered an error during transcoding.')
+        return('Your video encountered an error during transcoding.')
+
 
 
 

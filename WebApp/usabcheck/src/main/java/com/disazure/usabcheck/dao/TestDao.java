@@ -62,9 +62,9 @@ public class TestDao {
 	}
 	
 	public String getByTestId(int researcherId, int testId) throws JsonProcessingException {
-		System.out.println(researcherId + " ## " + testId);
+//		System.out.println(researcherId + " ## " + testId);
 		String sql = ""
-				+ "SELECT testId, testName, projectId, launchedDate, testStatus, referenceCode FROM test "
+				+ "SELECT testId, testName, projectId, launchedDate, testStatus, referenceCode, scenario FROM test "
 				+ "LEFT JOIN project using(projectId) "
 				+ "LEFT JOIN researcher using(researcherId) "
 				+ "WHERE testId = ? AND researcherId = ?";

@@ -5,6 +5,14 @@ import os
 from ScreenRecorder import *
 from FacialExpressionRecog import *
 from VideoUploading import *
+from TaskWindow import *
+from ScrollLabel import *
+from MultipleChoiceQuestionWindow import *
+from TextQuestionWindow import *
+from RecordingWindow import *
+from Loading import *
+
+
 from win32api import GetSystemMetrics
 import win32gui as win32gui
 from datetime import datetime
@@ -29,7 +37,7 @@ class InitialWindow(QWidget):
         # Window configurations
         self.setGeometry(400, 350, 500, 250)
         self.setWindowTitle("UsabCheck")
-        self.setStyleSheet("font-size: 14px;")
+        self.setStyleSheet("font-size: 16px;")
         
         # Layout
         self.mainLayout = QVBoxLayout()
@@ -81,6 +89,8 @@ class InitialWindow(QWidget):
         noOfTasks = 0
         noOfQuestions = 0
 
+        print(data)
+
         # Counte the number of tasks and questions
         for item in data["sequenceData"]:
             if ("questionConfigsJSON" in item.keys()):
@@ -97,22 +107,29 @@ class InitialWindow(QWidget):
         layout.addRow(QLabel("Created Date:  "), QLabel(str(createdDate)))
         layout.addRow(QLabel("No. of Tasks:  "), QLabel(str(noOfTasks)))
         layout.addRow(QLabel("No. of Questions:  "), QLabel(str(noOfQuestions)))
+        layout.addRow(QLabel("Scenario/Information:"))
+
+        scenarioLabel = QLabel(data["scenario"])
+        scenarioLabel.setFixedWidth(400)
+        scenarioLabel.setWordWrap(True) 
+        scenarioLabel.setTextInteractionFlags(Qt.TextSelectableByMouse)
+        layout.addRow(scenarioLabel)
         self.displayTestLayout.setLayout(layout)
         
         self.mainLayout.addWidget(self.displayTestLayout)
         
         # Form that asks the user for their info
         layout = QFormLayout()
-        refCodeLabel = QLabel("Your name:")
-        self.refCodeInput = QLineEdit()
+        self.userNameLabel = QLabel("Your name:")
+        self.userNameInput = QLineEdit()
         btn = QPushButton("Begin", self)
         btn.clicked.connect(partial(self.begin, data))
         btn.resize(btn.sizeHint())
         btn.setStyleSheet("background-color: rgb(32, 207, 76);")
         btn.setFixedWidth(100)
 
-        layout.addRow(refCodeLabel)
-        layout.addRow(self.refCodeInput)
+        layout.addRow(self.userNameLabel)
+        layout.addRow(self.userNameInput)
         layout.addRow(btn)
         layout.setContentsMargins(0, 30, 0, 30)
 
@@ -120,561 +137,8 @@ class InitialWindow(QWidget):
 
 
     def begin(self, data):
-        self.parent.begin(data)
-
-
-class TaskWindow(QWidget):
-    def __init__(self, parent, sequenceDataItem, previousTaskPos):
-        QWidget.__init__(self, None, Qt.WindowStaysOnTopHint)
-        self.parent = parent
-        self.previousTaskPos = previousTaskPos
-        self.sequenceDataItem = sequenceDataItem
-
-        self.mainLayout = QVBoxLayout()
-        self.mainLayout.setContentsMargins(0, 0, 0, 3)
-        self.setLayout(self.mainLayout)
-
-        self.renderTaskWindow()
-        self.renderTask(sequenceDataItem)
-
-
-    def renderTaskWindow(self):
-        # Setting dimensions
-        self.screenW = GetSystemMetrics(0)
-        self.screenH = GetSystemMetrics(1)
-        self.windowW = 300
-        self.windowH = 200
-        self.windowPaddingLeft = 30
-        self.windowsPaddingTop = 70
-
-        if self.previousTaskPos == None:
-            self.initX = self.screenW - self.windowW - self.windowPaddingLeft
-            self.initY = self.windowsPaddingTop
-        else:
-            self.initX = self.previousTaskPos.x()
-            self.initY = self.previousTaskPos.y()
-
-        self.buttonMinW = 100
-        self.buttonHeight = 25
-
-        # Configurations
-        self.setWindowFlag(Qt.FramelessWindowHint) 
-        self.setGeometry(self.initX, self.initY, self.windowW, self.windowH)
-        self.setStyleSheet("font-size: 14px;")
-        self.dragPos = QPoint(self.pos().x(), self.pos().y())
-        self.hideButtonDragged = False
-
-        # Hide button
-        hideButton = QPushButton("Hide", self)
-        hideButton.clicked.connect(self.toggleHide)
-        hideButton.resize(hideButton.sizeHint())
-        hideButton.setStyleSheet("background-color: rgb(32, 123, 207 );")
-        hideButton.pressed.connect(self.hideButtonPress)
-        hideButton.mouseMoveEvent = self.hideButtonDrag
-        self.hideButton = hideButton
-        self.mainLayout.addWidget(self.hideButton)
-
-
-    def renderTask(self, sequenceDataItem):
-        jsonSteps = json.loads(sequenceDataItem["stepsJSON"])
-
-        # Create instruction text body
-        stepIndex = 1
-        stepString = "Task: " + sequenceDataItem["taskName"] + "\n"
-        for step in jsonSteps:
-            stepString += "\n" + str(stepIndex) + ".    " + (str(step["value"]) + " ") + "\n"
-            stepIndex += 1
-
-
-        # Set the text
-        taskLayout = ScrollLabel(self) 
-        taskLayout.setText(stepString) 
-        taskLayout.setGeometry(0, 40, 300, 0) 
-        taskLayout.setContentsMargins(0, 0, 0, 0)
-
-        # Add "Finish Task" button
-        hbox = QHBoxLayout()
-        finishTaskButton = QPushButton("Finish Task", self)
-        finishTaskButton.clicked.connect(self.finishTaskButton)
-        finishTaskButton.resize(finishTaskButton.sizeHint())
-        finishTaskButton.setStyleSheet("background-color: rgb(32, 207, 76);")
-        finishTaskButton.setFixedWidth(100)
-        hbox.setAlignment(Qt.AlignCenter)
-        hbox.addWidget(finishTaskButton)
-        taskLayout.lay.addLayout(hbox)
-        self.taskLayout = taskLayout
-
-        self.mainLayout.addWidget(self.taskLayout)
-    
-
-    def hideButtonPress(self):
-        _, _, (x,y) = win32gui.GetCursorInfo()
-        self.dragPos = QPoint(x, y)
-
-    def hideButtonDrag(self, event):
-        if event.buttons() == Qt.LeftButton:
-            self.hideButtonDragged = True
-            self.move(self.pos() + event.globalPos() - self.dragPos)
-            self.dragPos = event.globalPos()
-            self.previousTaskPos = self.pos()
-
-
-    # Hiding the content of the task with the button
-    def toggleHide(self, e):
-        currentState = self.hideButton.text()
-
-        # If the hideButton was dragged (the window was moved when the button was selected)
-        # then do not activate the button. Button will only be activated on click (no drag before click)
-        if (self.hideButtonDragged):
-            self.hideButtonDragged = False
-            return
-
-        if (currentState == "Hide"):
-            self.hideButton.setText('Show')
-            self.setFixedSize(self.buttonMinW, self.buttonHeight)
-            x = int(self.pos().x() + self.windowW - self.buttonMinW)
-            y = int(self.pos().y())
-            self.setGeometry(x, y, 0, 0)
-            self.taskLayout.hide()
-            self.mainLayout.setContentsMargins(0, 0, 0, 0)
-
-        elif (currentState == "Show"):
-            self.hideButton.setText('Hide')
-            self.setFixedSize(self.windowW, self.windowH)
-            x = int(self.pos().x() - self.windowW + self.buttonMinW)
-            y = int(self.pos().y())
-            self.setGeometry(x, y, 0, 0)
-            self.taskLayout.show()
-            self.mainLayout.setContentsMargins(0, 0, 0, 3)
-            
-
-    # Clicking on the body of the window before it is dragged and repositioned
-    # The click position needs to be saved to know where to move the window to
-    def mousePressEvent(self, event):
-        self.dragPos = event.globalPos()
-    
-    # When the user drags the window
-    def mouseMoveEvent(self, event):
-        if event.buttons() == Qt.LeftButton:
-            self.move(self.pos() + event.globalPos() - self.dragPos)
-            self.dragPos = event.globalPos()
-            self.previousTaskPos = self.pos()
-    
-    
-    # User clicked finish task
-    def finishTaskButton(self, e):
-        self.parent.nextSequenceItem(None, "Task")
-
-
-# Scroll Label is used for the body of the task
-class ScrollLabel(QScrollArea): 
-    def __init__(self, *args, **kwargs): 
-        QScrollArea.__init__(self, *args, **kwargs) 
-        self.setWidgetResizable(True) 
-  
-        content = QWidget(self) 
-        self.setWidget(content) 
-  
-        self.lay = QVBoxLayout(content) 
-        # self.lay.setAlignment(Qt.AlignLeft | Qt.AlignTop) 
-        self.lay.setContentsMargins(15, 0, 15, 10)
-        self.label = QLabel(content) 
-
-        self.label.setAlignment(Qt.AlignLeft | Qt.AlignTop) 
-        self.label.setWordWrap(True) 
-        self.lay.addWidget(self.label) 
-  
-    def setText(self, text): 
-        self.label.setText(text) 
-
-
-class QuestionWindow(QWidget):
-    def __init__(self, parent, sequenceDataItem):
-        QWidget.__init__(self, None, Qt.WindowStaysOnTopHint)
-
-        print("sequenceDataItem", sequenceDataItem)
-
-        self.parent = parent
-        self.sequenceDataItem = sequenceDataItem
-
-        self.mainLayout = QVBoxLayout()
-
-        shadow = QGraphicsDropShadowEffect(self,
-            blurRadius=20.0,
-            color= QColor(105, 105, 105),
-            offset= QPointF(2.0, 2.0)
-        )
-        self.setGraphicsEffect(shadow)
-
-        self.mainLayout.setContentsMargins(20, 20, 20, 20)
-        self.setAttribute(Qt.WA_TranslucentBackground)
-        self.setLayout(self.mainLayout)
-
-        self.renderQuestionWindow()
-
-
-    def renderQuestionWindow(self):
-        # Setting dimensions
-        self.screenW = GetSystemMetrics(0)
-        self.screenH = GetSystemMetrics(1)
-        self.windowW = 500
-        self.windowH = 350
-
-        self.initX = int(self.screenW/2 - self.windowW/2)
-        self.initY = int(self.screenH/3 - self.windowH/2)
-
-        self.dragPos = QPoint(self.initX, self.initY + self.windowH)
-
-        self.buttonWidth = 100
-        self.buttonHeight = 25
-
-        # Configurations
-        self.setWindowFlag(Qt.FramelessWindowHint) 
-        self.setGeometry(self.initX, self.initY, self.windowW, self.windowH)
-        self.setStyleSheet("font-size: 14px;")
-
-    # Clicking on the body of the window before it is dragged and repositioned
-    # The click position needs to be saved to know where to move the window to
-    def mousePressEvent(self, event):
-        self.dragPos = event.globalPos()
-    
-
-    # When the user drags the window
-    def mouseMoveEvent(self, event):
-        if event.buttons() == Qt.LeftButton:
-            self.move(self.pos() + event.globalPos() - self.dragPos)
-            self.dragPos = event.globalPos()
-
-
-class TextQuestionWindow(QuestionWindow):
-    def __init__(self, parent, sequenceDataItem):
-        # QuestionWindow.__init__(self, parent, sequenceDataItem)
-        super().__init__(parent, sequenceDataItem)
-        self.renderQuestion(sequenceDataItem)
-
-
-    def renderQuestion(self, sequenceDataItem):
-        questionConfigs = json.loads(sequenceDataItem["questionConfigsJSON"])
-
-        questionText = questionConfigs["questionText"]
-
-        # Set the text
-        taskLayout = ScrollLabel(self) 
-        taskLayout.setGeometry(0, 40, 400, 0)
-        taskLayout.setContentsMargins(0, 0, 0, 0)
-
-        answerForm = QFormLayout()
-        questionLabel = QLabel("Question:")
-        questionLabel.setStyleSheet("font-size: 16px;")
-        questionLabel.setContentsMargins(0, 0, 0, 0)
-
-        hr = QFrame()
-        hr.setFrameShape(QFrame.HLine)
-        hr.setStyleSheet("color: gray")
-
-        questionLabel2 = QLabel(questionText)
-        questionLabel2.setContentsMargins(0, 0, 0, 10)
-        questionLabel2.setWordWrap(True) 
-        # questionLabel2.setStyleSheet("border-top: 1px solid gray")
-
-        answerLabel = QLabel("Your answer:")
-        self.answerInput = QLineEdit()
-        self.answerInput = QTextEdit()
-        self.answerInput.setFixedHeight(100)
-
-        hr2 = QLabel("")
-        hr2.setContentsMargins(30, 0, 0, 0)
-
-        # Add "Submit Question" button
-        submitButton = QPushButton("Submit", self)
-        submitButton.clicked.connect(self.submitButtonPress)
-        submitButton.resize(submitButton.sizeHint())
-        submitButton.setStyleSheet("background-color: rgb(32, 207, 76);")
-        submitButton.setFixedWidth(100)
-
-        answerForm.addRow(questionLabel)
-        answerForm.addRow(hr)
-        answerForm.addRow(questionLabel2)
-        answerForm.addRow(answerLabel)
-        answerForm.addRow(self.answerInput)
-        answerForm.addRow(hr2)
-        answerForm.addRow(submitButton)
-        answerForm.setContentsMargins(0, 0, 0, 15)
-
-        taskLayout.lay.addLayout(answerForm)
-
-        self.taskLayout = taskLayout
-        self.mainLayout.addWidget(self.taskLayout)
-
-
-    def submitButtonPress(self):
-        answerJSON = {
-            "answer": self.answerInput.toPlainText()
-        }
-
-        returnData = {
-            "answerJSON": answerJSON,
-            "questionId": self.sequenceDataItem["questionId"]
-        }
-        self.parent.nextSequenceItem(returnData, "Question Answer")
-
-
-class MultipleChoiceQuestionWindow(QuestionWindow):
-    def __init__(self, parent, sequenceDataItem):
-        super().__init__(parent, sequenceDataItem)
-        self.renderQuestion(sequenceDataItem)
-
-
-    def renderQuestion(self, sequenceDataItem):
-        questionConfigs = json.loads(sequenceDataItem["questionConfigsJSON"])
-        questionText = questionConfigs["questionText"]
-        choices = questionConfigs["choices"]
-
-        # Set the text
-        taskLayout = ScrollLabel(self) 
-        taskLayout.setGeometry(0, 40, 200, 0)
-
-        answerForm = QFormLayout()
-        questionLabel = QLabel("Multiple-Choice Question:")
-        questionLabel.setStyleSheet("font-size: 16px;")
-        questionLabel.setContentsMargins(0, 0, 0, 0)
-        questionLabel.setFixedWidth(420)
-
-        hr = QFrame()
-        hr.setFrameShape(QFrame.HLine)
-        hr.setStyleSheet("color: gray")
-
-        questionLabel2 = QLabel(questionText)
-        questionLabel2.setContentsMargins(0, 0, 0, 10)
-        questionLabel2.setWordWrap(True) 
-
-        answerLabel = QLabel("Select one answer")
-        radioButtonLayout = QVBoxLayout()
-        radioButtonLayout.setContentsMargins(0, 0, 0, 0)
-
-        for choice in choices:
-            button = QRadioButton(str(choice["value"]))
-            button.toggled.connect(self.radioSelect)
-            radioButtonLayout.addWidget(button)
-
-        hr2 = QLabel("")
-        hr2.setContentsMargins(30, 0, 0, 0)
-
-        # Add "Submit Question" button
-        submitButton = QPushButton("Submit", self)
-        submitButton.clicked.connect(self.submitButtonPress)
-        submitButton.resize(submitButton.sizeHint())
-        submitButton.setStyleSheet("background-color: rgb(32, 207, 76);")
-        submitButton.setFixedWidth(100)
-        submitButton.hide()
-        self.submitButton = submitButton
-
-        answerForm.addRow(questionLabel)
-        answerForm.addRow(hr)
-        answerForm.addRow(questionLabel2)
-        answerForm.addRow(answerLabel)
-        answerForm.addRow(radioButtonLayout)
-        answerForm.addRow(hr2)
-        answerForm.addRow(self.submitButton)
-        answerForm.setContentsMargins(0, 0, 0, 15)
-
-        taskLayout.lay.addLayout(answerForm)
-        taskLayout.lay.setAlignment(Qt.AlignLeft | Qt.AlignTop) 
-
-        self.taskLayout = taskLayout
-        self.mainLayout.addWidget(self.taskLayout)
-
-
-    def radioSelect(self):
-        self.submitButton.show()
-
-        radioButton =  self.sender()
-        if radioButton.isChecked():
-            self.choiceSelected = radioButton.text()
-            print("Selected: ", radioButton.text())
-
-
-    def submitButtonPress(self):
-        answerJSON = {
-            "answer": self.choiceSelected
-        }
-
-        returnData = {
-            "answerJSON": answerJSON,
-            "questionId": self.sequenceDataItem["questionId"]
-        }
-        self.parent.nextSequenceItem(returnData, "Question Answer")
-
-
-class RecordingWindow(QWidget):
-    def __init__(self, parent):
-        QWidget.__init__(self, None, Qt.WindowStaysOnTopHint)
-
-        self.mainLayout = QHBoxLayout()
-        self.mainLayout.setContentsMargins(0, 0, 0, 0)
-        self.mainLayout.setSpacing(0)
-        self.setStyleSheet("font-size: 16px;")
-
-        self.parent = parent
-        self.isMinimized = False
-        self.setAttribute(Qt.WA_TranslucentBackground)
-
-        self.renderBorder()
-        self.renderRecordingOptions()
-
-
-        self.videoFileName = "UsabTest-" + datetime.today().strftime('%Y-%m-%d-%H-%M-%S') +".avi"
-        
-        # self.screenRecorder = ScreenRecorder(self.videoFileName)
-        # screenRecThread = threading.Thread(target=self.startRecorder, args=(self.screenRecorder,)) 
-        screenRecThread = threading.Thread(target=self.startRecorder, args=(self,)) 
-        screenRecThread.start()
-        
-        while not hasattr(self, "screenRecorder"):
-            time.sleep(0.1)
-
-        # self.fer = FacialExpressionRecog("Model 1", self.screenRecorder)
-        # ferThread = threading.Thread(target=self.startFER, args=(self.fer,))
-        # ferThread.start()
-
-        ferThread = threading.Thread(target=self.startFER, args=(self,))
-        ferThread.start()
-        
-
-    # def startRecorder(self, screenRecorder):
-    #     screenRecorder.begin()
-
-    # def startFER(self, fer):
-    #     fer.begin()
-
-    def startRecorder(self, parent):
-        parent.screenRecorder = ScreenRecorder(parent.videoFileName)
-        parent.screenRecorder.begin()
-
-
-    def startFER(self, parent):
-        parent.fer = FacialExpressionRecog("Model 1", parent.screenRecorder)
-        parent.fer.begin()
-
-
-    def renderBorder(self):
-        # Setting dimensions
-        self.screenW = GetSystemMetrics(0)
-        self.screenH = GetSystemMetrics(1)
-
-        # Configurations
-        self.setWindowFlag(Qt.FramelessWindowHint) 
-        self.setGeometry(0, 0, self.screenW - 0, self.screenH - 0)
-
-        redFrame = QFrame(self)
-        redFrame.setGeometry(0, 0, self.screenW - 0, self.screenH - 0)
-        redFrame.setStyleSheet("border: 2px solid red;")
-
-    
-    def renderRecordingOptions(self):
-        frame = QWidget(self)
-        
-        self.frameWidth = 200
-        self.frameHeight = 40
-        frameX = self.screenW / 2 - self.frameWidth/2
-        frameY = self.screenH - self.frameHeight
-
-        frame.setFixedSize(self.frameWidth, self.frameHeight)
-        frame.move(frameX, frameY)
-        frame.setStyleSheet("background-color: rgb(211,211,211);")
-
-        innerLayout = QHBoxLayout()
-        innerLayout.setContentsMargins(0, 0, 15, 0)
-
-        label = QLabel("Recording")
-        label.setFixedHeight(self.frameHeight)
-        label.setContentsMargins(10, 0, 5, 0)
-
-        recordingIconLabel = QLabel(self) 
-        recIcon = QPixmap("./assets/RecordingIcon20x20.png") 
-        recIcon = recIcon.scaled(20, 20, Qt.KeepAspectRatio)
-        recordingIconLabel.setPixmap(recIcon) 
-        recordingIconLabel.resize(
-            recIcon.width(), 
-            recIcon.height()) 
-
-        stopButton = QPushButton("STOP", self)
-        stopButton.clicked.connect(self.stopRecording)
-        stopButton.resize(stopButton.sizeHint())
-        stopButton.setStyleSheet("background-color: rgb(255,51,51); margin: 0; padding: 2; font-size: 14px;")
-        stopButton.setFixedWidth(60)
-
-        minimizeButton = QPushButton(self)
-
-        leftArrowIcon = QIcon("./assets/LeftArrow40x80.png") 
-        minimizeButton.setIcon(leftArrowIcon) 
-        minimizeButton.setIconSize(QSize(15,35))
-        minimizeButton.pressed.connect(self.minimizeButtonPress)
-        minimizeButton.clicked.connect(self.minimize)
-        minimizeButton.resize(minimizeButton.sizeHint())
-        minimizeButton.setStyleSheet("background-color: gray; border: 1px solid gray;")
-        minimizeButton.setFixedWidth(20)
-        minimizeButton.setFixedHeight(self.frameHeight)
-        minimizeButton.mouseMoveEvent = self.minimizeButtonDrag
-        minimizeButton.move(frameX + self.frameWidth, frameY)
-        self.minimizeButtonDragged = False
-
-        self.minimizeButton = minimizeButton
-
-        innerLayout.addWidget(label)
-        innerLayout.addWidget(recordingIconLabel)
-        innerLayout.addWidget(stopButton)
-        self.innerLayout = innerLayout
-        frame.setLayout(self.innerLayout)
-
-        self.frame = frame
-    
-
-    def stopProcesses(self):
-        self.fer.running = False
-        self.fer.cap.release()
-        self.screenRecorder.quit = True
-
-
-    def stopRecording(self):
-        print("STOPPING RECORDING!")
-        self.stopProcesses()
-
-        self.parent.onRecordingStopped()
-        self.close()
-
-
-    def minimize(self):
-        if not self.minimizeButtonDragged:
-            if self.isMinimized:
-                self.frame.show()
-                self.isMinimized = False
-            else:
-                self.frame.hide()
-                self.isMinimized = True
-
-
-    def minimizeButtonPress(self):
-        _, _, (x,y) = win32gui.GetCursorInfo()
-        self.minimizeButtonDragged = False
-        self.dragPos = QPoint(x, y)
-
-    def minimizeButtonDrag(self, event):
-        self.minimizeButtonDragged = True
-        self.mouseMoveEvent(event)
-
-
-    # Clicking on the body of the window before it is dragged and repositioned
-    # The click position needs to be saved to know where to move the window to
-    def mousePressEvent(self, event):
-        self.dragPos = event.globalPos()
-    
-    # When the user drags the window
-    def mouseMoveEvent(self, event):
-        if event.buttons() == Qt.LeftButton:
-            self.frame.move(self.frame.pos().x() + event.globalPos().x() - self.dragPos.x(), self.frame.pos().y())
-            self.minimizeButton.move(self.minimizeButton.pos().x() + event.globalPos().x() - self.dragPos.x(), self.minimizeButton.pos().y())
-            self.dragPos = event.globalPos()
+        data["participantName"] = self.userNameInput.text()
+        self.parent.loadComponents(data)
 
 
 class UploadDataWindow(QWidget):
@@ -682,114 +146,108 @@ class UploadDataWindow(QWidget):
         QWidget.__init__(self, None, Qt.WindowStaysOnTopHint)
         self.parent = parent
 
+        self.status = "Uploading, please wait..."
+
         # Window configurations
-        self.setGeometry(400, 350, 500, 250)
+        self.setGeometry(400, 350, 300, 250)
         self.setWindowTitle("UsabCheck")
-        self.setStyleSheet("font-size: 14px;")
+        self.setStyleSheet("font-size: 16px;")
+
+        self.displayStatusLayout = QGroupBox("")
         
         # Layout
         self.mainLayout = QVBoxLayout()
-        self.mainLayout.setContentsMargins(20, 20, 200, 0)
-        self.createTestEnterLayout()
+        self.mainLayout.setContentsMargins(20, 20, 20, 20)
 
-        self.displayTestLayout = QGroupBox()
+        self.createInitialContent()
+
+        self.displayContent()
         self.setLayout(self.mainLayout)
 
 
-    # Creates the first part of the form where the user enters a test reference code
-    def createTestEnterLayout(self):
-        layout = QFormLayout()
-        
-        btn = QPushButton("Submit", self)
+    def createInitialContent(self):
+        self.initLayout = QFormLayout()
+   
+        btn = QPushButton("Upload Data", self)
         btn.clicked.connect(self.uploadDataToBackend)
         btn.resize(btn.sizeHint())
         btn.setStyleSheet("background-color: rgb(32, 123, 207);")
         btn.setFixedWidth(100)
 
-       
-        layout.addRow(btn)
-        layout.setContentsMargins(0, 0, 0, 30)
+        self.initLayout.addRow(btn)
+        self.initLayout.setContentsMargins(0, 0, 0, 30)
 
-        self.mainLayout.addLayout(layout)
-    
-
-    # When the user submits the code get the data
-    def uploadDataToBackend(self, e):
-        self.parent.uploadData()
-
-
-class LoadingWindow(QWidget):
-    def __init__(self, parent):
-        QWidget.__init__(self, None, Qt.WindowStaysOnTopHint)
-        self.parent = parent
-
-        self.status = "Loading..."
-
-        # Window configurations
-        self.setGeometry(400, 350, 300, 250)
-        self.setWindowTitle("UsabCheck")
-        self.setStyleSheet("font-size: 22px;")
-
-        self.displayStatusLayout = QGroupBox("Loading")
-        
-        # Layout
-        self.mainLayout = QVBoxLayout()
-        self.mainLayout.setContentsMargins(20, 20, 20, 20)
-        self.displayStatus()
-        self.setLayout(self.mainLayout)
+        self.mainLayout.addLayout(self.initLayout)
 
 
     # Display the data so that the user can verify that the test is correct
-    def displayStatus(self):
+    def displayContent(self):
         # Remove the widget if it already exists (if the user submits another code the data is reloaded)
         self.mainLayout.removeWidget(self.displayStatusLayout)
         self.displayStatusLayout = QGroupBox("")
         self.displayStatusLayout.setMinimumWidth(400)
         layout = QFormLayout()
         layout.setSpacing(10)
-        layout.addRow(QLabel("Loading Status: "), QLabel(str(self.status)))
+
+        infoText = QLabel("The usability study is finished. Please do not close this window until the data upload is finished.\nThank you for your participation.\n\n")
+        infoText.setFixedWidth(400)
+        infoText.setWordWrap(True) 
+
+        statusText = QLabel(str(self.status))
+        statusText.setFixedWidth(400)
+        statusText.setWordWrap(True) 
+
+        layout.addRow(infoText)
+        layout.addRow(QLabel("Uploading Status: "), statusText)
         self.displayStatusLayout.setLayout(layout)
         
         self.mainLayout.addWidget(self.displayStatusLayout)
 
-    def setStatus(self, text):
+
+    def updateStatus(self, text):
         self.status = text
-        self.displayStatus()
-        if text == "Finished!":
-            self.parent.loadNextSequenceItem()
-            self.close()
-
-    def busyFunc(self):
-        self.thread = Thread(self)
-        self.thread.signal.connect(self.setStatus)
-        self.thread.start() 
+        self.displayContent() 
 
 
-class Thread(QThread):
-    signal = pyqtSignal(str)
+    # When the user submits the code get the data
+    def uploadDataToBackend(self, e):
+        self.parent.uploadData()
+    
 
-    def __init__(self, parent=None):
+    def uploadVideo(self, testInstanceRef, videoFileName):
+        self.testInstanceRef = testInstanceRef
+
+        self.uploadThread = VideoUploadingThread(videoFileName, self)
+        self.uploadThread.updateVideoLinkSignal.connect(self.updateVideoId)
+        self.uploadThread.start() 
+
+
+    def updateVideoId(self, videoId):
+        videoLinkData = {
+            "testInstanceRef": self.testInstanceRef,
+            "videoId": videoId
+        }
+        saveVideoLinkRequest = requests.post("http://localhost:8090/api/localapp/saveVideoLink", data=videoLinkData)
+        print(saveVideoLinkRequest)
+        self.updateStatus("The video has uploaded and will be available shortly. You may close this window.")
+
+
+
+class VideoUploadingThread(QThread):
+    updateVideoLinkSignal = pyqtSignal(str)
+
+    def __init__(self, videoFileName, parent=None):
         QThread.__init__(self, parent)
         self.parent = parent
+        self.videoFileName = videoFileName
+
 
     def run(self):
-        parent = self.parent.parent
-        while True:
-            screenRecCreated = hasattr(parent, 'recordingWindow')
-            self.signal.emit("Loading Screen Recorder..")
-            if screenRecCreated:
-                self.signal.emit("Loading Camera")
-                ferCreated = hasattr(parent.recordingWindow, 'fer')
+        self.videoUploader = VideoUploader(self.videoFileName)
+        videoId = self.videoUploader.upload()
 
-                if ferCreated:
-                    self.signal.emit("Configuring Camera")
-                    ferStarted = parent.recordingWindow.fer.started
-                    if ferStarted:
-                        self.signal.emit("Finished!")
-                        parent.finishedLoading = True
-                        break
-
-            time.sleep(0.1)
+        self.updateVideoLinkSignal.emit(str(videoId))
+        print("Video ID: ", videoId)
 
 
 class MainProgram():
@@ -798,7 +256,6 @@ class MainProgram():
         app.setStyle('Fusion')
         
         self.began = False
-        self.finishedLoading = False
         self.answers = []
         self.sequenceTimeStamp = []
         self.previousTaskPos = None
@@ -828,8 +285,6 @@ class MainProgram():
         self.ferCameraData = self.recordingWindow.fer.ferCameraData
         self.videoFileName = self.recordingWindow.videoFileName
         
-        # for timeStamp in self.ferCameraData:
-        #     print(timeStamp)
         self.recordingWindow.close()
         self.window.close()
 
@@ -843,28 +298,15 @@ class MainProgram():
         print(sendData)
 
         saveTestRequest = requests.post("http://localhost:8090/api/localapp/saveTestResults", data=sendData)
-        testInstanceRef = saveTestRequest.text
-        print(saveTestRequest, testInstanceRef)
+        self.testInstanceRef = saveTestRequest.text
+        print(saveTestRequest, self.testInstanceRef)
 
-        videoUploader = VideoUploader(self.videoFileName)
-        videoId = videoUploader.upload()
-        print("Video ID: ", videoId)
-        
-        videoLinkData = {
-            "testInstanceRef": testInstanceRef,
-            "videoId": videoId
-        }
-        saveVideoLinkRequest = requests.post("http://localhost:8090/api/localapp/saveVideoLink", data=videoLinkData)
-        print(saveVideoLinkRequest)
+        self.uploadDataWindow.uploadVideo(self.testInstanceRef, self.videoFileName)
 
 
     def packageData(self):
-        # print(self.ferCameraData)
-        # print(self.answers)
-        # print(self.sequenceTimeStamp)
-        # print(self.data)
-
         packagedData = {
+            "participantName": self.data["participantName"],
             "referenceCode": self.data["referenceCode"],
             "ferCameraData":  json.dumps(self.ferCameraData),
             "sequenceTimeStamp":  json.dumps(self.sequenceTimeStamp),
@@ -962,7 +404,8 @@ class MainProgram():
         return data
     
 
-    def begin(self, data):
+    def loadComponents(self, data):
+        print(data)
         if (self.began == False):
             self.data = data
             self.began = True
@@ -977,6 +420,9 @@ class MainProgram():
             self.recordingWindow = RecordingWindow(self)
             self.recordingWindow.show()
 
+
+    def begin(self):
+        self.loadNextSequenceItem()
 
 if __name__ == '__main__':
     print("----------- Starting ----------- ")

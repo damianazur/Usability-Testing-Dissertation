@@ -5,6 +5,7 @@ public class UsabilityTestInstance {
 	private int testId;
 	private String studyDate;
 	private String videoLocation;
+	private String participantName;
 	
 	public UsabilityTestInstance(int testId, String studyDate) {
 		super();
@@ -43,4 +44,14 @@ public class UsabilityTestInstance {
 	public void setVideoLocation(String videoLocation) {
 		this.videoLocation = videoLocation;
 	}
+
+	public String getParticipantName() {
+		return participantName;
+	}
+
+	public void setParticipantName(String participantName) {
+		this.participantName = participantName;
+	}
+	
+	
 }

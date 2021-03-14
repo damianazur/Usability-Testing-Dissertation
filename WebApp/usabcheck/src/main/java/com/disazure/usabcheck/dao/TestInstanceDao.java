@@ -30,7 +30,7 @@ public class TestInstanceDao {
 	
 	public String getByTestId(int researcherId, int testId) throws JsonProcessingException {
 		String sql = ""
-				+ "SELECT testInstanceId, testId, studyDate, videoLocation FROM testinstance "
+				+ "SELECT testInstanceId, testId, studyDate, videoLocation, participantName FROM testinstance "
 				+ "LEFT JOIN test using(testId) "
 				+ "LEFT JOIN project using(projectId) "
 				+ "LEFT JOIN researcher using(researcherId) "
@@ -61,8 +61,8 @@ public class TestInstanceDao {
 	
 	public int create(UsabilityTestInstance testInstance) {
 		String sql = ""
-				+ "INSERT INTO testinstance (testId, studyDate, instanceReference) "
-				+ "VALUES (?, ?, ?)";
+				+ "INSERT INTO testinstance (testId, studyDate, instanceReference, participantName) "
+				+ "VALUES (?, ?, ?, ?)";
 		
 		GeneratedKeyHolder holder = new GeneratedKeyHolder();
 		
@@ -73,6 +73,7 @@ public class TestInstanceDao {
 		        statement.setString(1, Integer.toString(testInstance.getTestId()));
 		        statement.setString(2, testInstance.getStudyDate());
 		        statement.setString(3, generateReferenceCode());
+		        statement.setString(4, testInstance.getParticipantName());
 		        return statement;
 		    }
 		}, holder);
@@ -98,8 +99,8 @@ public class TestInstanceDao {
 	
 	public int setVideoLink(String testInstanceRef, String videoId) throws JsonProcessingException {
 		String sql = ""
-				+ "UPDATE testinstance SET videoLocation = ?"
-				+ "WHERE testInstanceRef = ?";
+				+ "UPDATE testinstance SET videoLocation = ? "
+				+ "WHERE instanceReference = ?";
 		
 		int result = jdbcTemplate.update(sql, videoId, testInstanceRef);
 		

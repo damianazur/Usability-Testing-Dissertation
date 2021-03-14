@@ -232,13 +232,13 @@ export const ScenarioInfoForm = ({ onSubmit }) => {
       <div className="form-group">
         <label className="fullWidth">Scenario Information</label>
         <p>
-         After the user answers the pre-test questions (if applicable) they will be presented with a scenario before the test begins.
+          Before the user begins the test, scenario and other information written in the text box will be displayed for them read.
         </p>
         <p>
-         This is where you can tell the participant the relevant information they should know before they begin the test.
+          This is where you can tell the participant the relevant information they should know before they begin the test.
         </p>
         <p>
-         For example, you could you tell them about the page they are starting on and you can give them the URL they should navigate to before they begin the test.
+          For example, you could you tell them about the page they are starting on and you can give them the URL they should navigate to before they begin the test.
         </p>
       </div>
     </form>

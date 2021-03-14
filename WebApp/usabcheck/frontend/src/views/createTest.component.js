@@ -317,6 +317,12 @@ export default class CreateTest extends Component {
             <label>Test Name</label>
             {CreateInfoButton("testName", this.showInfoModal.bind(this))}
             <input placeholder="Test Name" autoComplete="off" className="inputField2" type="text" name="testName" required/>
+
+            {/* SCENARIO */}
+            <h2  style={{marginTop: "50px"}}>Scenario  {CreateInfoButton("scenario", this.showInfoModal.bind(this))}</h2>
+            <textarea id="scenario" rows="3" cols="60" type="text" name="scenario"></textarea>
+
+            <hr></hr>
             
             {/* --------- PRE-TEST QUESTIONS --------- */}
             <h2 style={{marginTop: "50px"}}>Pre-test Questions {CreateInfoButton("preTest", this.showInfoModal.bind(this))}</h2>
@@ -339,12 +345,6 @@ export default class CreateTest extends Component {
                 + Multiple Choice Question
               </button>
             </div>
-            
-            <hr></hr>
-
-            {/* SCENARIO */}
-            <h2  style={{marginTop: "50px"}}>Scenario  {CreateInfoButton("scenario", this.showInfoModal.bind(this))}</h2>
-            <textarea id="scenario" rows="3" cols="60" type="text" name="scenario"></textarea>
             
             <hr></hr>
             {/* --------- USABILITY TEST BODY (TASKS & QUESTIONS) --------- */}
