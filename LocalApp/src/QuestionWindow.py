@@ -17,7 +17,8 @@ class QuestionWindow(QWidget):
 
         shadow = QGraphicsDropShadowEffect(self,
             blurRadius=20.0,
-            color= QColor(105, 105, 105),
+            # color= QColor(105, 105, 105),
+            color= QColor(70, 70, 70),
             offset= QPointF(2.0, 2.0)
         )
         self.setGraphicsEffect(shadow)

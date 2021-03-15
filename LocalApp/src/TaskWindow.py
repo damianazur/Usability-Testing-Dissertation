@@ -9,10 +9,12 @@ from win32api import GetSystemMetrics
 import win32gui as win32gui
 
 from ScrollLabel import *
+from ConfirmWindow import *
 
 class TaskWindow(QWidget):
     def __init__(self, parent, sequenceDataItem, previousTaskPos):
         QWidget.__init__(self, None, Qt.WindowStaysOnTopHint)
+
         self.parent = parent
         self.previousTaskPos = previousTaskPos
         self.sequenceDataItem = sequenceDataItem
@@ -153,4 +155,10 @@ class TaskWindow(QWidget):
     
     # User clicked finish task
     def finishTaskButton(self, e):
+        self.confirmWindow = ConfirmWindow(self, "Confirm you want to proceed to next task.", self.pos(), (self.windowW - 15, self.windowH - 0), self.onConfirmNextTask)
+        self.confirmWindow.show()
+
+        # self.parent.nextSequenceItem(None, "Task")
+    
+    def onConfirmNextTask(self):
         self.parent.nextSequenceItem(None, "Task")

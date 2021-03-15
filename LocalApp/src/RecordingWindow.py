@@ -6,6 +6,7 @@ from QuestionWindow import *
 
 from ScreenRecorder import *
 from FacialExpressionRecog import *
+from ConfirmWindow import *
 
 from win32api import GetSystemMetrics
 import win32gui as win32gui
@@ -129,12 +130,17 @@ class RecordingWindow(QWidget):
         self.screenRecorder.quit = True
 
 
-    def stopRecording(self):
+    def onConfirmStop(self):
         print("STOPPING RECORDING!")
         self.stopProcesses()
 
         self.parent.onRecordingStopped()
         self.close()
+
+
+    def stopRecording(self):
+        self.confirmWindow = ConfirmWindow(self, "Are you sure you want to stop the study? All data will be lost.", None, None, self.onConfirmStop)
+        self.confirmWindow.show()
 
 
     def minimize(self):
