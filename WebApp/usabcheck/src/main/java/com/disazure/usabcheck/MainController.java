@@ -82,7 +82,7 @@ public class MainController {
 	}
 	
 	@RequestMapping(value = "/createProject", method = RequestMethod.POST)
-	public ResponseEntity<?> getProjects(@RequestBody Map<String, String> json) {
+	public ResponseEntity<?> createProject(@RequestBody Map<String, String> json) {
 		String token = json.get("token");
 		String projectName = json.get("projectName");
 		String username = jwtUtils.getUserNameFromJwtToken(token);

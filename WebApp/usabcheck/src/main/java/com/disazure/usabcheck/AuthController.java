@@ -25,7 +25,7 @@ import com.disazure.usabcheck.dao.*;
 import com.disazure.usabcheck.security.jwt.JwtUtils;
 import com.disazure.usabcheck.security.services.UserDetailsImpl;
 
-@CrossOrigin(origins = "*", maxAge = 3600)
+@CrossOrigin(origins = "*", maxAge = 30600)
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {

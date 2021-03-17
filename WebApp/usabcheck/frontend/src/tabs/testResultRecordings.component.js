@@ -115,7 +115,7 @@ export class TestResultOverviewTab extends Component {
     var instanceId = testInstanceObj["testInstanceId"];
     var videoId = testInstanceObj["videoLocation"];
     if (videoId == null) {
-      this.setState({currentVideoId: null, selectedTestInstaceId: instanceId}, () => {
+      this.setState({currentVideoId: null, selectedTestInstaceId: instanceId, videoDuration: 0}, () => {
         this.setVideoEmbed();
       });
       return;
@@ -125,7 +125,7 @@ export class TestResultOverviewTab extends Component {
     // console.log(videoId, instanceId)
 
     // Set videoID and get data
-    this.setState({currentVideoId: videoId, selectedTestInstaceId: instanceId}, () => {
+    this.setState({currentVideoId: videoId, selectedTestInstaceId: instanceId, videoDuration: 0}, () => {
       this.setVideoEmbed();
       this.getVideoTimeStamps(instanceId);
       this.getTaskGradesByInstanceId(instanceId);
@@ -240,7 +240,10 @@ export class TestResultOverviewTab extends Component {
     }
   } 
 
-  setVideoPlayer(iframe) {  
+  setVideoPlayer() {  
+    if (!this.state.videoEmbed) {
+      return;
+    }
     // console.log("Setting video player");
     var player = new Vimeo("videoEmbed");
 
@@ -275,6 +278,7 @@ export class TestResultOverviewTab extends Component {
 
     // Save video durating which will be used in the calculations
     player.getDuration().then(function(duration) {
+      // console.log("True duration: ", duration);
       this.setState({
         player: player,
         videoDuration: duration
@@ -304,7 +308,7 @@ export class TestResultOverviewTab extends Component {
           position: "relative"}}>
         <iframe 
           id="videoEmbed"
-          ref={this.setVideoPlayer.bind(this)}
+          // ref={this.setVideoPlayer.bind(this)}
           src={src}
           style={{position:"absolute", top:"0", left:"0", width:"100%", height:"100%"}}
           frameBorder="0" 
@@ -313,7 +317,12 @@ export class TestResultOverviewTab extends Component {
         </iframe>
       </div>
 
-    this.setState({videoEmbed: iframe});
+    // The video embed if first cleared before the video player is set. This is because 
+    this.setState({videoEmbed: null}, () => {
+      this.setState({videoEmbed: iframe}, () => {
+        this.setVideoPlayer();
+      });
+    });
   }
 
   // Used to jump to a time in the video when the user clicks on the bars
@@ -324,8 +333,9 @@ export class TestResultOverviewTab extends Component {
   generateTaskGrading() {
     var taskGradeBoxes = [];
 
-    var key = 0;
+    var index = 0;
     this.state.taskGradeData.forEach(function(taskData) {
+      var key = new Date().getTime() + index;
       taskGradeBoxes.push(
         <TaskGrading
           key={key}
@@ -333,7 +343,7 @@ export class TestResultOverviewTab extends Component {
           >
         </TaskGrading>
       )
-      key += 1;
+      index += 1;
     });
 
     this.setState({taskGradeBoxes: taskGradeBoxes});
@@ -341,6 +351,7 @@ export class TestResultOverviewTab extends Component {
 
   renderVideoBars() {
     // Ensure all the data has been loaded
+    // console.log(this.state.videoDuration)
     if (this.state.videoTimeStamps.length === 0 
         || this.state.videoDuration === 0
         || this.state.testDetails.length === 0
@@ -357,8 +368,10 @@ export class TestResultOverviewTab extends Component {
     var functions = {};
     functions.setVideoTime = this.setVideoTime.bind(this);
 
+    var key = new Date().getTime();
     return (
       <VideoBars
+        key={key}
         ref={this._videoBars}
         data={data}
         functions={functions}

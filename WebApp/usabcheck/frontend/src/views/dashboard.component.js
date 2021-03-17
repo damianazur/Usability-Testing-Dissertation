@@ -252,12 +252,15 @@ export default class Login extends Component {
                           </div>
                         </div>
                       ) : (
-                        <h3>Please create a usability test for this project</h3>
+                        null
                       )}
 
                       {this.state.selectedProject.projectId && this.state.tests.length == 0 ? (
                         <span>
-                          {this.renderCreateTestButton()}
+                          <h3>Please create a usability test for this project</h3>
+                          <span>
+                            {this.renderCreateTestButton()}
+                          </span>
                         </span>
                       ) : (
                         null

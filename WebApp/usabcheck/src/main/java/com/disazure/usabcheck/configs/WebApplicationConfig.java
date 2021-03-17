@@ -17,7 +17,6 @@ public class WebApplicationConfig implements WebMvcConfigurer {
         registry.addViewController("/notFound").setViewName("forward:/index.html");
     }
 
-
     @Bean
     public WebServerFactoryCustomizer<ConfigurableServletWebServerFactory> webServerFactoryCustomizer() {
         return (factory) -> factory.addErrorPages(new ErrorPage(HttpStatus.NOT_FOUND, "/notFound"));

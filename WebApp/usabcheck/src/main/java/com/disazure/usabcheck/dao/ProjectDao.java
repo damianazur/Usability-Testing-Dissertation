@@ -16,7 +16,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class ProjectDao {
 	@Autowired
     private JdbcTemplate jdbcTemplate;
-	
 	private final ObjectMapper mapper = new ObjectMapper();
 	
 	public String findByResearcherId(int resId) throws JsonProcessingException {
