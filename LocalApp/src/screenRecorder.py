@@ -5,7 +5,9 @@ import time
 import datetime
 from win32api import GetSystemMetrics
 import imageio
+import os
 from PIL import ImageGrab
+
 
 class ScreenRecorder:
   def __init__(self, fileName):
@@ -17,6 +19,8 @@ class ScreenRecorder:
     self.fps = 30.0
     self.out = cv2.VideoWriter("./videos/"+fileName, fourcc, self.fps, (self.screenSize))
     self.quit = False
+
+    print(print(os.getcwd()))
 
     self.mouseImg = cv2.imread("./assets/cursor.png")
     self.mouseInv = cv2.imread("./assets/cursor_inverse.png")

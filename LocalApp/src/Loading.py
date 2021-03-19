@@ -1,11 +1,8 @@
-from ScrollLabel import *
-from QuestionWindow import *
+import time
+from PyQt5.QtCore import *
+from PyQt5.QtGui import *
+from PyQt5.QtWidgets import *
 
-from ScreenRecorder import *
-from FacialExpressionRecog import *
-
-from win32api import GetSystemMetrics
-import win32gui as win32gui
 from datetime import datetime
 
 class LoadingWindow(QWidget):

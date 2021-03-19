@@ -1,7 +1,6 @@
 import threading
 import os
 
-from ScrollLabel import *
 from QuestionWindow import *
 
 from ScreenRecorder import *
@@ -13,7 +12,7 @@ import win32gui as win32gui
 from datetime import datetime
 
 class RecordingWindow(QWidget):
-    def __init__(self, parent):
+    def __init__(self, mainProg):
         QWidget.__init__(self, None, Qt.WindowStaysOnTopHint)
 
         self.mainLayout = QHBoxLayout()
@@ -21,7 +20,7 @@ class RecordingWindow(QWidget):
         self.mainLayout.setSpacing(0)
         self.setStyleSheet("font-size: 16px;")
 
-        self.parent = parent
+        self.mainProg = mainProg
         self.isMinimized = False
         self.setAttribute(Qt.WA_TranslucentBackground)
 
@@ -31,24 +30,31 @@ class RecordingWindow(QWidget):
 
         self.videoFileName = "UsabTest-" + datetime.today().strftime('%Y-%m-%d-%H-%M-%S') +".avi"
         
-        screenRecThread = threading.Thread(target=self.startRecorder, args=(self,)) 
-        screenRecThread.start()
+        # screenRecThread = threading.Thread(target=self.startRecorder, args=(self,)) 
+        # screenRecThread.start()
+
+        print("Recording thread before")
+        recordingThread = RecordingThread(self)
+        recordingThread.start()
         
         while not hasattr(self, "screenRecorder"):
             time.sleep(0.1)
-
-        ferThread = threading.Thread(target=self.startFER, args=(self,))
+        
+        ferThread = FERThread(self)
         ferThread.start()
+
+        # ferThread = threading.Thread(target=self.startFER, args=(self,))
+        # ferThread.start()
         
 
-    def startRecorder(self, parent):
-        parent.screenRecorder = ScreenRecorder(parent.videoFileName)
-        parent.screenRecorder.begin()
+    # def startRecorder(self, parent):
+    #     parent.screenRecorder = ScreenRecorder(parent.videoFileName)
+    #     parent.screenRecorder.begin()
 
 
-    def startFER(self, parent):
-        parent.fer = FacialExpressionRecog("Model 1", parent.screenRecorder)
-        parent.fer.begin()
+    # def startFER(self, parent):
+    #     parent.fer = FacialExpressionRecog("Model 1", parent.screenRecorder)
+    #     parent.fer.begin()
 
 
     def renderBorder(self):
@@ -134,7 +140,7 @@ class RecordingWindow(QWidget):
         print("STOPPING RECORDING!")
         self.stopProcesses()
 
-        self.parent.onRecordingStopped()
+        self.mainProg.onRecordingStopped()
         self.close()
 
 
@@ -174,3 +180,26 @@ class RecordingWindow(QWidget):
             self.frame.move(self.frame.pos().x() + event.globalPos().x() - self.dragPos.x(), self.frame.pos().y())
             self.minimizeButton.move(self.minimizeButton.pos().x() + event.globalPos().x() - self.dragPos.x(), self.minimizeButton.pos().y())
             self.dragPos = event.globalPos()
+
+
+class RecordingThread(QThread):
+    def __init__(self, parent=None):
+        QThread.__init__(self, parent)
+        self.parent = parent
+
+
+    def run(self):
+        self.parent.screenRecorder = ScreenRecorder(self.parent.videoFileName)
+        self.parent.screenRecorder.begin()
+
+
+class FERThread(QThread):
+    def __init__(self, parent=None):
+        QThread.__init__(self, parent)
+        self.parent = parent
+
+
+    def run(self):
+        self.parent.fer = FacialExpressionRecog("Model 1", self.parent.screenRecorder)
+        self.parent.fer.begin()
+    

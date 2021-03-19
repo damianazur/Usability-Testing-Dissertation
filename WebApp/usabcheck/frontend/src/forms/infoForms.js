@@ -4,7 +4,7 @@ export const UsabTestInfoForm = ({ onSubmit }) => {
   return (
     <form>
       <div className="form-group">
-        <label className="fullWidth">Create Test Information</label>
+        <label className="fullWidth">Usability Test Information</label>
         <p>
           A usability test is a series of tasks and questions that will be presented to the user
           in chronological order.

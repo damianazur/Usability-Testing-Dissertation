@@ -54,6 +54,7 @@ class FacialExpressionRecog():
         
         # If camera does not detect a face, set the end time of the last face expression
         if len(faces) == 0:
+          previousLabel = None
           if len(self.ferCameraData) != 0:
             currentIndex = len(self.ferCameraData) - 1
             currentTime = self.screenRecorder.currentTime
