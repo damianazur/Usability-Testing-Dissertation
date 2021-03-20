@@ -8,7 +8,6 @@ from PyQt5.QtWidgets import *
 from win32api import GetSystemMetrics
 import win32gui as win32gui
 
-from ScrollLabel import *
 from ConfirmWindow import *
 
 
