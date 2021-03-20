@@ -14,6 +14,8 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
+from win32api import GetSystemMetrics
+
 
 class FacialExpressionRecog():
   def __init__(self, selectedModel, screenRecorder):
@@ -43,13 +45,9 @@ class FacialExpressionRecog():
 
     self.ferCameraData = []
     previousLabel = None
-    minEmotionTime = 0.5
 
-    self.display_image_widget = DisplayImageWidget()
-    self.display_image_widget.show()
-
-    # displayCamThread = DisplayCamThread(self)
-    # displayCamThread.start()
+    self.displayCameraWindow = DisplayCameraImage()
+    self.displayCameraWindow.show()
 
     camImageDim = None
     while self.running:
@@ -116,13 +114,12 @@ class FacialExpressionRecog():
           camImageDim = gray.shape
           print((int(camImageDim[1]/2), int(camImageDim[0]/2)))
 
-        width = int(camImageDim[1]/3)
-        height = int(camImageDim[0]/3)
-        resizedFrame = cv2.resize(frame, (width, height), interpolation=cv2.INTER_AREA)
+        # width = int(camImageDim[1]/3)
+        # height = int(camImageDim[0]/3)
+        # resizedFrame = cv2.resize(frame, (width, height), interpolation=cv2.INTER_AREA)
         
         # cv2.imshow('Facial Expression Detector', resizedFrame)
-        self.display_image_widget.show_image(self.cap)
-        print(width, height)
+        self.displayCameraWindow.show_image(self.cap, frame)
 
         # If the q letter is pressed then exit the program
         if cv2.waitKey(1) & 0xFF == ord('q'):
@@ -132,76 +129,48 @@ class FacialExpressionRecog():
     cv2.destroyAllWindows()
 
 
-# def displayCameraThread(self, parent):
-#     parent.display_image_widget = DisplayImageWidget(parent)
-#     parent.display_image_widget.begin()
-
-# class DisplayCamThread(QThread):
-#     def __init__(self, parent=None):
-#         QThread.__init__(self, None)
-#         self.parent = parent
-
-#     def run(self):
-#         self.parent.display_image_widget = DisplayImageWidget()
-#         self.parent.display_image_widget.show()
-
-
-class DisplayImageWidget(QWidget):
+class DisplayCameraImage(QWidget):
     def __init__(self, parent=None):
       QWidget.__init__(self, None, Qt.WindowStaysOnTopHint)
-      self.setGeometry(100,100,266,200)
+
+      self.showLabels = False
+
+      self.setWindowTitle("Camera")
+
+      self.screenW = GetSystemMetrics(0)
+      self.screenH = GetSystemMetrics(1)
+      self.windowW = 266
+      self.windowH = 200
+      self.windowPaddingLeft = 20
+      self.windowPaddingBottom = 50
+      self.initX = self.screenW - self.windowPaddingLeft - self.windowW
+      self.initY = self.screenH - self.windowPaddingBottom - self.windowH
+
+      self.setGeometry(self.initX, self.initY, self.windowW, self.windowH)
       self.mouseDown = False
 
-      # Create a layout.
       self.layout = QVBoxLayout()
       
       self.label = QLabel()
-      self.label.setFixedSize(266,200)
+      self.label.setFixedSize(self.windowW, self.windowH)
 
       self.layout.addWidget(self.label)
       padding = 3
       self.layout.setContentsMargins(padding, padding, padding, padding)
-      # Set the layout
+      self.setFixedSize(self.windowW + padding * 2, self.windowH  + padding * 2)
       self.setLayout(self.layout)
-      # self.setWindowFlag(Qt.FramelessWindowHint) 
 
 
     @pyqtSlot(QImage)
-    def show_image(self, camera):
-      rval, frame = camera.read()
+    def show_image(self, camera, frame):
+      if not self.showLabels:
+        _, frame = camera.read()
+
       frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
       resizedFrame = cv2.resize(frame, (320,240), interpolation=cv2.INTER_AREA)
-      # cv2.imshow('Facial Expression Detector', frame)
+
       image = QImage(resizedFrame, resizedFrame.shape[1], resizedFrame.shape[0], QImage.Format_RGB888)
       pixmap = QPixmap.fromImage(image)
       scaledPixmap = pixmap.scaled(self.label.size(), Qt.KeepAspectRatio)
       self.label.setPixmap(scaledPixmap)
       QApplication.processEvents()
-
-
-    # # Clicking on the body of the window before it is dragged and repositioned
-    # # The click position needs to be saved to know where to move the window to
-    # def mousePressEvent(self, event):
-    #   print("press")
-    #   self.label = QLabel()
-    #   self.dragPos = event.globalPos()
-    #   self.mouseDown = True
-    #   QApplication.processEvents()
-    
-    # def mouseReleaseEvent(self, event):
-    #   print("release")
-    #   self.mouseDown = False
-
-    # # When the user drags the window
-    # def mouseMoveEvent(self, event):
-    #   print("drag")
-    #   if event.buttons() == Qt.LeftButton:
-    #     self.move(self.pos() + event.globalPos() - self.dragPos)
-    #     self.dragPos = event.globalPos()
-
-
-# if __name__ == '__main__':
-#   print("----------- Starting FER ----------- ")
-#   fer = FacialExpressionRecog("Model 1", "Screen Rec")
-#   fer.begin()
-
