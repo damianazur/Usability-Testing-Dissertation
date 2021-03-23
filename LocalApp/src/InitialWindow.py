@@ -7,13 +7,15 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
+from TutorialWindow import TutorialWindow
+
 class InitialWindow(QWidget):
     LOCAL_APP_API = "http://localhost:8090/api/localapp/"
     GET_TEST_BY_REF_CODE_ENTRY = "getTestDetailsByReferenceCode/"
 
 
     def __init__(self, parent):
-        QWidget.__init__(self, None, Qt.WindowStaysOnTopHint)
+        QWidget.__init__(self, None) #, Qt.WindowStaysOnTopHint)
         self.parent = parent
 
         # Window configurations
@@ -23,7 +25,7 @@ class InitialWindow(QWidget):
         
         # Layout
         self.mainLayout = QVBoxLayout()
-        self.mainLayout.setContentsMargins(20, 20, 200, 0)
+        self.mainLayout.setContentsMargins(20, 20, 150, 0)
         self.createTestEnterLayout()
 
         self.displayTestLayout = QGroupBox()
@@ -110,6 +112,14 @@ class InitialWindow(QWidget):
 
         # Form that asks the user for their info
         layout = QFormLayout()
+        
+        tutorialBtn = QPushButton("Open Tutorial", self)
+        tutorialBtn.clicked.connect(partial(self.showTutorial))
+        tutorialBtn.resize(tutorialBtn.sizeHint())
+        tutorialBtn.setStyleSheet("background-color: rgb(32, 123, 207);")
+        tutorialBtn.setFixedWidth(150)
+        tutorialBtn.setContentsMargins(100, 100, 100, 100)
+
         self.userNameLabel = QLabel("Your name:")
         self.userNameInput = QLineEdit()
         btn = QPushButton("Begin", self)
@@ -118,6 +128,8 @@ class InitialWindow(QWidget):
         btn.setStyleSheet("background-color: rgb(32, 207, 76);")
         btn.setFixedWidth(100)
 
+        layout.addRow(tutorialBtn)
+        layout.addRow(QLabel())
         layout.addRow(self.userNameLabel)
         layout.addRow(self.userNameInput)
         layout.addRow(btn)
@@ -131,3 +143,8 @@ class InitialWindow(QWidget):
         data = self.data
         data["participantName"] = self.userNameInput.text()
         self.parent.loadComponents(data)
+
+
+    def showTutorial(self):
+        self.tutorialWindow = TutorialWindow()
+        self.tutorialWindow.show()

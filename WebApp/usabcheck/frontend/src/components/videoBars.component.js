@@ -7,6 +7,26 @@ export class VideoBars extends Component {
   constructor(props) {
     super(props);
 
+    this.emotionColourPair = {
+      "Neutral": "none",
+      "Sad": "#0099ff",
+      "Happy": "#FFD800",     
+      "Angry": "#ff0000",    
+      "Fear": "#6600cc",
+      "Disgust": "#00CC00",
+      "Surprise": "#FF6100"
+    }
+
+    // this.emotionColourPair = {
+    //   "Neutral": "none",
+    //   "Sad": "#0099ff",
+    //   "Happy": "#00ff00",     
+    //   "Angry": "#ff0000",    
+    //   "Fear": "#6600cc",
+    //   "Disgust": "#333399",
+    //   "Surprise": "#FFD800"
+    // }
+
     this.state = {
       barSliderWindowX: 0, // The position of the zoomed in slider "window" on the "entire" bar
       barWindowWidth: 0,   // The size of the zoomed in slider "window" on the "entire" bar
@@ -32,13 +52,13 @@ export class VideoBars extends Component {
   // Get the spans that make up the emotion bar
   generateEmotionSpanList(pixelTimeUnit, height) {
     var labelColours = {
-      "Neutral": "none",
-      "Sad": "#0099ff",
-      "Happy": "#00ff00",     
-      "Angry": "#ff0000",    
-      "Fear": "#6600cc",
-      "Disgust": "#333399",
-      "Surprise": "#FFD800"
+      "Neutral": this.emotionColourPair["Neutral"],
+      "Sad": this.emotionColourPair["Sad"],
+      "Happy": this.emotionColourPair["Happy"],     
+      "Angry": this.emotionColourPair["Angry"],    
+      "Fear": this.emotionColourPair["Fear"],
+      "Disgust": this.emotionColourPair["Disgust"],
+      "Surprise": this.emotionColourPair["Surprise"]
     }
 
     var emotionSpanList = [];
@@ -280,12 +300,12 @@ export class VideoBars extends Component {
     var legendList = [];
     if (type === "emotion") {
       var legendDataList = [
-        {label: "Happy", color: "#00ff00"},
-        {label: "Sad", color: "#0099ff"},
-        {label: "Angry", color: "#ff0000"},
-        {label: "Surprise", color: "#FFD800"},
-        {label: "Fear", color: "#6600cc"},
-        {label: "Disgust", color: "#333399"}
+        {label: "Happy", color: this.emotionColourPair["Happy"]},
+        {label: "Sad", color: this.emotionColourPair["Sad"]},
+        {label: "Angry", color: this.emotionColourPair["Angry"]},
+        {label: "Surprise", color: this.emotionColourPair["Surprise"]},
+        {label: "Fear", color: this.emotionColourPair["Fear"]},
+        {label: "Disgust", color: this.emotionColourPair["Disgust"]}
       ];
 
       var key = 0;
