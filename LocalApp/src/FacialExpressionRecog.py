@@ -54,6 +54,9 @@ class FacialExpressionRecog():
         # Get frame from camera
         ret, frame = self.cap.read()
 
+        if np.shape(frame) == ():
+          continue
+
         # Convert to grayscale
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
@@ -165,12 +168,13 @@ class DisplayCameraImage(QWidget):
     def show_image(self, camera, frame):
       if not self.showLabels:
         _, frame = camera.read()
+      
+      if np.shape(frame) != ():
+        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        resizedFrame = cv2.resize(frame, (320,240), interpolation=cv2.INTER_AREA)
 
-      frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-      resizedFrame = cv2.resize(frame, (320,240), interpolation=cv2.INTER_AREA)
-
-      image = QImage(resizedFrame, resizedFrame.shape[1], resizedFrame.shape[0], QImage.Format_RGB888)
-      pixmap = QPixmap.fromImage(image)
-      scaledPixmap = pixmap.scaled(self.label.size(), Qt.KeepAspectRatio)
-      self.label.setPixmap(scaledPixmap)
-      QApplication.processEvents()
+        image = QImage(resizedFrame, resizedFrame.shape[1], resizedFrame.shape[0], QImage.Format_RGB888)
+        pixmap = QPixmap.fromImage(image)
+        scaledPixmap = pixmap.scaled(self.label.size(), Qt.KeepAspectRatio)
+        self.label.setPixmap(scaledPixmap)
+        QApplication.processEvents()

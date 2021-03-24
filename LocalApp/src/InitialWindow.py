@@ -62,9 +62,11 @@ class InitialWindow(QWidget):
         sendData = {"referenceCode": str(refCode)}
         request = requests.post(self.LOCAL_APP_API + self.GET_TEST_BY_REF_CODE_ENTRY, data=sendData)
         data = json.loads(request.text)
-        data["sequenceData"].sort(key=lambda obj: obj["sequenceNumber"], reverse=False)
+        
+        if 'sequenceData' in data.keys():
+            data["sequenceData"].sort(key=lambda obj: obj["sequenceNumber"], reverse=False)
 
-        self.displayTestData(data)
+            self.displayTestData(data)
 
     
     # Display the data so that the user can verify that the test is correct

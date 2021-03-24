@@ -193,7 +193,7 @@ export class TestResultOverviewTab extends Component {
         }];
         var key = new Date().getTime() + i.toString();
         taskChartList.push(
-          <div key={key} style={{display: "inline-block", "marginRight": "30px"}}>
+          <div key={key} style={{display: "inline-block", "marginRight": "30px", width: "400px"}}>
             <h3 className="chartHeading">
             [{gradeCount["Task"]["sequenceNumber"] + 1}] {gradeCount["Task"]["taskName"]}
             </h3>
@@ -369,7 +369,7 @@ export class TestResultOverviewTab extends Component {
         // console.log(textAnswerBox);
 
         textAnswerList.push(
-          <div key={i} className="textAnswerContainer">
+          <div key={i} className="textAnswerContainer" style={{float: "left", marginBottom: "40px"}}>
               <h3 className="chartHeading">
                 [{question["sequenceNumber"] + 1}] Question: <i>{questionConfigsJSON["questionText"]}</i>
               </h3>
@@ -431,7 +431,7 @@ export class TestResultOverviewTab extends Component {
               </div>
 
               <br></br>
-              <div className="chartHolder">
+              <div className="chartHolder" style={{overflow: "auto"}}>
                 <h2>Text Question Answers</h2>
                 <hr className="hr2"></hr>
                 {this.state.textAnswerList}

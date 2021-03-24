@@ -83,12 +83,12 @@ export class TaskGrading extends Component {
       )
       key += 1;
     }
-    for (let i = 0; i < stepsJSON.length; i++) {
-      taskStepsList.push(
-        <label key={key} style={{display: "block", textAlign:"left", paddingLeft: "10px"}}>{stepsJSON[i]["value"]}</label>
-      )
-      key += 1;
-    }
+    // for (let i = 0; i < stepsJSON.length; i++) {
+    //   taskStepsList.push(
+    //     <label key={key} style={{display: "block", textAlign:"left", paddingLeft: "10px"}}>{stepsJSON[i]["value"]}</label>
+    //   )
+    //   key += 1;
+    // }
 
     return taskStepsList;
   }
