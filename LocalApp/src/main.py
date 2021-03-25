@@ -15,6 +15,9 @@ from PyQt5.QtWidgets import *
 
 
 class MainProgram():
+    ENTRY_API = "https://usabcheck.herokuapp.com/api/localapp/"
+    # ENTRY_API = "http://localhost:8090/api/localapp/"
+
     def __init__(self):
         app = QApplication([])
         app.setStyle('Fusion')
@@ -60,7 +63,7 @@ class MainProgram():
         sendData = self.packageData()
         print("Uploading Data", sendData)
 
-        saveTestRequest = requests.post("http://localhost:8090/api/localapp/saveTestResults", data=sendData)
+        saveTestRequest = requests.post(self.ENTRY_API + "saveTestResults", data=sendData)
         self.testInstanceRef = saveTestRequest.text
         print("Test Instance Reference:", self.testInstanceRef)
 
@@ -150,7 +153,7 @@ class MainProgram():
     def getDebugData(self):
         refCode = "H8VH1NLA"
         sendData = {"referenceCode": str(refCode)}
-        request = requests.post("http://localhost:8090/api/localapp/getTestDetailsByReferenceCode", data=sendData)
+        request = requests.post(self.ENTRY_API + "getTestDetailsByReferenceCode", data=sendData)
         data = json.loads(request.text)
         data["sequenceData"].sort(key=lambda obj: obj["sequenceNumber"], reverse=False)
         

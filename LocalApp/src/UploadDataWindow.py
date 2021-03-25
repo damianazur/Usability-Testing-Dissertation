@@ -7,6 +7,10 @@ import requests
 
 
 class UploadDataWindow(QWidget):
+    ENTRY_API = "https://usabcheck.herokuapp.com/api/localapp/"
+    # ENTRY_API = "http://localhost:8090/api/localapp/"
+
+
     def __init__(self, parent):
         QWidget.__init__(self, None, Qt.WindowStaysOnTopHint)
         self.parent = parent
@@ -92,7 +96,7 @@ class UploadDataWindow(QWidget):
             "testInstanceRef": self.testInstanceRef,
             "videoId": videoId
         }
-        saveVideoLinkRequest = requests.post("http://localhost:8090/api/localapp/saveVideoLink", data=videoLinkData)
+        saveVideoLinkRequest = requests.post(self.ENTRY_API + "saveVideoLink", data=videoLinkData)
         print(saveVideoLinkRequest)
         self.updateStatus("Finished")
 

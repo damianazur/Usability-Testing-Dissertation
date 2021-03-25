@@ -10,7 +10,9 @@ from PyQt5.QtWidgets import *
 from TutorialWindow import TutorialWindow
 
 class InitialWindow(QWidget):
-    LOCAL_APP_API = "http://localhost:8090/api/localapp/"
+    ENTRY_API = "https://usabcheck.herokuapp.com/api/localapp/"
+    # ENTRY_API = "http://localhost:8090/api/localapp/"
+
     GET_TEST_BY_REF_CODE_ENTRY = "getTestDetailsByReferenceCode/"
 
 
@@ -60,7 +62,7 @@ class InitialWindow(QWidget):
             refCode = "H8VH1NLA"
 
         sendData = {"referenceCode": str(refCode)}
-        request = requests.post(self.LOCAL_APP_API + self.GET_TEST_BY_REF_CODE_ENTRY, data=sendData)
+        request = requests.post(self.ENTRY_API + self.GET_TEST_BY_REF_CODE_ENTRY, data=sendData)
         data = json.loads(request.text)
         
         if 'sequenceData' in data.keys():

@@ -1,7 +1,7 @@
 import axios from "axios";
 
-const API_URL = "http://localhost:8090/api/auth/main/";
-// const API_URL = "https://usabcheck.herokuapp.com/api/auth/main/";
+// const API_URL = "http://localhost:8090/api/auth/main/";
+const API_URL = "https://usabcheck.herokuapp.com/api/auth/main/";
 
 class ServerComponent {
     getProjectList() {
