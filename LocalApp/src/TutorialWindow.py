@@ -8,7 +8,7 @@ class TutorialWindow(QWidget):
         QWidget.__init__(self, parent)
         self.setStyleSheet("font-size: 16px;")
 
-        videoPath = "C:\\Users\\New User\\Desktop\\Fourth Year\\Usability_Testing_FYP\\LocalApp\\tutorial_videos\\"
+        videoPath = "./tutorial_videos/"
         title = "UsabCheck Tutorial"
         self.tutorialGifs = {
           "Video Recording Slider": videoPath + "RecordingSliderPanning.gif",

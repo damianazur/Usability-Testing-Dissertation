@@ -36,42 +36,47 @@ class ScreenRecorder:
   # This is done by cropping out the region where the mouse goes and pasting in the image of the icon
   # into the place
   def addCursor(self, mousePos, frame):
-    screenWidth = self.screenSize[0]
-    screenHeight = self.screenSize[1]
+    frameWithCursor = frame.copy()
+    try:
+      screenWidth = self.screenSize[0]
+      screenHeight = self.screenSize[1]
 
-    pt1 = mousePos
-    # The width and height of the curson icon is recalulated in case it goes out of the screen
-    iconWidth = 12
-    if mousePos[0] + iconWidth > screenWidth:
-      iconWidth = screenWidth - mousePos[0]
+      pt1 = mousePos
+      # The width and height of the curson icon is recalulated in case it goes out of the screen
+      iconWidth = 12
+      if mousePos[0] + iconWidth > screenWidth:
+        iconWidth = screenWidth - mousePos[0]
 
-    iconHeight = 19
-    if mousePos[1] + iconHeight > screenHeight:
-      iconHeight = screenHeight - mousePos[1]
-    
-    # The region is cropped, the mouse will be put on top of this region and the region will be put back into the original image
-    pt2 = (mousePos[0] + iconWidth, mousePos[1] + iconHeight)
-    croppedRegion = frame[pt1[1] : pt2[1], pt1[0] : pt2[0]]
+      iconHeight = 19
+      if mousePos[1] + iconHeight > screenHeight:
+        iconHeight = screenHeight - mousePos[1]
+      
+      # The region is cropped, the mouse will be put on top of this region and the region will be put back into the original image
+      pt2 = (mousePos[0] + iconWidth, mousePos[1] + iconHeight)
+      croppedRegion = frameWithCursor[pt1[1] : pt2[1], pt1[0] : pt2[0]]
 
-    # The cursor image and the inverse cursor image is cropped if need be
-    iconPt1 = (0, 0)
-    iconPt2 = (iconWidth, iconHeight)
-    croppedIcon = self.mouseImg[iconPt1[1] : iconPt2[1], iconPt1[0] : iconPt2[0]]
-    croppedInvIcon = self.mouseInv[iconPt1[1] : iconPt2[1], iconPt1[0] : iconPt2[0]]
+      # The cursor image and the inverse cursor image is cropped if need be
+      iconPt1 = (0, 0)
+      iconPt2 = (iconWidth, iconHeight)
+      croppedIcon = self.mouseImg[iconPt1[1] : iconPt2[1], iconPt1[0] : iconPt2[0]]
+      croppedInvIcon = self.mouseInv[iconPt1[1] : iconPt2[1], iconPt1[0] : iconPt2[0]]
 
-    # The cropped region and the icon are comined
-    # The result is an image with a black region where the cursor should go and the original background
-    newRegion = cv2.bitwise_or(croppedRegion, croppedIcon, mask = croppedInvIcon)
-    # The cursor icon is put on top of the region. Now we have the cursor and the original background
-    newRegion = cv2.bitwise_or(newRegion, croppedIcon)
+      # The cropped region and the icon are comined
+      # The result is an image with a black region where the cursor should go and the original background
+      newRegion = cv2.bitwise_or(croppedRegion, croppedIcon, mask = croppedInvIcon)
+      # The cursor icon is put on top of the region. Now we have the cursor and the original background
+      newRegion = cv2.bitwise_or(newRegion, croppedIcon)
 
-    # The cropped region is put back on the original
-    x_offset = mousePos[0]
-    y_offset = mousePos[1]
-    frame[y_offset:(y_offset + self.mouseImg.shape[0]), x_offset:(x_offset + self.mouseImg.shape[1])] = newRegion
+      # The cropped region is put back on the original
+      x_offset = mousePos[0]
+      y_offset = mousePos[1]
+      frameWithCursor[y_offset:(y_offset + self.mouseImg.shape[0]), x_offset:(x_offset + self.mouseImg.shape[1])] = newRegion
 
-    return frame
+      return frameWithCursor
 
+    except:
+      print("Adding Cursor Failed!")
+      return frame
 
   def startRecording(self, out, fps):
     print("Recording Starting!")
