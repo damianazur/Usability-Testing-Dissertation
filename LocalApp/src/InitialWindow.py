@@ -9,6 +9,7 @@ from PyQt5.QtWidgets import *
 
 from TutorialWindow import TutorialWindow
 
+
 class InitialWindow(QWidget):
     ENTRY_API = "https://usabcheck.herokuapp.com/api/localapp/"
     # ENTRY_API = "http://localhost:8090/api/localapp/"
@@ -18,6 +19,7 @@ class InitialWindow(QWidget):
 
     def __init__(self, parent):
         QWidget.__init__(self, None) #, Qt.WindowStaysOnTopHint)
+
         self.parent = parent
 
         # Window configurations
