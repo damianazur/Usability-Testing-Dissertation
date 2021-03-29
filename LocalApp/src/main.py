@@ -19,9 +19,6 @@ class MainProgram():
     # ENTRY_API = "http://localhost:8090/api/localapp/"
 
     def __init__(self):
-        app = QApplication([])
-        app.setStyle('Fusion')
-        
         self.began = False
         self.answers = []
         self.sequenceTimeStamp = []
@@ -31,8 +28,6 @@ class MainProgram():
 
         self.mainWindow = InitialWindow(self)
         self.mainWindow.show()
-
-        app.exec_()
 
 
     # When usability test/recording is forcefully stopped
@@ -135,11 +130,12 @@ class MainProgram():
             questionType = questionConfigsJSON["questionType"]
 
             if questionType == "text":
-                self.window = TextQuestionWindow(self, sequenceDataItem)
+                self.window = TextQuestionWindow(self.nextSequenceItem, len(self.data["sequenceData"]), sequenceDataItem)
                 self.window.show()
 
             elif questionType == "multiple-choice":
-                self.window = MultipleChoiceQuestionWindow(self, sequenceDataItem)
+                # print("\n\n"+ str(sequenceDataItem) +"\n\n")
+                self.window = MultipleChoiceQuestionWindow(self.nextSequenceItem, len(self.data["sequenceData"]), sequenceDataItem)
                 self.window.show()
                 
 
@@ -181,10 +177,15 @@ class MainProgram():
 
 
 if __name__ == '__main__':
-    print("----------- Starting ----------- ")
+    print("----------- Starting (MAIN) ----------- ")
 
     try:
+        app = QApplication([])
+        app.setStyle('Fusion')
+        
         main = MainProgram()
+
+        app.exec_()
     except Exception as e:
         print('Unexpected error:' + str(e))
         input()

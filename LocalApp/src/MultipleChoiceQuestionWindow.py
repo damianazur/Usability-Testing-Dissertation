@@ -3,8 +3,11 @@ from QuestionWindow import *
 import json
 
 class MultipleChoiceQuestionWindow(QuestionWindow):
-    def __init__(self, parent, sequenceDataItem):
-        super().__init__(parent, sequenceDataItem)
+    def __init__(self, onSubmitFunc, numSequenceItems, sequenceDataItem):
+        super().__init__(sequenceDataItem)
+
+        self.onSubmitFunc = onSubmitFunc
+        self.numSequenceItems = numSequenceItems
         self.renderQuestion(sequenceDataItem)
 
 
@@ -17,10 +20,10 @@ class MultipleChoiceQuestionWindow(QuestionWindow):
         taskLayout = ScrollLabel(self) 
         taskLayout.setGeometry(0, 40, 200, 0)
 
-        progress = "Progress: [" + str(sequenceDataItem["sequenceNumber"] + 1) + "/" + str(len(self.parent.data["sequenceData"])) + "]" + "\n"
+        self.progress = "Progress: [" + str(sequenceDataItem["sequenceNumber"] + 1) + "/" + str(self.numSequenceItems) + "]" + "\n"
 
         answerForm = QFormLayout()
-        questionLabel = QLabel(progress + "Multiple-Choice Question:")
+        questionLabel = QLabel(self.progress + "Multiple-Choice Question:")
         questionLabel.setStyleSheet("font-size: 16px;")
         questionLabel.setContentsMargins(0, 0, 0, 0)
         questionLabel.setFixedWidth(420)
@@ -34,13 +37,13 @@ class MultipleChoiceQuestionWindow(QuestionWindow):
         questionLabel2.setWordWrap(True) 
 
         answerLabel = QLabel("Select one answer")
-        radioButtonLayout = QVBoxLayout()
-        radioButtonLayout.setContentsMargins(0, 0, 0, 0)
+        self.radioButtonLayout = QVBoxLayout()
+        self.radioButtonLayout.setContentsMargins(0, 0, 0, 0)
 
         for choice in choices:
             button = QRadioButton(str(choice["value"]))
             button.toggled.connect(self.radioSelect)
-            radioButtonLayout.addWidget(button)
+            self.radioButtonLayout.addWidget(button)
 
         hr2 = QLabel("")
         hr2.setContentsMargins(30, 0, 0, 0)
@@ -58,7 +61,7 @@ class MultipleChoiceQuestionWindow(QuestionWindow):
         answerForm.addRow(hr)
         answerForm.addRow(questionLabel2)
         answerForm.addRow(answerLabel)
-        answerForm.addRow(radioButtonLayout)
+        answerForm.addRow(self.radioButtonLayout)
         answerForm.addRow(hr2)
         answerForm.addRow(self.submitButton)
         answerForm.setContentsMargins(0, 0, 0, 15)
@@ -88,4 +91,4 @@ class MultipleChoiceQuestionWindow(QuestionWindow):
             "answerJSON": answerJSON,
             "questionId": self.sequenceDataItem["questionId"]
         }
-        self.parent.nextSequenceItem(returnData, "Question Answer")
+        self.onSubmitFunc(returnData, "Question Answer")

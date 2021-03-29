@@ -3,9 +3,12 @@ from QuestionWindow import *
 import json
 
 class TextQuestionWindow(QuestionWindow):
-    def __init__(self, parent, sequenceDataItem):
+    def __init__(self, onSubmitFunc, numSequenceItems, sequenceDataItem):
         # QuestionWindow.__init__(self, parent, sequenceDataItem)
-        super().__init__(parent, sequenceDataItem)
+        super().__init__(sequenceDataItem)
+
+        self.onSubmitFunc = onSubmitFunc
+        self.numSequenceItems = numSequenceItems
         self.renderQuestion(sequenceDataItem)
 
 
@@ -19,7 +22,7 @@ class TextQuestionWindow(QuestionWindow):
         taskLayout.setGeometry(0, 40, 400, 0)
         taskLayout.setContentsMargins(0, 0, 0, 0)
 
-        progress = "Progress: [" + str(sequenceDataItem["sequenceNumber"] + 1) + "/" + str(len(self.parent.data["sequenceData"])) + "]" + "\n"
+        progress = "Progress: [" + str(sequenceDataItem["sequenceNumber"] + 1) + "/" + str(self.numSequenceItems) + "]" + "\n"
 
         answerForm = QFormLayout()
         questionLabel = QLabel(progress + "Question:")
@@ -74,4 +77,4 @@ class TextQuestionWindow(QuestionWindow):
             "answerJSON": answerJSON,
             "questionId": self.sequenceDataItem["questionId"]
         }
-        self.parent.nextSequenceItem(returnData, "Question Answer")
+        self.onSubmitFunc(returnData, "Question Answer")

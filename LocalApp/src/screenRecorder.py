@@ -78,6 +78,7 @@ class ScreenRecorder:
       print("Adding Cursor Failed!")
       return frame
 
+
   def startRecording(self, out, fps):
     print("Recording Starting!")
     start_time = time.time()

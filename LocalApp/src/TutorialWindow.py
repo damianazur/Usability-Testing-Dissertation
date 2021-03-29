@@ -44,7 +44,6 @@ class TutorialWindow(QWidget):
         self.setGeometry(200, 200, self.width, self.height)
         self.setWindowTitle(title)
 
-
         self.movieContainer = QLabel()
         self.movieContainer.setAlignment(Qt.AlignCenter)
         self.mainLayout = QVBoxLayout()

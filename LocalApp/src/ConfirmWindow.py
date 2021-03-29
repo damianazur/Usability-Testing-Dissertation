@@ -48,16 +48,7 @@ class ConfirmWindow(QWidget):
         self.renderWindow()
 
         self.setLayout(self.mainLayout)
-
-
-    # def renderBorder(self):
-    #   # Setting dimensions
-    #   frame = QFrame(self)
-    #   frame.setGeometry(self.position.x(), self.position.y(), self.windowW, self.windowH)
-    #   frame.setFixedWidth(self.windowW)
-    #   frame.setFixedHeight(self.windowH)
-    #   frame.setStyleSheet("border: 20px solid blue;")
-
+        
 
     def renderWindow(self):
         frame = QFrame()

@@ -5,12 +5,11 @@ from PyQt5.QtWidgets import *
 from win32api import GetSystemMetrics
 
 class QuestionWindow(QWidget):
-    def __init__(self, parent, sequenceDataItem):
+    def __init__(self, sequenceDataItem):
         QWidget.__init__(self, None, Qt.WindowStaysOnTopHint)
 
         print("sequenceDataItem", sequenceDataItem)
 
-        self.parent = parent
         self.sequenceDataItem = sequenceDataItem
 
         self.mainLayout = QVBoxLayout()

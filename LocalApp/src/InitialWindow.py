@@ -43,15 +43,15 @@ class InitialWindow(QWidget):
         
         refCodeLabel = QLabel("Test Reference Code:")
         self.refCodeInput = QLineEdit()
-        btn = QPushButton("Submit", self)
-        btn.clicked.connect(self.submitRefCode)
-        btn.resize(btn.sizeHint())
-        btn.setStyleSheet("background-color: rgb(32, 123, 207);")
-        btn.setFixedWidth(100)
+        self.submitBtn = QPushButton("Submit", self)
+        self.submitBtn.clicked.connect(self.submitRefCode)
+        self.submitBtn.resize(self.submitBtn.sizeHint())
+        self.submitBtn.setStyleSheet("background-color: rgb(32, 123, 207);")
+        self.submitBtn.setFixedWidth(100)
 
         layout.addRow(refCodeLabel)
         layout.addRow(self.refCodeInput)
-        layout.addRow(btn)
+        layout.addRow(self.submitBtn)
         layout.setContentsMargins(0, 0, 0, 30)
 
         self.mainLayout.addLayout(layout)
@@ -65,6 +65,7 @@ class InitialWindow(QWidget):
 
         sendData = {"referenceCode": str(refCode)}
         request = requests.post(self.ENTRY_API + self.GET_TEST_BY_REF_CODE_ENTRY, data=sendData)
+        # print("\n\n" + request.text + "\n\n")
         data = json.loads(request.text)
         
         if 'sequenceData' in data.keys():
@@ -76,19 +77,19 @@ class InitialWindow(QWidget):
     # Display the data so that the user can verify that the test is correct
     def displayTestData(self, data):
         self.data = data
-        testName = data["testName"]
-        createdDate = data["launchedDate"]
-        noOfTasks = 0
-        noOfQuestions = 0
+        self.testName = data["testName"]
+        self.createdDate = data["launchedDate"]
+        self.noOfTasks = 0
+        self.noOfQuestions = 0
 
         print(data)
 
         # Counte the number of tasks and questions
         for item in data["sequenceData"]:
             if ("questionConfigsJSON" in item.keys()):
-                noOfQuestions += 1
+                self.noOfQuestions += 1
             if ("stepsJSON" in item.keys()):
-                noOfTasks += 1
+                self.noOfTasks += 1
 
         # Remove the widget if it already exists (if the user submits another code the data is reloaded)
         self.mainLayout.removeWidget(self.displayTestLayout)
@@ -96,10 +97,10 @@ class InitialWindow(QWidget):
         self.displayTestLayout = QGroupBox("Usability Test Details")
         layout = QFormLayout()
         layout.setSpacing(10)
-        layout.addRow(QLabel("Test Name:  "), QLabel(str(testName)))
-        layout.addRow(QLabel("Created Date:  "), QLabel(str(createdDate)))
-        layout.addRow(QLabel("No. of Tasks:  "), QLabel(str(noOfTasks)))
-        layout.addRow(QLabel("No. of Questions:  "), QLabel(str(noOfQuestions)))
+        layout.addRow(QLabel("Test Name:  "), QLabel(str(self.testName)))
+        layout.addRow(QLabel("Created Date:  "), QLabel(str(self.createdDate)))
+        layout.addRow(QLabel("No. of Tasks:  "), QLabel(str(self.noOfTasks)))
+        layout.addRow(QLabel("No. of Questions:  "), QLabel(str(self.noOfQuestions)))
         layout.addRow(QLabel("Scenario/Information:"))
 
         scenarioLabel = QLabel(data["scenario"])
@@ -128,17 +129,17 @@ class InitialWindow(QWidget):
 
         self.userNameLabel = QLabel("Your name:")
         self.userNameInput = QLineEdit()
-        btn = QPushButton("Begin", self)
-        btn.clicked.connect(partial(self.begin))
-        btn.resize(btn.sizeHint())
-        btn.setStyleSheet("background-color: rgb(32, 207, 76);")
-        btn.setFixedWidth(100)
+        self.beginBtn = QPushButton("Begin", self)
+        self.beginBtn.clicked.connect(partial(self.begin))
+        self.beginBtn.resize(self.beginBtn.sizeHint())
+        self.beginBtn.setStyleSheet("background-color: rgb(32, 207, 76);")
+        self.beginBtn.setFixedWidth(100)
 
         layout.addRow(tutorialBtn)
         layout.addRow(QLabel())
         layout.addRow(self.userNameLabel)
         layout.addRow(self.userNameInput)
-        layout.addRow(btn)
+        layout.addRow(self.beginBtn)
         layout.setContentsMargins(0, 30, 0, 30)
 
         self.beginForm.setLayout(layout)
