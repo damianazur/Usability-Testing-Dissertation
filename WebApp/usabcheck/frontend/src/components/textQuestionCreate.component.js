@@ -91,6 +91,7 @@ export class TestQuestionBox extends Component {
             className="inputField" 
             type="text"
             required
+            onKeyPress={(e) => { e.key === 'Enter' && e.preventDefault(); }}
           />
         </div>
       </div>

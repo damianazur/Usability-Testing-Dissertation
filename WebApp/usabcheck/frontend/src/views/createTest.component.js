@@ -316,7 +316,7 @@ export default class CreateTest extends Component {
             <br></br>
             <label>Test Name</label>
             {CreateInfoButton("testName", this.showInfoModal.bind(this))}
-            <input placeholder="Test Name" autoComplete="off" className="inputField2" type="text" name="testName" required/>
+            <input placeholder="Test Name" autoComplete="off" className="inputField2" type="text" name="testName" required onKeyPress={(e) => { e.key === 'Enter' && e.preventDefault(); }}/>
 
             {/* SCENARIO */}
             <h2  style={{marginTop: "50px"}}>Scenario  {CreateInfoButton("scenario", this.showInfoModal.bind(this))}</h2>

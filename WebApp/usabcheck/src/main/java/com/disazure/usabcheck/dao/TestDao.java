@@ -61,6 +61,22 @@ public class TestDao {
 		return false;
 	}
 	
+	public boolean checkTestNameUnique(int researcherId, String testName) {
+		String sql = ""
+				+ "SELECT COUNT(testName) FROM test "
+				+ "JOIN project using(projectId) "
+				+ "JOIN researcher using(researcherId) "
+				+ "WHERE researcherId = ? AND testName = ?";
+		
+		int retTestNameCount = jdbcTemplate.queryForObject(sql, Integer.class, researcherId, testName);
+		
+		if (retTestNameCount > 0) {
+			return false;
+		}
+		
+		return true;
+	}
+	
 	public String getByTestId(int researcherId, int testId) throws JsonProcessingException {
 //		System.out.println(researcherId + " ## " + testId);
 		String sql = ""
@@ -127,12 +143,16 @@ public class TestDao {
         return saltStr;
     }
 	
-	public int createTest(int researcherId, UsabilityTest test) {
+	public int createTest(int researcherId, UsabilityTest test) throws Exception {
 		int resId = proDao.getResearcherIdFromProject(test.getProjectId());
 		
 		// Check if user is authorised
 		if (resId != researcherId) {
 			return -1;
+		}
+		
+		if (!checkTestNameUnique(researcherId, test.getTestName())) {
+			 throw new Exception("The test name already exists!");
 		}
 		
 		String sql = ""
@@ -154,6 +174,21 @@ public class TestDao {
 				+ "WHERE researcherId = ? AND testId = ? AND testName = ?";
 		
         return jdbcTemplate.update(sql, researcherId, testId, testName);
+	}
+	
+	public String getTestStatusByRef(String referenceCode) throws JsonProcessingException {
+		String sql = ""
+				+ "SELECT testStatus FROM test "
+				+ "WHERE referenceCode = ?";
+		
+		String testStatus = "";
+		try {
+			testStatus = jdbcTemplate.queryForObject(sql, String.class, referenceCode);
+			return testStatus;
+			
+		} catch (Exception e) {
+			return testStatus;
+		}
 	}
 	
 	public int changeStatus(int researcherId, int testId, String status) {

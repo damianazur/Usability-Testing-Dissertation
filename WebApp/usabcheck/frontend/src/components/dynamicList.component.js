@@ -75,7 +75,8 @@ export class DynamicList extends Component {
             autoComplete="off" 
             className="inputField" 
             type="text"
-            required/>
+            required
+            onKeyPress={(e) => { e.key === 'Enter' && e.preventDefault(); }}/>
 
         </div>
         <div style={{"width": "10%", display:"inline-block"}}>

@@ -31,6 +31,10 @@ public class LocalAppController {
 		
 		String referenceCode = json.get("referenceCode");
 		
+		if (!usabilityTestService.checkTestOpen(referenceCode)) {
+			return new ResponseEntity<String>("The usability study is currently not open!", HttpStatus.FORBIDDEN);
+		}
+		
 		String result = usabilityTestService.getTestsWithDetailsByReference(referenceCode);
 		System.out.println(result);
 		

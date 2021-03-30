@@ -174,4 +174,17 @@ public class UsabilityTestService {
 		
 		return result;
 	}
+	
+	public boolean checkTestOpen(String testReference) {
+		try {
+			if (testDao.getTestStatusByRef(testReference).equals("Open")) {
+				return true;
+			} else {
+				return false;
+			}
+		} catch (JsonProcessingException e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
 }

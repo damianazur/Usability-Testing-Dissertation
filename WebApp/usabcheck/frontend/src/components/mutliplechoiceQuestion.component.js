@@ -114,6 +114,7 @@ export class MultipleChoiceQuestionBox extends Component {
             className="inputField" 
             type="text"
             required
+            onKeyPress={(e) => { e.key === 'Enter' && e.preventDefault(); }}
         />
 
         <h4 className="createTestInputBox-heading" style={{marginTop: "20px"}}>Answer Choices</h4>  

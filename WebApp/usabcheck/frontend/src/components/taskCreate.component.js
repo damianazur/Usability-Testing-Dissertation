@@ -101,13 +101,16 @@ export class TaskCreateBox extends Component {
         </div>
 
         <h3 className="createTestInputBox-heading">Task</h3>
-        <input className="createTestInputBox-inputField"
-            ref={this._taskNameRef}
-            onChange={this.updateOutputData.bind(this)} 
-            placeholder="Task Name" 
-            autoComplete="off"
-            type="text"
-            required/>
+        <input 
+          className="createTestInputBox-inputField"
+          ref={this._taskNameRef}
+          onChange={this.updateOutputData.bind(this)} 
+          placeholder="Task Name" 
+          autoComplete="off"
+          type="text"
+          required
+          onKeyPress={(e) => { e.key === 'Enter' && e.preventDefault(); }}
+        />
         
         {this.generateOptionsDropdown()}
 

@@ -11,8 +11,8 @@ from TutorialWindow import TutorialWindow
 
 
 class InitialWindow(QWidget):
-    ENTRY_API = "https://usabcheck.herokuapp.com/api/localapp/"
-    # ENTRY_API = "http://localhost:8090/api/localapp/"
+    # ENTRY_API = "https://usabcheck.herokuapp.com/api/localapp/"
+    ENTRY_API = "http://localhost:8090/api/localapp/"
 
     GET_TEST_BY_REF_CODE_ENTRY = "getTestDetailsByReferenceCode/"
 
@@ -65,13 +65,32 @@ class InitialWindow(QWidget):
 
         sendData = {"referenceCode": str(refCode)}
         request = requests.post(self.ENTRY_API + self.GET_TEST_BY_REF_CODE_ENTRY, data=sendData)
-        # print("\n\n" + request.text + "\n\n")
-        data = json.loads(request.text)
+        print("#request", request)
         
-        if 'sequenceData' in data.keys():
-            data["sequenceData"].sort(key=lambda obj: obj["sequenceNumber"], reverse=False)
+        if (request.status_code != 200):
+            errorMessage = "ERROR " + str(request.status_code) + ": " + request.text
+            print(errorMessage)
+            self.displayError(errorMessage)
+        else:
+            data = json.loads(request.text)
+            
+            if 'sequenceData' in data.keys():
+                data["sequenceData"].sort(key=lambda obj: obj["sequenceNumber"], reverse=False)
 
-            self.displayTestData(data)
+                self.displayTestData(data)
+
+
+    def displayError(self, errorMessage):
+        self.mainLayout.removeWidget(self.displayTestLayout)
+        self.mainLayout.removeWidget(self.beginForm)
+
+        self.displayTestLayout = QWidget(self)
+        self.beginForm = QWidget(self)
+        layout = QFormLayout()
+        layout.setSpacing(10)
+        layout.addRow(QLabel(errorMessage))
+        self.displayTestLayout.setLayout(layout)
+        self.mainLayout.addWidget(self.displayTestLayout)
 
     
     # Display the data so that the user can verify that the test is correct

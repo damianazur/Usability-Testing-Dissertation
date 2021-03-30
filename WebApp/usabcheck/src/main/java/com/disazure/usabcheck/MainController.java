@@ -156,8 +156,15 @@ public class MainController {
 		int projectId = data.get("projectId").getAsInt();
 		java.sql.Date currentDate = new java.sql.Date(Calendar.getInstance().getTime().getTime());
 		UsabilityTest newTest = new UsabilityTest(testName, projectId, currentDate.toString(), "Open", scenario);
-		int result = testDao.createTest(researcherId, newTest);
 		
+		int result = 0;
+		try {
+			result = testDao.createTest(researcherId, newTest);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<String>(e.toString(), HttpStatus.CONFLICT);
+		}
+
 		
 		if (result == 1) {
 			int testId = -1;
