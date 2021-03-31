@@ -11,8 +11,8 @@ from TutorialWindow import TutorialWindow
 
 
 class InitialWindow(QWidget):
-    # ENTRY_API = "https://usabcheck.herokuapp.com/api/localapp/"
-    ENTRY_API = "http://localhost:8090/api/localapp/"
+    ENTRY_API = "https://usabcheck.herokuapp.com/api/localapp/"
+    # ENTRY_API = "http://localhost:8090/api/localapp/"
 
     GET_TEST_BY_REF_CODE_ENTRY = "getTestDetailsByReferenceCode/"
 
