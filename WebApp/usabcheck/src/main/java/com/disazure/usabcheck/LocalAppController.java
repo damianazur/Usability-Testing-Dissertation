@@ -41,6 +41,16 @@ public class LocalAppController {
 		return new ResponseEntity<String>(result, HttpStatus.OK);
 	}
 	
+	@RequestMapping(value = "/getInstanceReference", method = RequestMethod.POST)
+	public ResponseEntity<?> getInstanceReference(@RequestParam  Map<String, String> json) {
+				
+		String instanceRef = "";
+		instanceRef = usabilityTestService.getReferenceCode();
+		System.out.println(instanceRef);
+		
+		return new ResponseEntity<String>(instanceRef, HttpStatus.OK);
+	}
+	
 	@RequestMapping(value = "/saveTestResults", method = RequestMethod.POST)
 	public ResponseEntity<?> saveTestResults(@RequestParam  Map<String, String> json) {
 				

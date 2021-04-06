@@ -6,6 +6,7 @@ public class UsabilityTestInstance {
 	private String studyDate;
 	private String videoLocation;
 	private String participantName;
+	private String instanceReference;
 	
 	public UsabilityTestInstance(int testId, String studyDate) {
 		super();
@@ -52,6 +53,15 @@ public class UsabilityTestInstance {
 	public void setParticipantName(String participantName) {
 		this.participantName = participantName;
 	}
+
+	public String getInstanceReference() {
+		return instanceReference;
+	}
+
+	public void setInstanceReference(String instanceReference) {
+		this.instanceReference = instanceReference;
+	}
+	
 	
 	
 }

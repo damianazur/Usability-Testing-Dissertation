@@ -97,6 +97,12 @@ public class UsabilityTestService {
 	}
 	
 	
+	public String getReferenceCode() {
+		String refCode = testInstanceDao.generateReferenceCode();
+		return refCode;
+	}
+	
+	
 	public String createUsabilityTestInstance(Map<String, String> json) throws JsonProcessingException {
 		JsonParser jsonParser = new JsonParser();
 		
@@ -105,6 +111,7 @@ public class UsabilityTestService {
 		String ferCameraDataStr = json.get("ferCameraData");
 		String sequenceTimeStampStr = json.get("sequenceTimeStamp");
 		String questionAnswersStr = json.get("questionAnswers");
+		String instanceReference = json.get("instanceReference");
 		
 		JsonArray ferCamData = jsonParser.parse(ferCameraDataStr).getAsJsonArray();
 		JsonArray sequenceTimeStamp = jsonParser.parse(sequenceTimeStampStr).getAsJsonArray();
@@ -114,6 +121,7 @@ public class UsabilityTestService {
 		java.sql.Date currentDate = new java.sql.Date(Calendar.getInstance().getTime().getTime());
 		UsabilityTestInstance newUsabTestInst = new UsabilityTestInstance(testId, currentDate.toString());
 		newUsabTestInst.setParticipantName(participantName);
+		newUsabTestInst.setInstanceReference(instanceReference);
 		
 		String tasksStr = taskDao.getByTestIdNoSecurity(testId);
 		JsonArray tasks = jsonParser.parse(tasksStr).getAsJsonArray();
@@ -130,9 +138,9 @@ public class UsabilityTestService {
 		System.out.println(sequenceTimeStamp);
 		System.out.println(questionAnswers);
 		
-		String instanceReference = testInstanceDao.getReferenceCodeById(instanceId);
+//		String instanceReference = testInstanceDao.getReferenceCodeById(instanceId);
 		
-		return instanceReference;
+		return "";
 	}
 	
 	public JsonObject getQuestionAndAnswers(int researcherId, int testId) throws JsonProcessingException {

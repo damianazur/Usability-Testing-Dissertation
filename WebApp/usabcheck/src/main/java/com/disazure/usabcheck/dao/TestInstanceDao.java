@@ -44,7 +44,7 @@ public class TestInstanceDao {
 	    return jsonString;
 	}
 	
-	private String generateReferenceCode() {
+	public String generateReferenceCode() {
         String SALTCHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
         StringBuilder salt = new StringBuilder();
         Random random = new Random();
@@ -72,7 +72,7 @@ public class TestInstanceDao {
 		        PreparedStatement statement = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
 		        statement.setString(1, Integer.toString(testInstance.getTestId()));
 		        statement.setString(2, testInstance.getStudyDate());
-		        statement.setString(3, generateReferenceCode());
+		        statement.setString(3, testInstance.getInstanceReference());
 		        statement.setString(4, testInstance.getParticipantName());
 		        return statement;
 		    }
@@ -82,7 +82,6 @@ public class TestInstanceDao {
 		
         return (int) primaryKey;	
 	}
-	
 	
 	public String getReferenceCodeById(int testInstanceId) throws JsonProcessingException {
 		String sql = ""

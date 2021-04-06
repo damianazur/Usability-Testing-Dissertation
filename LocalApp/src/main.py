@@ -15,8 +15,8 @@ from PyQt5.QtWidgets import *
 
 
 class MainProgram():
-    ENTRY_API = "https://usabcheck.herokuapp.com/api/localapp/"
-    # ENTRY_API = "http://localhost:8090/api/localapp/"
+    # ENTRY_API = "https://usabcheck.herokuapp.com/api/localapp/"
+    ENTRY_API = "http://localhost:8090/api/localapp/"
 
     def __init__(self):
         self.began = False
@@ -55,12 +55,15 @@ class MainProgram():
 
 
     def uploadData(self):
+        instanceRefRequest = requests.post(self.ENTRY_API + "getInstanceReference", data={})
+        self.testInstanceRef = instanceRefRequest.text
+        print("Test Instance Reference:", self.testInstanceRef)
+
         sendData = self.packageData()
         print("Uploading Data", sendData)
 
         saveTestRequest = requests.post(self.ENTRY_API + "saveTestResults", data=sendData)
-        self.testInstanceRef = saveTestRequest.text
-        print("Test Instance Reference:", self.testInstanceRef)
+        print(saveTestRequest.text)
 
         self.uploadDataWindow.uploadVideo(self.testInstanceRef, self.videoFileName)
 
@@ -71,7 +74,8 @@ class MainProgram():
             "referenceCode": self.data["referenceCode"],
             "ferCameraData":  json.dumps(self.ferCameraData),
             "sequenceTimeStamp":  json.dumps(self.sequenceTimeStamp),
-            "questionAnswers":  json.dumps(self.answers)
+            "questionAnswers":  json.dumps(self.answers),
+            "instanceReference":  self.testInstanceRef
         }
 
         return packagedData
