@@ -1,6 +1,5 @@
 /Documents/Datasets/
 /Datasets/
-LocalApp/videos/
 LocalApp/src/build/
 LocalApp/src/dist/
 LocalApp/dist/
@@ -10,3 +9,5 @@ Src/EmotionPredictionApp
 LocalApp/LocalApp.zip
 LocalApp/dist.zip
 LocalApp/Production Backups/
+Datasets.zip
+UsabCheck Local App v2.zip

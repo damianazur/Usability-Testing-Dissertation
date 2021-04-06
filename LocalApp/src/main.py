@@ -15,8 +15,8 @@ from PyQt5.QtWidgets import *
 
 
 class MainProgram():
-    # ENTRY_API = "https://usabcheck.herokuapp.com/api/localapp/"
-    ENTRY_API = "http://localhost:8090/api/localapp/"
+    ENTRY_API = "https://usabcheck.herokuapp.com/api/localapp/"
+    # ENTRY_API = "http://localhost:8090/api/localapp/"
 
     def __init__(self):
         self.began = False
