@@ -1,6 +1,6 @@
 # Introduction
 The README file only shows an overview of the dissertation report and showcases diagrams.<br>
-![Read full dissertation here!](google.ie)
+[Read full dissertation here!](https://drive.google.com/file/d/1zlgnvDQijK94nGY5yw5oQHu7yE9cRH0x/)
 ### Abstract
 The return on investment for usability is on average a 135% increase in the desired metrics with only 10% of the budget invested. The design flaws within applications make the applications more difficult to use and these flaws can be discovered through usability testing. The information gathered from a usability test when used to improve the application can improve the user experience leading to greater user productivity, satisfaction and as a result greater profits for the business. 
 <br><br>
@@ -10,6 +10,11 @@ The UX researchers and developers who wish to test their software can configure 
 <br><br>
 ### Project Scope
 The scope of this project involves designing, implementing, testing, and evaluating a usability testing suite with facial expression recognition for desktop machines. The operating system which the testing suite is primary designed for is Windows and the focus will be on website usability testing. However, in theory any software can be tested with the UsabCheck testing suite. The software suite is not designed and not intended for usability testing on mobile devices. The aim is to investigate how facial expression recognition can be applied to usability testing and how the data, which includes emotion data from a conducted usability study can be presented for analysis. 
+### Main Conclusions
+The project aimed to provide a usability testing software suite and investigate the use and applicability of facial expression recognition in the area of usability testing. The project provides a web application service allowing researchers to create customized usability studies which can be conducted on the UsabCheck local application. The usability study data which includes the screen recordings, participant responses and emotions of the participant are presented to the researcher for analysis. The findings show that the presence of both positive and negative emotions can be a sign of usability problems, however, the lack of emotion does not imply that there are no usability issues. Additionally, as not all emotions experienced by the participants are expressed via their facial expressions and the FER alone cannot be used discover all usability flaws. Means of displaying emotions on a timeline has been developed and it allows the researcher to clearly view and analyse the participant’s expressible emotions. The applicability of FER in usability testing is the improved navigation of the screen recordings of the usability study as the emotion timestamps provide the researcher with another layer by which they can navigate the video. 
+<br><br>
+It should be also noted that the sample size of participants who participated in the usability study is only 3, all of whom where close friends and family of the author and took part in the usability study from the comfort of their own home. This sense of familiarity may have resulted in the participants expressing more visible emotion than they otherwise would in a professional usability testing setting. As a result of this small sample size and familiarity variable more research is needed.
+
 
 # Diagrams
 ## High Level View & Architecture
