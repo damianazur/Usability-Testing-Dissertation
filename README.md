@@ -1,3 +1,5 @@
+# UsabCheck – A Usability Testing Suite With Facial Expression Recognition
+
 # Introduction
 The README file only shows an overview of the dissertation report and showcases diagrams.<br>
 [Read full dissertation here!](https://drive.google.com/file/d/1zlgnvDQijK94nGY5yw5oQHu7yE9cRH0x/)
